@@ -2,3 +2,5 @@
 .cproject
 *.d
 *.o
+tests/rs_test
+src/librs.so
