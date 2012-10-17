@@ -25,52 +25,6 @@ suite_t *suites[] = {
 		NULL, /* NULL guard */
 };
 
-#define BUF_SIZE (10 * 1024)
-
-char resolver_backup[BUF_SIZE];
-
-size_t resolver_backup_sz;
-
-static int backup_resolv_conf(void)
-{
-	FILE *fp = NULL;
-
-	fp = fopen(_PATH_RESCONF, "r");
-	if (!fp)
-		return 0;
-
-	resolver_backup_sz = fread(resolver_backup, 1, BUF_SIZE, fp);
-	if (ferror(fp)) {
-		resolver_backup_sz = 0;
-		fprintf(stderr, "fread of resolv.conf failed\n");
-		fclose(fp);
-		return 1;
-	}
-	fclose(fp);
-
-	return 0;
-}
-
-static int restore_resolv_conf(void)
-{
-	FILE *fp = NULL;
-
-	fp = fopen(_PATH_RESCONF, "w");
-	if (!fp)
-		return 0;
-
-	fwrite(resolver_backup, 1, resolver_backup_sz, fp);
-	if (ferror(fp)) {
-		resolver_backup_sz = 0;
-		fprintf(stderr, "fwrite of resolv.conf failed\n");
-		fclose(fp);
-		return 1;
-	}
-	fclose(fp);
-
-	return 0;
-}
-
 /**
  *
  * @return
@@ -105,15 +59,6 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	/* global level initialization */
-	system("udevadm trigger --subsystem-match=misc"); /* needed for tun */
-	/* netboxd is mono-client: kill ck5050 */
-	printf("killing possibly running ck5050\n");
-	system("killall -q -KILL ck5050");
-
-	if (backup_resolv_conf() != 0)
-		return EXIT_FAILURE;
-
 	/* initialize the CUnit test registry */
 	cu_err = CU_initialize_registry();
 	if (CUE_SUCCESS != cu_err) {
@@ -145,8 +90,6 @@ int main(int argc, char *argv[])
 	}
 
 	CU_cleanup_registry();
-
-	restore_resolv_conf();
 
 	/* to clean up valgrind's output */
 	close(STDIN_FILENO);
