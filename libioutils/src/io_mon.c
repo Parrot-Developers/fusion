@@ -57,6 +57,30 @@ static int add_source(io_mon_t *mon, io_src_t *src)
 }
 
 /**
+ * Changes the epoll monitoring status of a source
+ * @param epfd Epoll file descriptor
+ * @param source Source to alter
+ * @param op epoll's operator (EPOLL_CTL_ADD, EPOLL_CTL_MOD or EPOLL_CTL_DEL)
+ * @return FUNK_ERROR_MONITOR
+ */
+static int alter_source(int epfd, io_src_t *src, int op)
+{
+	struct epoll_event event = {
+			.events = src->active,
+			.data = {
+					.ptr = src,
+			},
+	};
+	int ret;
+
+	ret = epoll_ctl(epfd, op, src->fd, &event);
+	if (-1 == ret)
+		return -errno;
+
+	return 0;
+}
+
+/**
  * Removes a source from the monitoring pool and stop monitoring the
  * corresponding fd
  * @param mon Monitor
@@ -69,7 +93,10 @@ static int remove_source(io_mon_t *mon, io_src_t *src)
 	rs_node_t *node;
 	io_src_t *old_src;
 
-	node = rs_node_remove(mon->source, &(src->node));
+	if (&(src->node) == mon->source)
+		mon->source = rs_node_next(mon->source);
+
+	node = rs_node_remove(&(src->node), &(src->node));
 	if (NULL == node)
 		return -EINVAL;
 	mon->nb_sources--;
@@ -77,40 +104,11 @@ static int remove_source(io_mon_t *mon, io_src_t *src)
 	old_src = to_src(node);
 	if (IO_NONE != old_src->active) {
 		old_src->active = IO_NONE;
-		ret = epoll_ctl(mon->epollfd, EPOLL_CTL_DEL, old_src->fd, NULL);
+		ret = alter_source(mon->epollfd, old_src, EPOLL_CTL_DEL);
 		if (-1 == ret)
 			return -errno;
 	}
 
-
-	return 0;
-}
-
-/**
- * Changes the epoll monitoring status of a source
- * @param epfd Epoll file descriptor
- * @param source Source to alter
- * @param op epoll's operator (EPOLL_CTL_ADD, EPOLL_CTL_MOD or EPOLL_CTL_DEL)
- * @param out_active For an out or duplex source, says whether the out must be
- * monitored r not
- * @return FUNK_ERROR_MONITOR
- */
-static int alter_source(int epfd, io_src_t *src, int op, int out_active)
-{
-	struct epoll_event event = {
-			.events = src->type,
-			.data = {
-					.ptr = src,
-			},
-	};
-	int ret;
-
-	/* don't monitor out events until we have data to write */
-	if (!out_active)
-		event.events &= ~IO_OUT;
-	ret = epoll_ctl(epfd, op, src->fd, &event);
-	if (-1 == ret)
-		return -errno;
 
 	return 0;
 }
@@ -128,7 +126,7 @@ static int register_source(io_mon_t *mon, io_src_t *src)
 	if (NULL == mon || NULL == src)
 		return -EINVAL;
 
-	return alter_source(mon->epollfd, src, EPOLL_CTL_ADD, 0);
+	return alter_source(mon->epollfd, src, EPOLL_CTL_ADD);
 }
 
 io_mon_t *io_mon_new(void)
@@ -167,11 +165,7 @@ int io_mon_add_source(io_mon_t *mon, io_src_t *src)
 	/* by default, only IN monitoring is activated */
 	src->active = src->type & ~IO_OUT;
 
-	/* add the source to epoll's fd pool, only if it's an input source */
-	if (IO_IN & src->type)
-		ret = register_source(mon, src);
-
-	return ret;
+	return register_source(mon, src);
 }
 
 void io_mon_dump_epoll_event(uint32_t events)
@@ -202,10 +196,10 @@ int io_mon_activate_out_source(io_mon_t *mon, io_src_t *src, int active)
 	else
 		src->active &= ~IO_OUT;
 
-	return alter_source(mon->epollfd, src, EPOLL_CTL_MOD, active);
+	return alter_source(mon->epollfd, src, EPOLL_CTL_MOD);
 }
 
-int io_monitor_get_fd(io_mon_t *mon)
+int io_mon_get_fd(io_mon_t *mon)
 {
 	if (NULL == mon)
 		return -EINVAL;
@@ -213,7 +207,7 @@ int io_monitor_get_fd(io_mon_t *mon)
 	return mon->epollfd;
 }
 
-int io_monitor_process_events(io_mon_t *mon)
+int io_mon_process_events(io_mon_t *mon)
 {
 	int n = 0;
 	int i = 0;
@@ -236,7 +230,7 @@ int io_monitor_process_events(io_mon_t *mon)
 		 * if during processing, sources are altered, some events may
 		 * have become irrelevant and must be filtered out
 		 */
-		if (!(src->events & (src->active & IO_EPOLL_ERROR_EVENTS)))
+		if (!(src->active & src->events) && !(src->active & IO_EPOLL_ERROR_EVENTS))
 			continue;
 
 		ret = src->callback(src);
@@ -244,6 +238,11 @@ int io_monitor_process_events(io_mon_t *mon)
 			perror("src->callback");
 
 		if (0 > ret || (IO_EPOLL_ERROR_EVENTS & events[i].events)) {
+			/*
+			 * a negative return from the callback says the source
+			 * must be removed. The removal is also forced when any
+			 * I/O error occurs
+			 */
 			ret = remove_source(mon, src);
 			if (0 != ret)
 				return ret;
@@ -257,10 +256,16 @@ int io_monitor_process_events(io_mon_t *mon)
 void io_mon_delete(io_mon_t **monitor)
 {
 	io_mon_t *mon;
+	io_src_t *src;
 
 	if (NULL == monitor || NULL == *monitor)
 		return;
 	mon = *monitor;
+
+	while (mon->source) {
+		src = to_src(mon->source);
+		remove_source(mon, src);
+	}
 
 	close(mon->epollfd);
 	free(mon);

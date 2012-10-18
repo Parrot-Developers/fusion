@@ -21,15 +21,16 @@
 /**
  * @brief tests suites
  */
-//extern suite_t mon_suite;
+extern suite_t mon_suite;
 extern suite_t src_suite;
 extern suite_t utils_suite;
 
 suite_t *suites[] = {
-//		&mon_suite,
+		&mon_suite,
 		&src_suite,
 		&utils_suite,
-	NULL, /* NULL guard */
+
+		NULL, /* NULL guard */
 };
 
 int main(int argc, char *argv[])
@@ -44,7 +45,7 @@ int main(int argc, char *argv[])
 	 *   to activate just one, set defaut_active_state to 0 and put a ! in
 	 *   front of the relevant active state value.
 	 */
-//	  mon_suite.active = defaut_active_state;
+	  mon_suite.active = defaut_active_state;
 	  src_suite.active = defaut_active_state;
 	utils_suite.active = defaut_active_state;
 
