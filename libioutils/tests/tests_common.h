@@ -11,6 +11,7 @@
 #define TESTS_COMMON_H_
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <stdbool.h>
 
 #include <CUnit/CUError.h>
@@ -120,6 +121,68 @@ char *get_tun_path(void);
  */
 int compare_string_to_file(char *path, char *buf, size_t size);
 
+#ifndef MIN
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#endif /* MIN */
+#ifndef MAX
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#endif /* MAX */
+
+/**
+ * Executes a function echoing something to a file descriptor and stores it
+ * @param string String where the output is stored
+ * @param len Size of the buffer, including the room for a trailing 0 which is
+ * automatically added
+ * @param output_function Function to test the output of
+ * @param filedes File descriptor out_func writes to
+ * @param ... Parameters passed to the function
+ * @return 0 if everything went successful, 0 otherwise
+ */
+#define store_function_output_to_string(string, len, out_func, filedes, ...) \
+({ \
+	int __old_out_fd = -1; \
+	int __pipe[2] = {-1, -1}; \
+	int __ret; \
+ \
+ __old_out_fd = dup(filedes); \
+	if (-1 == __old_out_fd) { \
+		__ret = -errno; \
+		perror("dup"); \
+	} else { \
+		__ret = pipe(__pipe); \
+		if (-1 == __ret) { \
+			__ret = -errno; \
+			perror("pipe"); \
+		} else { \
+			__ret = dup2(__pipe[1], filedes); \
+			if (-1 == __ret) { \
+				__ret = -errno; \
+				perror("dup2"); \
+			} else { \
+				(out_func)(__VA_ARGS__); \
+				__ret = read(__pipe[0], (string), (len)); \
+				if (-1 == __ret) { \
+					__ret = -errno; \
+					perror("read"); \
+				} else { \
+					(string)[MIN(__ret, (len) - 1)] = '\0';\
+					__ret = 0; \
+				} \
+			} \
+		} \
+	} \
+	dup2(__old_out_fd, filedes); \
+	if (-1 != __pipe[0]) \
+		close(__pipe[0]); \
+	if (-1 != __pipe[1]) \
+		close(__pipe[1]); \
+	if (-1 != __old_out_fd) \
+		close(__old_out_fd); \
+ \
+	/* "return" value */ \
+	__ret; \
+})
+
 /**
  * Executes a function echoing something to standard output and stores it
  * @param string String where the output is stored
@@ -129,49 +192,7 @@ int compare_string_to_file(char *path, char *buf, size_t size);
  * @param ... Parameters passed to the function
  * @return 0 if everything went successful, 0 otherwise
  */
-#define store_function_output_to_string(string, len, out_func, ...) \
-({ \
-	int __old_stdout_fd = -1; \
-	int __pipe[2] = {-1, -1}; \
-	int __ret; \
- \
-	__old_stdout_fd = dup(STDOUT_FILENO); \
-	if (-1 == __old_stdout_fd) { \
-		__ret = -errno; \
-		perror("dup"); \
-	} else { \
-		__ret = pipe(__pipe); \
-		if (-1 == __ret) { \
-			__ret = -errno; \
-			perror("pipe"); \
-		} else { \
-			__ret = dup2(__pipe[1], STDOUT_FILENO); \
-			if (-1 == __ret) { \
-				__ret = -errno; \
-				perror("dup2"); \
-			} else { \
-				(out_func)(__VA_ARGS__); \
-				__ret = read(__pipe[0], (string), (len)); \
-				(string)[(len) - 1] = '\0'; \
-				if (-1 == __ret) { \
-					__ret = -errno; \
-					perror("read"); \
-				} else { \
-					__ret = 0; \
-				} \
-			} \
-		} \
-	} \
-	dup2(__old_stdout_fd, STDOUT_FILENO); \
-	if (-1 != __pipe[0]) \
-		close(__pipe[0]); \
-	if (-1 != __pipe[1]) \
-		close(__pipe[1]); \
-	if (-1 != __old_stdout_fd) \
-		close(__old_stdout_fd); \
- \
-	/* "return" value */ \
-	__ret; \
-})
+#define store_function_stdoutput_to_string(string, len, out_func, ...) \
+	store_function_output_to_string(string, len, out_func, STDOUT_FILENO, ...)
 
 #endif /* TESTS_COMMON_H_ */
