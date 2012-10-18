@@ -134,6 +134,9 @@ rs_node_t *rs_node_find_match(rs_node_t *node, rs_node_match_cb_t match,
  * @param list One node of the list (not necessarily the first), the search is
  * performed forward, starting from node
  * @param trash Node to remove, matched on address
+ * @note Beware that if the node removed is the "handle" of the list, this
+ * handle must be modified after. E.g. if the node removed is the head, then one
+ * must update the head reference, to point to the next element
  * @return Node removed if found, NULL otherwise or on error
  */
 rs_node_t *rs_node_remove(rs_node_t *list, rs_node_t *trash);
