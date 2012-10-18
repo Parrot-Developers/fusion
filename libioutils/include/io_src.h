@@ -24,14 +24,16 @@ typedef struct io_src io_src_t;
 /**
  * @typedef io_callback_t
  * @brief Callback notified when a source is ready to perform I/O. If an I/O
- * error occurs, the source is notify by mean of the callback and is
- * automatically removed once the callback returns.
- * @param source source ready for I/O
+ * error occurs, the source is notified by mean of the callback and is
+ * automatically removed once the callback returns.<br />
+ * Before the callback is called, the event fields is updated according to the
+ * type of event which occurred, be it an I/O error or a normal event.
+ * @param src source ready for I/O
  *
  * @return Negative errno compatible value on error which implies source
  * removal, positive errno compatible value for a warning, 0 on success
  */
-typedef int (io_callback_t)(io_src_t *source);
+typedef int (io_callback_t)(io_src_t *src);
 
 /**
  * @typedef io_src_event_t
@@ -59,19 +61,27 @@ typedef enum io_src_event {
 struct io_src {
 	/** file descriptor of the source */
 	int fd;
-	/** type of the source (IN or OUT or DUPLEX), see man epoll_ctl */
+	/**
+	 * type of the source (IN or OUT or DUPLEX)
+	 * @see man epoll_ctl
+	 */
 	io_src_event_t type;
 	/** callback responsible of this source */
 	io_callback_t *callback;
 
 	/**
 	 * epoll events which occurred on this source, set before the callback
-	 * is called. see man epoll_ctl
+	 * is called
+	 * @see man epoll_ctl
 	 */
 	uint32_t events;
 
 	/* fields used by a monitor */
-	/** epoll events activated on this source, see man epoll_ctl */
+	/**
+	 * epoll events activated on this source, altered by io_mon_add_source
+	 * and io_mon_activate_out_source
+	 * @see man epoll_ctl
+	 */
 	io_src_event_t active;
 	/** node for linking */
 	rs_node_t node;

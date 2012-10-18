@@ -37,10 +37,10 @@ io_mon_t *io_mon_new(void);
 
 /**
  * Add a source to the pool of sources we monitor. The monitoring is activated
- * automatically only if it's an input source
+ * automatically only for the input direction of the source, if relevant
  * @param mon Monitor's context
  * @param src Source to add, source's file descriptor must be unique across
- * sources
+ * sources. The file descriptor is forced non-blocking when added
  * @return negative errno value on error, 0 otherwise
  */
 int io_mon_add_source(io_mon_t *mon, io_src_t *src);
@@ -71,14 +71,18 @@ int io_mon_get_fd(io_mon_t *monitor);
 /**
  * When monitor's fd is ready for reading operation, a call to
  * io_mon_process_events will dispatch each event to the relevant
- * callback
+ * callback.<br />
+ * Sources which encounter errors are removed automatically, be it any I/O
+ * error or a negative return from the source's callback. On I/O error, the
+ * callback is notified anyhow
+ *
  * @param mon Monitor's context
  * @return negative errno value on error, 0 otherwise
  */
 int io_mon_process_events(io_mon_t *mon);
 
 /**
- * Destroys monitor's allocated resources.
+ * De register sources and destroys monitor's allocated resources.
  * @param monitor Monitor's context, NULL in output
  */
 void io_mon_delete(io_mon_t **mon);
