@@ -22,7 +22,6 @@ $(TEST_BINARY): $(TEST_SOURCES) $(RS_MODULES) $(RS_DEPENDENCIES)
 
 clean:
 	@echo librs: cleaning $(TEST_BINARY)
-
-mrproper:
-	@echo librs: deep cleaning $(TEST_BINARY)
 	rm -f $(TEST_BINARY)
+
+mrproper:clean
