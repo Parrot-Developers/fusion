@@ -1,5 +1,5 @@
 /**
- * @file tests_common.h
+ * @file fautes_utils.h
  * @date Mar 22, 2012
  * @author nicolas.carrier@parrot.com
  * @brief Common definitions for unit tests
@@ -7,44 +7,12 @@
  * Copyright (C) 2011 Parrot S.A.
  */
 
-#ifndef TESTS_COMMON_H_
-#define TESTS_COMMON_H_
+#ifndef FAUTES_UTILS_H_
+#define FAUTES_UTILS_H_
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
-
-#include <CUnit/CUError.h>
-
-/**
- * @typedef test_t
- * @brief Unit test
- */
-typedef struct {
-	CU_TestFunc fn;
-	const char *name;
-} test_t;
-
-/**
- * @typedef suite_t
- * @brief Unit tests suite, one must define a structure of this type prior to
- * a suite_register() call
- */
-typedef struct {
-	const char *name;
-	CU_InitializeFunc init;
-	CU_CleanupFunc clean;
-	const test_t *tests;
-	int active;
-} suite_t;
-
-/**
- * Registers a test suite and all it's tests to the CUnit framework
- * @param suite Suite of unit tests
- * @return Error code of the first error to happen in either CU_add_suite
- * or CU_add_test
- */
-CU_ErrorCode suite_register(suite_t *suite);
 
 /**
  * Launches a shell command and read it's output.
@@ -195,4 +163,4 @@ int compare_string_to_file(char *path, char *buf, size_t size);
 #define store_function_stdoutput_to_string(string, len, out_func, ...) \
 	store_function_output_to_string(string, len, out_func, STDOUT_FILENO, ...)
 
-#endif /* TESTS_COMMON_H_ */
+#endif /* FAUTES_UTILS_H_ */

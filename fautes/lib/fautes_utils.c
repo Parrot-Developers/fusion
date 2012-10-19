@@ -18,36 +18,11 @@
 #include <sys/mman.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdarg.h>
 #include <limits.h>
 
-#include "tests_common.h"
-
-CU_ErrorCode suite_register(suite_t *suite)
-{
-	CU_pSuite pSuite = NULL;
-	CU_pTest pTest = NULL;
-	const test_t *test = &(suite->tests[0]);
-
-	pSuite = CU_add_suite(suite->name, suite->init, suite->clean);
-	if (NULL == pSuite) {
-		CU_cleanup_registry();
-		fprintf(stderr, "CU_add_suite %s\n", CU_get_error_msg());
-		return CU_get_error();
-	}
-
-	/* add the tests to the suite */
-	do {
-		pTest = CU_add_test(pSuite, test->name, test->fn);
-		if (NULL == pTest) {
-			CU_cleanup_registry();
-			fprintf(stderr, "CU_add_test %s\n", CU_get_error_msg());
-			return CU_get_error();
-		}
-	} while ((++test)->fn);
-
-	return CUE_SUCCESS;
-}
+#include <fautes_utils.h>
 
 int read_from_output(char *buf, size_t size, const char *cmd)
 {
