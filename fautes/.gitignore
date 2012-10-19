@@ -1,2 +1,5 @@
 .cproject
 .project
+lib/libfautes.so
+src/fautes
+*.o
