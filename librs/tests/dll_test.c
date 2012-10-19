@@ -14,7 +14,8 @@
 #include "../include/rs_dll.h"
 #include "../src/rs_utils.h"
 
-#include "tests_common.h"
+#include <fautes.h>
+#include <fautes_utils.h>
 
 struct int_node {
 	int val;
@@ -69,6 +70,7 @@ static void testRS_DLL_PUSH(void)
 	int_node_t int_node_b = {.val = 42,};
 	int_node_t int_node_c = {.val = 666,};
 	rs_dll_t dll;
+	int f_ret = 0;
 	int two_times_cb(rs_node_t *node, void *data)
 	{
 		int_node_t *in = to_int_node(node);
@@ -80,7 +82,6 @@ static void testRS_DLL_PUSH(void)
 
 		return 0;
 	};
-	int f_ret = 0;
 
 	f_ret = rs_dll_init(&dll, &dll_test_vtable);
 	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
@@ -350,19 +351,18 @@ static void testRS_DLL_REMOVE_MATCH(void)
 	int_node_t needle = {.val = 42,};
 	rs_node_t *node;
 	int odd;
-	int parity_cb(rs_node_t *node, const void *data)
+	rs_dll_t dll;
+	int f_ret = 0;
+	int parity_cb(rs_node_t *n, const void *data)
 	{
-		int odd = *((int *)data);
-		int_node_t *int_node = to_int_node(node);
+		int my_odd = *((int *)data);
+		int_node_t *int_node = to_int_node(n);
 
-		if (odd)
+		if (my_odd)
 			return int_node->val % 2;
 		else
 			return !(int_node->val % 2);
 	};
-	rs_dll_t dll;
-
-	int f_ret = 0;
 
 	f_ret = rs_dll_init(&dll, &dll_test_vtable);
 	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
@@ -397,13 +397,13 @@ static void testRS_DLL_REMOVE_MATCH(void)
 static void testRS_DLL_FOREACH(void)
 {
 	rs_dll_t dll;
+	int f_ret = 0;
 	int cb(rs_node_t __attribute__((unused))*node,
 			void __attribute__((unused))*data)
 	{
 		/* do nothing */
 		return 0;
 	};
-	int f_ret = 0;
 
 	/* normal use case is tested in testRS_DLL_PUSH */
 

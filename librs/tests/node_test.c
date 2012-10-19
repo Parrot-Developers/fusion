@@ -14,7 +14,8 @@
 #include <rs_node.h>
 #include "../src/rs_utils.h"
 
-#include "tests_common.h"
+#include <fautes.h>
+#include <fautes_utils.h>
 
 struct int_node {
 	int val;
@@ -35,7 +36,7 @@ static int int_node_test_equals(rs_node_t *node_a, void *int_node_b)
 	return 0 == (int_node_a->val - ((int_node_t *)int_node_b)->val);
 }
 
-RS_NODE_MATCH_MEMBER(int_node_t, val, node)
+static RS_NODE_MATCH_MEMBER(int_node_t, val, node)
 
 static void testRS_NODE_HEAD(void)
 {
@@ -359,10 +360,10 @@ static void testRS_NODE_FOREACH(void)
 	int cb(rs_node_t __attribute__((unused))*node,
 			void __attribute__((unused))*data)
 	{
-		int *val = data;
+		int *v = data;
 
 		int_node_t *in = to_int_node(node);
-		in->val *= *val;
+		in->val *= *v;
 
 		return 0;
 	};

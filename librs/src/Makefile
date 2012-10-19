@@ -1,6 +1,9 @@
 LIB=librs.so
 
+UNIT_TESTS=yes
+
 SRC=$(wildcard *.c)
+
 OBJ=$(SRC:.c=.o)
 
 WARNINGS= -Wall -Wunused -Wunused-value  -Wunused-variable  -Wunused-label \
@@ -12,6 +15,11 @@ WARNINGS= -Wall -Wunused -Wunused-value  -Wunused-variable  -Wunused-label \
 CFLAGS+= -O0 -g $(WARNINGS)
 
 CPPFLAGS+=-I../include
+
+ifeq ($(UNIT_TESTS),yes)
+	SRC+=$(wildcard ../tests/*.c)
+	CPPFLAGS+=-I../../fautes/include
+endif
 
 all:$(LIB)
 
