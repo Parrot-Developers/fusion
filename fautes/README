@@ -13,10 +13,12 @@ This project consists in two independent parts
  * a library with with tools to ease the process of actually writing test
 
 III Add Fautes support to a library
-A library supporting Fautes has to declare the following symbols
+A library supporting Fautes has to declare the following symbols :
  * the library name fautes_lib_name LIBNAME
  * a suites set named LIBNAME_test_suites, which is a nul-terminated array of 
    test suites
+ * optional, a LIBNAME_init_test_suites which is called before any test occur
+   and which can for example enable / disable individual suites
 
 IV Usage
 Once the library supports fautes, to run the tests suites embedded into a .so,

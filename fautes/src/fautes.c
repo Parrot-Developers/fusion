@@ -79,13 +79,16 @@ static int get_sym(void *lib_handle, const char *name, void **output)
 	return 0;
 }
 
+typedef void (*init_fun_t)(void);
+
 static suite_t **get_test_suite(const char *so_lib, void **lib_handle)
 {
 	char *libname;
 	void *sym;
 	suite_t **res = NULL;
 	int ret;
-	char suites_set_name[512];
+	char names_buf[512];
+	init_fun_t init_fun;
 
 	/* load the library to test */
 	*lib_handle = dlopen(so_lib, RTLD_LAZY);
@@ -101,13 +104,20 @@ static suite_t **get_test_suite(const char *so_lib, void **lib_handle)
 	libname = *(char **)sym;
 
 	/* get it's test suite */
-	snprintf(suites_set_name, 512, "%s_test_suites", libname);
-	ret = get_sym(*lib_handle, suites_set_name, &sym);
+	snprintf(names_buf, 512, "%s_test_suites", libname);
+	ret = get_sym(*lib_handle, names_buf, &sym);
 	if (-1 == ret)
 		goto out;
 	res = (suite_t **)sym;
 
-	/* if there is a suites initialization funtion, call it */
+	/* if there is a suites initialization function, call it */
+	snprintf(names_buf, 512, "%s_init_test_suites", libname);
+	ret = get_sym(*lib_handle, names_buf, &sym);
+	if (-1 == ret)
+		goto out;
+	*(void **)(&init_fun) = sym;
+	if (NULL != init_fun)
+		init_fun();
 
 	printf("Found test suite for library %s\n", libname);
 out:
@@ -134,6 +144,11 @@ int main(int argc, char *argv[])
 	xml = 0 == strcmp(argv[1], "xml");
 	/* the first library path follows the progname or the xml flag */
 	so_lib = argv + 1 + xml;
+
+	/* TODO get rid of the following limitation by renaming the xml files */
+	if (xml && argc >= 3)
+		fprintf(stderr, "More than 1 library tested in xml mode, "
+				"resultant xml files will be overwritten\n");
 
 	do {
 		suite = get_test_suite(*so_lib, &lib_handle);
