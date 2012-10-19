@@ -1,0 +1,81 @@
+
+
+
+
+I Description
+Fautes stands for Framework for AUto TESts. It provides tools for
+automatic unit testing of software libraries. It relies on libcunit and adds
+sugar arountd it.
+
+II Content
+This project consists in two independent parts
+ * the tests launcher responsible to launch tests embedded into a .so
+ * a library with with tools to ease the process of actually writing test
+
+III Add Fautes support to a library
+A library supporting Fautes has to declare the following symbols
+ * the library name LIBNAME
+ * a suites set named LIBNAME_test_suites, which is a nul-terminated array of 
+   test suites
+
+IV Usage
+Once the library supports fautes, to run the tests suites embedded into a .so,
+one need to run :
+     fautes SO_FILE [xml]
+to actually run the tests. The xml flag, if present leads to the generation of
+two xml files, CUnitAutomated-Listing.xml and CUnitAutomated-Results.xml.
+without this flag, the result of the tests is echoed to standard output.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
