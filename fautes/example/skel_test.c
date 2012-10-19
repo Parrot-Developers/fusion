@@ -16,7 +16,7 @@
  * optional, only needed if the testing facilities provided by Fautes are
  * needed
  */
-#include "tests_common.h"
+#include <fautes.h>
 
 /* one example testing function */
 static void testSKEL_A_FUNCTION(void)
