@@ -14,7 +14,7 @@ This project consists in two independent parts
 
 III Add Fautes support to a library
 A library supporting Fautes has to declare the following symbols
- * the library name LIBNAME
+ * the library name fautes_lib_name LIBNAME
  * a suites set named LIBNAME_test_suites, which is a nul-terminated array of 
    test suites
 
