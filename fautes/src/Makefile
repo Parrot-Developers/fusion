@@ -5,27 +5,19 @@ endif
 
 CFLAGS   += -g -O0 -Wall -Wextra
 CPPFLAGS += -I../include/
-LDFLAGS  += -lcunit -lrs
+LDFLAGS  += -lcunit -ldl
 
-# Put the path to librs headers and binary lib
-CPPFLAGS += -I../../librs/include
-LDFLAGS  += -L../../librs/src
+BINARY = fautes
 
-TEST_BINARY = io_test
+SOURCES = $(wildcard *.c)
 
-TEST_SOURCES = $(wildcard *.c)
+all: $(BINARY)
 
-IO_MODULES = $(wildcard ../src/*.c)
-
-IO_DEPENDENCIES =
-
-all: $(TEST_BINARY)
-
-$(TEST_BINARY): $(TEST_SOURCES) $(IO_MODULES) $(IO_DEPENDENCIES)
+$(BINARY): $(SOURCES)
 	$(Q) $(CC) $^ $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o $@
 
 clean:
 	@echo ioutils: cleaning $(TEST_BINARY)
-	$(Q) rm -f $(TEST_BINARY)
+	$(Q) rm -f $(BINARY)
 	
 mrproper:clean

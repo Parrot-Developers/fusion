@@ -1,20 +1,19 @@
 VGR=valgrind --tool=memcheck --leak-check=full --show-reachable=yes --track-fds=yes
 
-all:
+all:fautes lib
+
+fautes:
 	$(MAKE) -C src
 
-test:
-	$(MAKE) -C tests
-	tests/io_test basic
-
-vtest:
-	$(MAKE) -C tests
-	$(VGR) tests/io_test basic
+lib:
+	$(MAKE) -C lib
 
 clean:
 	$(MAKE) -C src clean
-	$(MAKE) -C tests clean
+	$(MAKE) -C lib clean
 
 mrproper:
 	$(MAKE) -C src mrproper
-	$(MAKE) -C tests mrproper
+	$(MAKE) -C lib mrproper
+
+.PHONY:lib
