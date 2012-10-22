@@ -245,6 +245,14 @@ int io_mon_process_events(io_mon_t *mon)
 			ret = remove_source(mon, src);
 			if (0 != ret)
 				return ret;
+
+			/*
+			 * cleanup cb must be called AFTER unchaining so that
+			 * the client can do what he wants of it's context
+			 */
+			if (src->cleanup)
+				src->cleanup(src);
+			io_src_cleanup(src);
 		}
 		ret = 0;
 	}
@@ -264,6 +272,8 @@ void io_mon_delete(io_mon_t **monitor)
 	while (mon->source) {
 		src = to_src(mon->source);
 		remove_source(mon, src);
+		if (src->cleanup)
+			src->cleanup(src);
 	}
 
 	close(mon->epollfd);
