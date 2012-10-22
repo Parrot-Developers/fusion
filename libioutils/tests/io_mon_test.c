@@ -50,13 +50,13 @@ static void testMON_ADD_SOURCE(void)
 	CU_ASSERT_PTR_NOT_NULL(mon);
 	ret = pipe(pipefd);
 	CU_ASSERT_NOT_EQUAL_FATAL(ret, -1);
-	ret = io_src_init(&src_in, pipefd[0], IO_IN, my_dummy_callback);
+	ret = io_src_init(&src_in, pipefd[0], IO_IN, my_dummy_callback, NULL);
 	CU_ASSERT_EQUAL(ret, 0);
-	ret = io_src_init(&src_out, pipefd[1], IO_OUT, my_dummy_callback);
+	ret = io_src_init(&src_out, pipefd[1], IO_OUT, my_dummy_callback, NULL);
 	CU_ASSERT_EQUAL(ret, 0);
 	fd = open("/dev/random", O_RDWR | O_CLOEXEC);
 	CU_ASSERT_NOT_EQUAL_FATAL(fd, -1);
-	ret = io_src_init(&src_duplex, fd, IO_DUPLEX, my_dummy_callback);
+	ret = io_src_init(&src_duplex, fd, IO_DUPLEX, my_dummy_callback, NULL);
 	CU_ASSERT_EQUAL(ret, 0);
 
 	/* normal use cases */
@@ -127,9 +127,9 @@ static void testMON_ACTIVATE_OUT_SOURCE(void)
 	CU_ASSERT_PTR_NOT_NULL(mon);
 	ret = pipe(pipefd);
 	CU_ASSERT_NOT_EQUAL_FATAL(ret, -1);
-	ret = io_src_init(&src_in, pipefd[0], IO_IN, my_dummy_callback);
+	ret = io_src_init(&src_in, pipefd[0], IO_IN, my_dummy_callback, NULL);
 	CU_ASSERT_EQUAL(ret, 0);
-	ret = io_src_init(&src_out, pipefd[1], IO_OUT, my_dummy_callback);
+	ret = io_src_init(&src_out, pipefd[1], IO_OUT, my_dummy_callback, NULL);
 	CU_ASSERT_EQUAL(ret, 0);
 	ret = io_mon_add_source(mon, &src_out);
 	CU_ASSERT_EQUAL(ret, 0);
@@ -150,7 +150,7 @@ static void testMON_ACTIVATE_OUT_SOURCE(void)
 	io_mon_delete(&mon);
 	mon = io_mon_new();
 	CU_ASSERT_PTR_NOT_NULL(mon);
-	ret = io_src_init(&src_duplex, fd, IO_DUPLEX, my_dummy_callback);
+	ret = io_src_init(&src_duplex, fd, IO_DUPLEX, my_dummy_callback, NULL);
 	CU_ASSERT_EQUAL(ret, 0);
 	ret = io_mon_add_source(mon, &src_duplex);
 	CU_ASSERT_EQUAL(ret, 0);
@@ -198,6 +198,11 @@ static void testMON_GET_FD(void)
 	io_mon_delete(&mon);
 }
 
+static void reached_state(int *glob_state, int state)
+{
+	*glob_state |= state;
+}
+
 static void testMON_PROCESS_EVENTS(void)
 {
 	fd_set rfds;
@@ -216,7 +221,8 @@ static void testMON_PROCESS_EVENTS(void)
 #define STATE_MSG1_RECEIVED 1
 #define STATE_MSG2_SENT 2
 #define STATE_MSG2_RECEIVED 4
-#define STATE_ALL_DONE 7
+#define STATE_PIPE_OUT_CLOSED 8
+#define STATE_ALL_DONE 15
 	int state = STATE_START;
 	int in_cb(io_src_t *src)
 	{
@@ -228,14 +234,16 @@ static void testMON_PROCESS_EVENTS(void)
 
 		if (0 == strcmp(msg1, buf)) {
 			CU_ASSERT(0 == (state & STATE_MSG1_RECEIVED));
-			state |= STATE_MSG1_RECEIVED;
+			reached_state(&state, STATE_MSG1_RECEIVED);
 
 			/* monitor out to sent the second message */
 			r = io_mon_activate_out_source(mon,& src_out, 1);
 			CU_ASSERT_NOT_EQUAL(r, -1);
 		} else if (0 == strcmp(msg2, buf)) {
 			CU_ASSERT(0 == (state & STATE_MSG2_RECEIVED));
-			state |= STATE_MSG2_RECEIVED;
+			reached_state(&state, STATE_MSG2_RECEIVED);
+			/* generates an input/output error */
+			close(pipefd[0]);
 		}
 
 		return 0;
@@ -244,6 +252,9 @@ static void testMON_PROCESS_EVENTS(void)
 	{
 		int r;
 
+		if (io_mon_has_error(src->events))
+			return -EIO;
+
 		r = write(src->fd, msg2, strlen(msg2) + 1);
 		CU_ASSERT_NOT_EQUAL_FATAL(r, -1);
 
@@ -251,9 +262,14 @@ static void testMON_PROCESS_EVENTS(void)
 		r = io_mon_activate_out_source(mon,& src_out, 0);
 		CU_ASSERT_NOT_EQUAL(r, -1);
 
-		state |= STATE_MSG2_SENT;
+		reached_state(&state, STATE_MSG2_SENT);
 
 		return 0;
+	}
+	void cleanup_cb(io_src_t *src)
+	{
+		reached_state(&state, STATE_PIPE_OUT_CLOSED);
+		close(src->fd);
 	}
 
 	mon = io_mon_new();
@@ -261,9 +277,9 @@ static void testMON_PROCESS_EVENTS(void)
 	mon_fd = io_mon_get_fd(mon);
 	ret = pipe(pipefd);
 	CU_ASSERT_NOT_EQUAL_FATAL(ret, -1);
-	ret = io_src_init(&src_in, pipefd[0], IO_IN, in_cb);
+	ret = io_src_init(&src_in, pipefd[0], IO_IN, in_cb, NULL);
 	CU_ASSERT_EQUAL(ret, 0);
-	ret = io_src_init(&src_out, pipefd[1], IO_OUT, out_cb);
+	ret = io_src_init(&src_out, pipefd[1], IO_OUT, out_cb, cleanup_cb);
 	CU_ASSERT_EQUAL(ret, 0);
 
 	ret = io_mon_add_source(mon, &src_out);
@@ -307,11 +323,10 @@ out:
 	CU_ASSERT(state & STATE_MSG1_RECEIVED);
 	CU_ASSERT(state & STATE_MSG2_SENT);
 	CU_ASSERT(state & STATE_MSG2_RECEIVED);
+	CU_ASSERT(state & STATE_PIPE_OUT_CLOSED);
 
 	/* cleanup */
 	io_mon_delete(&mon);
-	close(pipefd[0]);
-	close(pipefd[1]);
 }
 
 static void testMON_DELETE(void)

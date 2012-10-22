@@ -36,6 +36,13 @@ typedef struct io_src io_src_t;
 typedef int (io_callback_t)(io_src_t *src);
 
 /**
+ * @typedef io_src_cleanup_t
+ * @brief Callback called after the source has been removed from the monitor
+ * @param src Source to cleanup
+ */
+typedef void (io_src_cleanup_t)(io_src_t *src);
+
+/**
  * @typedef io_src_event_t
  * @brief Indicates if one can read or write to a given source
  */
@@ -68,6 +75,8 @@ struct io_src {
 	io_src_event_t type;
 	/** callback responsible of this source */
 	io_callback_t *callback;
+	/** callback called to cleanup when the source is removed */
+	io_src_cleanup_t *cleanup;
 
 	/**
 	 * epoll events which occurred on this source, set before the callback
@@ -75,8 +84,6 @@ struct io_src {
 	 * @see man epoll_ctl
 	 */
 	uint32_t events;
-	/** user data */
-	void *data;
 
 	/* fields used by a monitor */
 	/**
@@ -116,10 +123,16 @@ struct io_src {
  * @param fd File descriptor of the source
  * @param type Type, in out or both
  * @param cb Callback notified whe fd is ready for I/O
- * @param data User data, accessible via src->data when called back
+ * @param cleanup Called to cleanup the source when removed
  * @return Negative errno compatible value on error otherwise zero
  */
 int io_src_init(io_src_t *src, int fd, io_src_event_t type, io_callback_t *cb,
-		void *data);
+		io_src_cleanup_t *cleanup);
+
+/**
+ * Cleans up a source (basically a memset...)
+ * @param src Source to cleanup
+ */
+void io_src_cleanup(io_src_t *src);
 
 #endif /* IO_SOURCE_H_ */
