@@ -14,12 +14,12 @@ CFLAGS+= -O0 -g $(WARNINGS)
 CPPFLAGS+=-I../include
 
 CPPFLAGS += -I../../librs/include
-LDFLAGS  += -L../../librs/src
+LDFLAGS  += -L../../librs/src -lrs
 
 all:$(LIB)
 
 $(LIB):$(OBJ)
-	$(CC) --shared  -o $@ $^ -Wl,-soname=$@
+	$(CC) --shared  -o $@ $^ -Wl,-soname=$@ $(LDFLAGS)
 
 %.o:%.c
 	$(CC) -c -o $@ $< $(CFLAGS) $(CPPFLAGS)
