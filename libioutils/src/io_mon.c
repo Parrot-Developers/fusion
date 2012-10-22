@@ -235,7 +235,7 @@ int io_mon_process_events(io_mon_t *mon)
 
 		ret = src->callback(src);
 		if (0 != ret)
-			perror("src->callback");
+			fprintf(stderr, "src->callback: %s\n", strerror(abs(ret)));
 
 		/*
 		 * a negative return from the callback says the source must be
