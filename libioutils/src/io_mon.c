@@ -237,12 +237,11 @@ int io_mon_process_events(io_mon_t *mon)
 		if (0 != ret)
 			perror("src->callback");
 
-		if (0 > ret || (IO_EPOLL_ERROR_EVENTS & events[i].events)) {
-			/*
-			 * a negative return from the callback says the source
-			 * must be removed. The removal is also forced when any
-			 * I/O error occurs
-			 */
+		/*
+		 * a negative return from the callback says the source must be
+		 * removed. The removal is also forced when any I/O error occur
+		 */
+		if (0 > ret || (io_mon_has_error(events[i].events))) {
 			ret = remove_source(mon, src);
 			if (0 != ret)
 				return ret;

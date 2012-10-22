@@ -21,6 +21,12 @@
 #define IO_EPOLL_ERROR_EVENTS (EPOLLERR | EPOLLHUP | EPOLLRDHUP)
 
 /**
+ * @def io_mon_has_error
+ * @brief Returns 1 if the epoll event set contains at least an error event
+ */
+#define io_mon_has_error(events) (IO_EPOLL_ERROR_EVENTS & (events))
+
+/**
  * @typedef io_mon_t
  * @brief Monitor's context
  */
@@ -86,5 +92,12 @@ int io_mon_process_events(io_mon_t *mon);
  * @param monitor Monitor's context, NULL in output
  */
 void io_mon_delete(io_mon_t **mon);
+
+/*
+ * candidates for implementation :
+ *    io_mon_update_source
+ *    io_mon_remove_source
+ *    plus maybe tests like IS_READ, IS_WRITE IS_ERROR ...
+ */
 
 #endif /* IO_MONITOR_H_ */
