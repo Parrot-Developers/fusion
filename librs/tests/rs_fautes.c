@@ -1,11 +1,10 @@
 /**
- * @file test.c
- * @date Mar 21, 2012
+ * @file rs_fautes.c
+ * @date Oct 19, 2012
  * @author nicolas.carrier@parrot.com
- * @brief Automated unit tests for netbox internal modules. Definitions for
- * Fautes support
+ * @brief Automated unit tests librs. Definitions for Fautes support
  *
- * Copyright (C) 2011 Parrot S.A.
+ * Copyright (C) 2012 Parrot S.A.
  */
 #include <fautes.h>
 
