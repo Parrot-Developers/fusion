@@ -1,10 +1,10 @@
 /**
- * @file test.c
- * @date Mar 21, 2012
+ * @file io_fautes.c
+ * @date Oct 19, 2012
  * @author nicolas.carrier@parrot.com
- * @brief Automated unit tests for netbox internal modules
+ * @brief Automated unit tests libioutils. Definitions for Fautes support
  *
- * Copyright (C) 2011 Parrot S.A.
+ * Copyright (C) 2012 Parrot S.A.
  */
 #include <unistd.h>
 #include <signal.h>

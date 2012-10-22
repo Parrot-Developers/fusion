@@ -1,5 +1,3 @@
-VGR=valgrind --tool=memcheck --leak-check=full --show-reachable=yes --track-fds=yes
-
 all:
 	$(MAKE) -C src
 
