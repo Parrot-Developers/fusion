@@ -230,7 +230,7 @@ int io_mon_process_events(io_mon_t *mon)
 		 * if during processing, sources are altered, some events may
 		 * have become irrelevant and must be filtered out
 		 */
-		if (!(src->active & src->events) && !(src->active & IO_EPOLL_ERROR_EVENTS))
+		if (!(src->events & (src->active | IO_EPOLL_ERROR_EVENTS)))
 			continue;
 
 		ret = src->callback(src);
