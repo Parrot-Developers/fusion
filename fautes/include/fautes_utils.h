@@ -161,6 +161,7 @@ int compare_string_to_file(char *path, char *buf, size_t size);
  * @return 0 if everything went successful, 0 otherwise
  */
 #define store_function_stdoutput_to_string(string, len, out_func, ...) \
-	store_function_output_to_string(string, len, out_func, STDOUT_FILENO, ...)
+	store_function_output_to_string(string, len, out_func, STDOUT_FILENO, \
+			__VA_ARGS__)
 
 #endif /* FAUTES_UTILS_H_ */
