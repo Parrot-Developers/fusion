@@ -11,7 +11,8 @@
 
 #include <io_src.h>
 
-int io_src_init(io_src_t *src, int fd, io_src_event_t type, io_callback_t *cb)
+int io_src_init(io_src_t *src, int fd, io_src_event_t type, io_callback_t *cb,
+		void *data)
 {
 	if (NULL == src || -1 == fd || NULL == cb)
 		return -EINVAL;
@@ -21,6 +22,7 @@ int io_src_init(io_src_t *src, int fd, io_src_event_t type, io_callback_t *cb)
 	src->fd = fd;
 	src->type = type;
 	src->callback = cb;
+	src->data = data;
 
 	return 0;
 }

@@ -26,6 +26,7 @@ static void testSRC_INIT(void)
 	int fd;
 	io_src_t src;
 	int ret;
+	int dummy_data = 42;
 
 	ret = pipe(pipefd);
 	CU_ASSERT_NOT_EQUAL_FATAL(ret, -1);
@@ -36,11 +37,13 @@ static void testSRC_INIT(void)
 	/* put garbage in the struct */
 	ret = read(fd, &src, sizeof(src));
 	CU_ASSERT_EQUAL(ret, sizeof(src));
-	ret = io_src_init(&src, pipefd[0], IO_IN, my_dummy_callback);
+	ret = io_src_init(&src, pipefd[0], IO_IN, my_dummy_callback,
+			(void *)dummy_data);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_EQUAL(src.fd, pipefd[0]);
 	CU_ASSERT_EQUAL(src.type, IO_IN);
 	CU_ASSERT_EQUAL(src.callback, my_dummy_callback);
+	CU_ASSERT_EQUAL(src.data, (void *)42);
 
 	CU_ASSERT_EQUAL(src.events, 0);
 
@@ -51,7 +54,7 @@ static void testSRC_INIT(void)
 	/* put garbage in the struct */
 	ret = read(fd, &src, sizeof(src));
 	CU_ASSERT_EQUAL(ret, sizeof(src));
-	ret = io_src_init(&src, pipefd[1], IO_OUT, my_dummy_callback);
+	ret = io_src_init(&src, pipefd[1], IO_OUT, my_dummy_callback, NULL);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_EQUAL(src.fd, pipefd[1]);
 	CU_ASSERT_EQUAL(src.type, IO_OUT);
@@ -66,7 +69,7 @@ static void testSRC_INIT(void)
 	/* put garbage in the struct */
 	ret = read(fd, &src, sizeof(src));
 	CU_ASSERT_EQUAL(ret, sizeof(src));
-	ret = io_src_init(&src, fd, IO_DUPLEX, my_dummy_callback);
+	ret = io_src_init(&src, fd, IO_DUPLEX, my_dummy_callback, NULL);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_EQUAL(src.fd, fd);
 	CU_ASSERT_EQUAL(src.type, IO_DUPLEX);
@@ -79,11 +82,11 @@ static void testSRC_INIT(void)
 	CU_ASSERT_PTR_NULL(src.node.prev);
 
 	/* error use cases */
-	ret = io_src_init(NULL, pipefd[0], IO_IN, my_dummy_callback);
+	ret = io_src_init(NULL, pipefd[0], IO_IN, my_dummy_callback, NULL);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_src_init(&src, -1, IO_IN, my_dummy_callback);
+	ret = io_src_init(&src, -1, IO_IN, my_dummy_callback, NULL);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_src_init(&src, pipefd[0], IO_IN, NULL);
+	ret = io_src_init(&src, pipefd[0], IO_IN, NULL, NULL);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	/* cleanup */

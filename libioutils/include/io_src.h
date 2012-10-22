@@ -75,6 +75,8 @@ struct io_src {
 	 * @see man epoll_ctl
 	 */
 	uint32_t events;
+	/** user data */
+	void *data;
 
 	/* fields used by a monitor */
 	/**
@@ -114,8 +116,10 @@ struct io_src {
  * @param fd File descriptor of the source
  * @param type Type, in out or both
  * @param cb Callback notified whe fd is ready for I/O
+ * @param data User data, accessible via src->data when called back
  * @return Negative errno compatible value on error otherwise zero
  */
-int io_src_init(io_src_t *src, int fd, io_src_event_t type, io_callback_t *cb);
+int io_src_init(io_src_t *src, int fd, io_src_event_t type, io_callback_t *cb,
+		void *data);
 
 #endif /* IO_SOURCE_H_ */
