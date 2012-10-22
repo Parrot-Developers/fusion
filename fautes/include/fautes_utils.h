@@ -133,7 +133,7 @@ int compare_string_to_file(char *path, char *buf, size_t size);
 					__ret = -errno; \
 					perror("read"); \
 				} else { \
-					(string)[MIN(__ret, (len) - 1)] = '\0';\
+					(string)[MIN(__ret, (int)(len) - 1)] = '\0';\
 					__ret = 0; \
 				} \
 			} \
