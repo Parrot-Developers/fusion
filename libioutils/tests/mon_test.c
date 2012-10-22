@@ -9,11 +9,14 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#include <stdbool.h>
+
 #include <CUnit/Basic.h>
 
 #include <io_mon.h>
 
-#include "tests_common.h"
+#include <fautes.h>
+#include <fautes_utils.h>
 
 static void testMON_NEW(void)
 {
@@ -92,9 +95,9 @@ static void testMON_DUMP_EPOLL_EVENT(void)
 {
 	char str[1024];
 	int ret;
-	char *ref1 = "epoll events :\n"
+	const char *ref1 = "epoll events :\n"
 			"\tEPOLLOUT\n";
-	char *ref2 = "epoll events :\n"
+	const char *ref2 = "epoll events :\n"
 			"\tEPOLLOUT\n"
 			"\tEPOLLHUP\n";
 
@@ -218,18 +221,18 @@ static void testMON_PROCESS_EVENTS(void)
 	int in_cb(io_src_t *src)
 	{
 		char buf[1024];
-		int ret;
+		int r;
 
-		ret = read(src->fd, buf, 1024);
-		CU_ASSERT_NOT_EQUAL_FATAL(ret, -1);
+		r = read(src->fd, buf, 1024);
+		CU_ASSERT_NOT_EQUAL_FATAL(r, -1);
 
 		if (0 == strcmp(msg1, buf)) {
 			CU_ASSERT(0 == (state & STATE_MSG1_RECEIVED));
 			state |= STATE_MSG1_RECEIVED;
 
 			/* monitor out to sent the second message */
-			ret = io_mon_activate_out_source(mon,& src_out, 1);
-			CU_ASSERT_NOT_EQUAL(ret, -1);
+			r = io_mon_activate_out_source(mon,& src_out, 1);
+			CU_ASSERT_NOT_EQUAL(r, -1);
 		} else if (0 == strcmp(msg2, buf)) {
 			CU_ASSERT(0 == (state & STATE_MSG2_RECEIVED));
 			state |= STATE_MSG2_RECEIVED;
@@ -239,14 +242,14 @@ static void testMON_PROCESS_EVENTS(void)
 	}
 	int out_cb(io_src_t *src)
 	{
-		int ret;
+		int r;
 
-		ret = write(src->fd, msg2, strlen(msg2) + 1);
-		CU_ASSERT_NOT_EQUAL_FATAL(ret, -1);
+		r = write(src->fd, msg2, strlen(msg2) + 1);
+		CU_ASSERT_NOT_EQUAL_FATAL(r, -1);
 
 		/* disable out source when unneeded to avoid event loop panic */
-		ret = io_mon_activate_out_source(mon,& src_out, 0);
-		CU_ASSERT_NOT_EQUAL(ret, -1);
+		r = io_mon_activate_out_source(mon,& src_out, 0);
+		CU_ASSERT_NOT_EQUAL(r, -1);
 
 		state |= STATE_MSG2_SENT;
 

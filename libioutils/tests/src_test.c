@@ -13,7 +13,7 @@
 
 #include <io_src.h>
 
-#include "tests_common.h"
+#include <fautes.h>
 
 static int my_dummy_callback(__attribute__((unused)) io_src_t *source)
 {

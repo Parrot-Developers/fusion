@@ -13,7 +13,7 @@
 
 #include "../src/io_utils.h"
 
-#include "tests_common.h"
+#include <fautes.h>
 
 static void testSET_NON_BLOCKING(void)
 {
