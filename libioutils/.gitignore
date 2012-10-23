@@ -3,3 +3,6 @@
 *.o
 src/libioutils.so
 tests/io_test
+*.swp
+trash
+tags
