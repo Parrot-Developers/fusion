@@ -19,16 +19,18 @@
 #include <fautes.h>
 
 extern suite_t mon_suite;
-extern suite_t src_suite;
+extern suite_t src_sep_suite;
 extern suite_t src_sig_suite;
+extern suite_t src_suite;
 extern suite_t utils_suite;
 
 const char const *fautes_lib_name = "libioutils";
 
 suite_t *libioutils_test_suites[] = {
 		&mon_suite,
-		&src_suite,
+		&src_sep_suite,
 		&src_sig_suite,
+		&src_suite,
 		&utils_suite,
 
 		NULL, /* NULL guard */
@@ -40,7 +42,8 @@ void libioutils_init_test_suites(void)
 	int default_active_state = 1;
 
 	mon_suite.active = default_active_state;
-	src_suite.active = default_active_state;
+	src_sep_suite.active = default_active_state;
 	src_sig_suite.active = default_active_state;
+	src_suite.active = default_active_state;
 	utils_suite.active = default_active_state;
 }
