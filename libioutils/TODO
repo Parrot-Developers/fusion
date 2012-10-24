@@ -1,0 +1,4 @@
+rename io_sig_callback_t to io_src_sig_cb_t
+remove the need for malloc (io_mon_new, io_mon_delete)
+make sep_src able to accept a 2 char separator (crlf)
+rename callback ->cb
