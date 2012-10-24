@@ -39,7 +39,7 @@ struct io_mon {
  * @param source Monitor's source
  * @return FUNK_ERROR_EXHAUSTION or FUNK_ERROR_PARAM
  */
-static int add_source(io_mon_t *mon, io_src_t *src)
+static int add_source(struct io_mon *mon, struct io_src *src)
 {
 	int ret = -1;
 
@@ -63,7 +63,7 @@ static int add_source(io_mon_t *mon, io_src_t *src)
  * @param op epoll's operator (EPOLL_CTL_ADD, EPOLL_CTL_MOD or EPOLL_CTL_DEL)
  * @return FUNK_ERROR_MONITOR
  */
-static int alter_source(int epfd, io_src_t *src, int op)
+static int alter_source(int epfd, struct io_src *src, int op)
 {
 	struct epoll_event event = {
 			.events = src->active,
@@ -87,11 +87,11 @@ static int alter_source(int epfd, io_src_t *src, int op)
  * @param src Source to remove
  * @return negative errno compatible value on error, 0 otherwise
  */
-static int remove_source(io_mon_t *mon, io_src_t *src)
+static int remove_source(struct io_mon *mon, struct io_src *src)
 {
 	int ret;
 	rs_node_t *node;
-	io_src_t *old_src;
+	struct io_src *old_src;
 
 	if (&(src->node) == mon->source)
 		mon->source = rs_node_next(mon->source);
@@ -121,7 +121,7 @@ static int remove_source(io_mon_t *mon, io_src_t *src)
  * @param src Source to register
  * @return negative errno-compatible value on error, 0 otherwise
  */
-static int register_source(io_mon_t *mon, io_src_t *src)
+static int register_source(struct io_mon *mon, struct io_src *src)
 {
 	if (NULL == mon || NULL == src)
 		return -EINVAL;
@@ -129,9 +129,9 @@ static int register_source(io_mon_t *mon, io_src_t *src)
 	return alter_source(mon->epollfd, src, EPOLL_CTL_ADD);
 }
 
-io_mon_t *io_mon_new(void)
+struct io_mon *io_mon_new(void)
 {
-	io_mon_t *mon = NULL;
+	struct io_mon *mon = NULL;
 
 	/* allocate resources */
 	mon = calloc(1, sizeof(*mon));
@@ -150,7 +150,7 @@ out:
 	return NULL;
 }
 
-int io_mon_add_source(io_mon_t *mon, io_src_t *src)
+int io_mon_add_source(struct io_mon *mon, struct io_src *src)
 {
 	int ret = 0;
 
@@ -186,7 +186,8 @@ void io_mon_dump_epoll_event(uint32_t events)
 		fprintf(stderr, "\tEPOLLHUP\n");
 }
 
-int io_mon_activate_out_source(io_mon_t *mon, io_src_t *src, int active)
+int io_mon_activate_out_source(struct io_mon *mon, struct io_src *src,
+		int active)
 {
 	if (NULL == mon || NULL == src || !(IO_OUT & src->type))
 		return -EINVAL;
@@ -199,7 +200,7 @@ int io_mon_activate_out_source(io_mon_t *mon, io_src_t *src, int active)
 	return alter_source(mon->epollfd, src, EPOLL_CTL_MOD);
 }
 
-int io_mon_get_fd(io_mon_t *mon)
+int io_mon_get_fd(struct io_mon *mon)
 {
 	if (NULL == mon)
 		return -EINVAL;
@@ -207,13 +208,13 @@ int io_mon_get_fd(io_mon_t *mon)
 	return mon->epollfd;
 }
 
-int io_mon_process_events(io_mon_t *mon)
+int io_mon_process_events(struct io_mon *mon)
 {
 	int n = 0;
 	int i = 0;
 	struct epoll_event events[MONITOR_MAX_SOURCES];
 	int ret = 0;
-	io_src_t *src = NULL;
+	struct io_src *src = NULL;
 
 	if (NULL == mon)
 		return -EINVAL;
@@ -260,10 +261,10 @@ int io_mon_process_events(io_mon_t *mon)
 	return 0;
 }
 
-void io_mon_delete(io_mon_t **monitor)
+void io_mon_delete(struct io_mon **monitor)
 {
-	io_mon_t *mon;
-	io_src_t *src;
+	struct io_mon *mon;
+	struct io_src *src;
 
 	if (NULL == monitor || NULL == *monitor)
 		return;

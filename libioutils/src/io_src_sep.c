@@ -21,7 +21,7 @@
  * @def to_src
  * @brief Convert a source to it's signal source container
  */
-#define to_src_sep(p) container_of(p, io_src_sep_t, src)
+#define to_src_sep(p) container_of(p, struct io_src_sep, src)
 
 /**
  * @def buf_write_start
@@ -56,7 +56,7 @@
  * @param len
  * @return result of the user callback
  */
-static int notify_user(io_src_sep_t *sep, unsigned len)
+static int notify_user(struct io_src_sep *sep, unsigned len)
 {
 	int ret;
 	char *chunk = buf_read_start(sep);
@@ -78,7 +78,7 @@ static int notify_user(io_src_sep_t *sep, unsigned len)
  * @param sep Separator source
  * @return return of notify_user
  */
-static int end_of_file(io_src_sep_t *sep)
+static int end_of_file(struct io_src_sep *sep)
 {
 	int ret = notify_user(sep, already_read(sep));
 
@@ -94,12 +94,12 @@ static int end_of_file(io_src_sep_t *sep)
  * Source callback, reads the signal and notifies the client
  * @param src Underlying monitor source of the signal source
  */
-static int sep_cb(io_src_t *src)
+static int sep_cb(struct io_src *src)
 {
 	int ret;
 	char *cur = NULL;
 	ssize_t sret;
-	io_src_sep_t *sep = to_src_sep(src);
+	struct io_src_sep *sep = to_src_sep(src);
 
 	if (io_mon_has_error(src->events))
 		return -EIO;
@@ -135,9 +135,9 @@ static int sep_cb(io_src_t *src)
  * Callback called when the source is removed
  * @param src Underlying monitor source of the signal source
  */
-static void sep_cleanup(io_src_t *src)
+static void sep_cleanup(struct io_src *src)
 {
-	io_src_sep_t *sep;
+	struct io_src_sep *sep;
 
 	if (NULL == src)
 		return;
@@ -147,7 +147,7 @@ static void sep_cleanup(io_src_t *src)
 	src->fd = -1;
 }
 
-int io_src_sep_init(io_src_sep_t *sep_src, int fd, io_src_sep_cb_t *cb,
+int io_src_sep_init(struct io_src_sep *sep_src, int fd, io_src_sep_cb_t *cb,
 		char sep)
 {
 	if (NULL == sep_src || NULL == cb || -1 == fd)

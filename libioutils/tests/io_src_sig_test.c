@@ -1,5 +1,5 @@
 /**
- * @file io_src_sig_test.c
+ * @file struct io_src_sigest.c
  * @date 22 oct. 2012
  * @author nicolas.carrier@parrot.com
  * @brief Unit tests for signal source.
@@ -46,8 +46,8 @@ static void testSRC_SIG_INIT(void)
 	fd_set rfds;
 	int mon_fd;
 	int ret;
-	io_mon_t *mon;
-	io_src_sig_t src_sig;
+	struct io_mon *mon;
+	struct io_src_sig src_sig;
 	bool loop = true;
 	struct timeval timeout;
 #define STATE_START 0
@@ -55,7 +55,7 @@ static void testSRC_SIG_INIT(void)
 #define STATE_SIGUSR2_RECEIVED 2
 #define STATE_ALL_DONE 3
 	int state = STATE_START;
-	int sig_cb(io_src_sig_t *sig)
+	int sig_cb(struct io_src_sig *sig)
 	{
 		if (SIGUSR1 == sig->si.ssi_signo) {
 			CU_ASSERT(!(STATE_SIGUSR2_RECEIVED & state));
@@ -129,6 +129,10 @@ out:
 	ret = sigprocmask(SIG_SETMASK, NULL, &new_mask);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT(sigsets_are_equals(&old_mask, &new_mask));
+
+	/* error use cases */
+	// TODO
+
 }
 
 static const test_t tests[] = {

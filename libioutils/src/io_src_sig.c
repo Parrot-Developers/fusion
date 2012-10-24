@@ -20,22 +20,22 @@
  * @def to_src
  * @brief Convert a source to it's signal source container
  */
-#define to_src_sig(p) container_of(p, io_src_sig_t, src)
+#define to_src_sig(p) container_of(p, struct io_src_sig, src)
 
 /**
  * Source callback, reads the signal and notifies the client
  * @param src Underlying monitor source of the signal source
  */
-static int sig_cb(io_src_t *src)
+static int sig_cb(struct io_src *src)
 {
 	ssize_t ret;
-	io_src_sig_t *sig = to_src_sig(src);
+	struct io_src_sig *sig = to_src_sig(src);
 
 	if (io_mon_has_error(src->events))
 		return -EIO;
 
 	ret = read(src->fd, &(sig->si), sizeof(sig->si));
-	if (ret != sizeof(sig->si))
+	if (sizeof(sig->si) != ret)
 		return -errno;
 
 	return sig->cb(sig);
@@ -45,9 +45,9 @@ static int sig_cb(io_src_t *src)
  * Callback called when the source is removed
  * @param src Underlying monitor source of the signal source
  */
-static void sig_cleanup(io_src_t *src)
+static void sig_cleanup(struct io_src *src)
 {
-	io_src_sig_t *sig;
+	struct io_src_sig *sig;
 
 	if (NULL == src)
 		return;
@@ -60,7 +60,8 @@ static void sig_cleanup(io_src_t *src)
 	src->fd = -1;
 }
 
-int io_src_sig_init(io_src_sig_t *sig, io_sig_callback_t *cb, unsigned nb, ...)
+int io_src_sig_init(struct io_src_sig *sig, io_sig_callback_t *cb, unsigned nb,
+		...)
 {
 	int ret;
 	int fd;

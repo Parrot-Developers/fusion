@@ -15,12 +15,12 @@
 
 #include <fautes.h>
 
-static int my_dummy_cb(__attribute__((unused)) io_src_t *source)
+static int my_dummy_cb(__attribute__((unused)) struct io_src *source)
 {
 	return 0;
 }
 
-static void cleanup_cb(__attribute__((unused)) io_src_t *src)
+static void cleanup_cb(__attribute__((unused)) struct io_src *src)
 {
 
 }
@@ -29,7 +29,7 @@ static void testSRC_INIT(void)
 {
 	int pipefd[2] = {-1, -1};
 	int fd;
-	io_src_t src;
+	struct io_src src;
 	int ret;
 
 	ret = pipe(pipefd);
@@ -100,7 +100,7 @@ static void testSRC_INIT(void)
 
 static void testTO_SRC(void)
 {
-	io_src_t src;
+	struct io_src src;
 
 	CU_ASSERT_EQUAL(to_src(&(src.node)), &src);
 }

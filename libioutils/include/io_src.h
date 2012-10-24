@@ -16,10 +16,25 @@
 #include <rs_node.h>
 
 /**
- * @typedef io_src_t
+ * @enum io_src_event
+ * @brief Indicates if one can read or write to a given source
+ */
+enum io_src_event {
+	/** No events */
+	IO_NONE = 0,
+	/** The source is an "IN" source, i.e. readable */
+	IO_IN = EPOLLIN,
+	/** The source is an "out" source, i.e. writable */
+	IO_OUT = EPOLLOUT,
+	/** The source is a full duplex source, i.e. writable and readable */
+	IO_DUPLEX = EPOLLIN | EPOLLOUT,
+};
+
+/**
+ * @struct io_src
  * @brief Source to register in a monitor
  */
-typedef struct io_src io_src_t;
+struct io_src;
 
 /**
  * @typedef io_callback_t
@@ -33,33 +48,14 @@ typedef struct io_src io_src_t;
  * @return Negative errno compatible value on error which implies source
  * removal, positive errno compatible value for a warning, 0 on success
  */
-typedef int (io_callback_t)(io_src_t *src);
+typedef int (io_callback_t)(struct io_src *src);
 
 /**
  * @typedef io_src_cleanup_t
  * @brief Callback called after the source has been removed from the monitor
  * @param src Source to cleanup
  */
-typedef void (io_src_cleanup_t)(io_src_t *src);
-
-/**
- * @typedef io_src_event_t
- * @brief Indicates if one can read or write to a given source
- */
-/**
- * @enum io_src_event
- * @brief Indicates if one can read or write to a given source
- */
-typedef enum io_src_event {
-	/** No events */
-	IO_NONE = 0,
-	/** The source is an "IN" source, i.e. readable */
-	IO_IN = EPOLLIN,
-	/** The source is an "out" source, i.e. writable */
-	IO_OUT = EPOLLOUT,
-	/** The source is a full duplex source, i.e. writable and readable */
-	IO_DUPLEX = EPOLLIN | EPOLLOUT,
-} io_src_event_t;
+typedef void (io_src_cleanup_t)(struct io_src *src);
 
 /**
  * @struct io_src
@@ -72,7 +68,7 @@ struct io_src {
 	 * type of the source (IN or OUT or DUPLEX)
 	 * @see man epoll_ctl
 	 */
-	io_src_event_t type;
+	enum io_src_event type;
 	/** callback responsible of this source */
 	io_callback_t *callback;
 	/** callback called to cleanup when the source is removed */
@@ -91,7 +87,7 @@ struct io_src {
 	 * and io_mon_activate_out_source
 	 * @see man epoll_ctl
 	 */
-	io_src_event_t active;
+	enum io_src_event active;
 	/** node for linking */
 	rs_node_t node;
 };
@@ -115,7 +111,7 @@ struct io_src {
  * @def to_src
  * @brief Convert a list node to it's container interface
  */
-#define to_src(p) container_of(p, io_src_t, node)
+#define to_src(p) container_of(p, struct io_src, node)
 
 /**
  * Initializes a source
@@ -126,13 +122,13 @@ struct io_src {
  * @param cleanup Called to cleanup the source when removed
  * @return Negative errno compatible value on error otherwise zero
  */
-int io_src_init(io_src_t *src, int fd, io_src_event_t type, io_callback_t *cb,
-		io_src_cleanup_t *cleanup);
+int io_src_init(struct io_src *src, int fd, enum io_src_event type,
+		io_callback_t *cb, io_src_cleanup_t *cleanup);
 
 /**
  * Cleans up a source (basically a memset...)
  * @param src Source to cleanup
  */
-void io_src_cleanup(io_src_t *src);
+void io_src_cleanup(struct io_src *src);
 
 #endif /* IO_SOURCE_H_ */

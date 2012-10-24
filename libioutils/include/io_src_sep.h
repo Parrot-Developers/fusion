@@ -18,10 +18,10 @@
 #define IO_SRC_SEP_SIZE 1024
 
 /**
- * @typedef io_src_sep_t
- * @brief Line buffered source type
+ * @typedef io_src_sep
+ * @brief Separator source type
  */
-typedef struct io_src_sep io_src_sep_t;
+struct io_src_sep;
 
 /**
  * @typedef io_src_sep_cb_t
@@ -43,11 +43,11 @@ typedef struct io_src_sep io_src_sep_t;
  * @return errno compatible value, positive for only a warning, negative if the
  * source must be removed, 0 on success
  */
-typedef int (io_src_sep_cb_t)(io_src_sep_t *sep, char *chunk, unsigned len);
+typedef int (io_src_sep_cb_t)(struct io_src_sep *sep, char *chunk, unsigned len);
 
 /**
  * @typedef io_src_sep
- * @brief Line buffered source type
+ * @brief Separator source type
  */
 struct io_src_sep {
 	/** separator byte */
@@ -55,7 +55,7 @@ struct io_src_sep {
 	/** user callback, notified when one of the registered signals occur */
 	io_src_sep_cb_t *cb;
 	/** inner monitor source */
-	io_src_t src;
+	struct io_src src;
 	/** buffer containing the bytes read from the source */
 	char buf[2 * IO_SRC_SEP_SIZE + 1];
 
@@ -76,7 +76,7 @@ struct io_src_sep {
  * @param sep Separator between the chunks of data
  * @return Negative errno compatible value on error, 0 otherwise
  */
-int io_src_sep_init(io_src_sep_t *sep_src, int fd, io_src_sep_cb_t *cb,
+int io_src_sep_init(struct io_src_sep *sep_src, int fd, io_src_sep_cb_t *cb,
 		char sep);
 
 #endif /* IO_SRC_SEP_H_ */

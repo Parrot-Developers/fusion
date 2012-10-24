@@ -14,10 +14,10 @@
 #include "io_src.h"
 
 /**
- * @typedef io_src_sig_t
+ * @typedef io_src_sig
  * @brief Signal source type
  */
-typedef struct io_src_sig io_src_sig_t;
+struct io_src_sig;
 
 /**
  * @typedef io_sig_callback_t
@@ -27,7 +27,7 @@ typedef struct io_src_sig io_src_sig_t;
  * @return errno compatible value, positive for only a warning, negative if the
  * source must be removed, 0 on success
  */
-typedef int (io_sig_callback_t)(io_src_sig_t *sig);
+typedef int (io_sig_callback_t)(struct io_src_sig *sig);
 
 /**
  * @typedef io_src_sig
@@ -41,7 +41,7 @@ struct io_src_sig {
 	/** user callback, notified when one of the registered signals occur */
 	io_sig_callback_t *cb;
 	/** inner monitor source */
-	io_src_t src;
+	struct io_src src;
 	/** signal info structure, filled in before calling back the client */
 	struct signalfd_siginfo si;
 };
@@ -55,6 +55,7 @@ struct io_src_sig {
  * @param nb Number of signals to mask
  * @return
  */
-int io_src_sig_init(io_src_sig_t *sig, io_sig_callback_t *cb, unsigned nb, ...);
+int io_src_sig_init(struct io_src_sig *sig, io_sig_callback_t *cb, unsigned nb,
+		...);
 
 #endif /* IO_SRC_SIG_H_ */

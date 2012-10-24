@@ -27,19 +27,13 @@
 #define io_mon_has_error(events) (IO_EPOLL_ERROR_EVENTS & (events))
 
 /**
- * @typedef io_mon_t
- * @brief Monitor's context
- */
-typedef struct io_mon io_mon_t;
-
-/**
  * @brief Monitor creation and initialization
  *
  * Creates a monitoring context, ready for use to monitor IO events in an event
  * loop
  * @return Monitor context on success, NULL otherwise
  */
-io_mon_t *io_mon_new(void);
+struct io_mon *io_mon_new(void);
 
 /**
  * Add a source to the pool of sources we monitor. The monitoring is activated
@@ -49,7 +43,7 @@ io_mon_t *io_mon_new(void);
  * sources. The file descriptor is forced non-blocking when added
  * @return negative errno value on error, 0 otherwise
  */
-int io_mon_add_source(io_mon_t *mon, io_src_t *src);
+int io_mon_add_source(struct io_mon *mon, struct io_src *src);
 
 /**
  * Dumps the events in an epoll event flag set
@@ -65,14 +59,15 @@ void io_mon_dump_epoll_event(uint32_t events);
  *
  * @return negative errno value on error, 0 otherwise
  */
-int io_mon_activate_out_source(io_mon_t *mon, io_src_t *src, int active);
+int io_mon_activate_out_source(struct io_mon *mon, struct io_src *src,
+		int active);
 
 /**
  * Returns the monitor's file descriptor for use in an I/O loop
  * @param mon Monitor context
  * @return Monitor's file descriptor, -1 on error
  */
-int io_mon_get_fd(io_mon_t *monitor);
+int io_mon_get_fd(struct io_mon *monitor);
 
 /**
  * When monitor's fd is ready for reading operation, a call to
@@ -85,13 +80,13 @@ int io_mon_get_fd(io_mon_t *monitor);
  * @param mon Monitor's context
  * @return negative errno value on error, 0 otherwise
  */
-int io_mon_process_events(io_mon_t *mon);
+int io_mon_process_events(struct io_mon *mon);
 
 /**
  * De register sources and destroys monitor's allocated resources.
  * @param monitor Monitor's context, NULL in output
  */
-void io_mon_delete(io_mon_t **mon);
+void io_mon_delete(struct io_mon **mon);
 
 /*
  * candidates for implementation :

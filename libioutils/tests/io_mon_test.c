@@ -20,7 +20,7 @@
 
 static void testMON_NEW(void)
 {
-	io_mon_t *mon;
+	struct io_mon *mon;
 
 	/* normal use case */
 	mon = io_mon_new();
@@ -30,7 +30,7 @@ static void testMON_NEW(void)
 	io_mon_delete(&mon);
 }
 
-static int my_dummy_callback(__attribute__((unused)) io_src_t *src)
+static int my_dummy_callback(__attribute__((unused)) struct io_src *src)
 {
 	return 0;
 }
@@ -39,10 +39,10 @@ static void testMON_ADD_SOURCE(void)
 {
 	int pipefd[2] = {-1, -1};
 	int fd;
-	io_mon_t *mon;
-	io_src_t src_in;
-	io_src_t src_out;
-	io_src_t src_duplex;
+	struct io_mon *mon;
+	struct io_src src_in;
+	struct io_src src_out;
+	struct io_src src_duplex;
 	int ret;
 	int flags;
 
@@ -117,10 +117,10 @@ static void testMON_ACTIVATE_OUT_SOURCE(void)
 {
 	int pipefd[2] = {-1, -1};
 	int fd;
-	io_mon_t *mon;
-	io_src_t src_out;
-	io_src_t src_in;
-	io_src_t src_duplex;
+	struct io_mon *mon;
+	struct io_src src_out;
+	struct io_src src_in;
+	struct io_src src_duplex;
 	int ret;
 
 	mon = io_mon_new();
@@ -181,7 +181,7 @@ static void testMON_ACTIVATE_OUT_SOURCE(void)
 static void testMON_GET_FD(void)
 {
 	int fd;
-	io_mon_t *mon;
+	struct io_mon *mon;
 
 	mon = io_mon_new();
 	CU_ASSERT_PTR_NOT_NULL(mon);
@@ -209,9 +209,9 @@ static void testMON_PROCESS_EVENTS(void)
 	int pipefd[2] = {-1, -1};
 	int mon_fd;
 	int ret;
-	io_mon_t *mon;
-	io_src_t src_out;
-	io_src_t src_in;
+	struct io_mon *mon;
+	struct io_src src_out;
+	struct io_src src_in;
 	bool loop = true;
 	struct timeval timeout;
 	const char const *msg1 = "Salut !";
@@ -224,7 +224,7 @@ static void testMON_PROCESS_EVENTS(void)
 #define STATE_PIPE_OUT_CLOSED 8
 #define STATE_ALL_DONE 15
 	int state = STATE_START;
-	int in_cb(io_src_t *src)
+	int in_cb(struct io_src *src)
 	{
 		char buf[1024];
 		int r;
@@ -248,7 +248,7 @@ static void testMON_PROCESS_EVENTS(void)
 
 		return 0;
 	}
-	int out_cb(io_src_t *src)
+	int out_cb(struct io_src *src)
 	{
 		int r;
 
@@ -266,7 +266,7 @@ static void testMON_PROCESS_EVENTS(void)
 
 		return 0;
 	}
-	void cleanup_cb(io_src_t *src)
+	void cleanup_cb(struct io_src *src)
 	{
 		reached_state(&state, STATE_PIPE_OUT_CLOSED);
 		close(src->fd);
@@ -331,7 +331,7 @@ out:
 
 static void testMON_DELETE(void)
 {
-	io_mon_t *mon;
+	struct io_mon *mon;
 
 	mon = io_mon_new();
 	CU_ASSERT_PTR_NOT_NULL(mon);

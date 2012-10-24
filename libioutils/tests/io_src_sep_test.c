@@ -42,8 +42,8 @@ static void testSRC_SEP_INIT(void)
 
 	int mon_fd;
 	int ret;
-	io_mon_t *mon;
-	io_src_sep_t src_sep;
+	struct io_mon *mon;
+	struct io_src_sep src_sep;
 	bool loop = true;
 	struct timeval timeout;
 	char big_msg[] = MSG1 MSG2 MSG3 MSG4;
@@ -54,12 +54,13 @@ static void testSRC_SEP_INIT(void)
 #define STATE_TIMER_EXPIRED 8
 #define STATE_ALL_DONE 15
 	int state = STATE_START;
-	int sep_cb(__attribute__((unused)) io_src_sep_t *sep, char *chunk,
+	int sep_cb(__attribute__((unused)) struct io_src_sep *sep, char *chunk,
 			__attribute__((unused)) unsigned len)
 	{
 /*		printf("received %u byte(s) : \"%.*s\"\n", len, len, chunk); */
 
-		CU_ASSERT_NOT_EQUAL(state, STATE_ALL_DONE & ~STATE_TIMER_EXPIRED);
+		CU_ASSERT_NOT_EQUAL(state,
+				STATE_ALL_DONE & ~STATE_TIMER_EXPIRED);
 		CU_ASSERT_NOT_EQUAL(0, memcmp(chunk, MSG4, strlen(MSG4)));
 
 		if (0 == memcmp(chunk, MSG1, strlen(MSG1))) {
