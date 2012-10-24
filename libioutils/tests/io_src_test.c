@@ -45,7 +45,7 @@ static void testSRC_INIT(void)
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_EQUAL(src.fd, pipefd[0]);
 	CU_ASSERT_EQUAL(src.type, IO_IN);
-	CU_ASSERT_EQUAL(src.callback, my_dummy_cb);
+	CU_ASSERT_EQUAL(src.cb, my_dummy_cb);
 	CU_ASSERT_EQUAL(src.cleanup, cleanup_cb);
 
 	CU_ASSERT_EQUAL(src.events, 0);
@@ -61,7 +61,7 @@ static void testSRC_INIT(void)
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_EQUAL(src.fd, pipefd[1]);
 	CU_ASSERT_EQUAL(src.type, IO_OUT);
-	CU_ASSERT_EQUAL(src.callback, my_dummy_cb);
+	CU_ASSERT_EQUAL(src.cb, my_dummy_cb);
 
 	CU_ASSERT_EQUAL(src.events, 0);
 
@@ -76,7 +76,7 @@ static void testSRC_INIT(void)
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_EQUAL(src.fd, fd);
 	CU_ASSERT_EQUAL(src.type, IO_DUPLEX);
-	CU_ASSERT_EQUAL(src.callback, my_dummy_cb);
+	CU_ASSERT_EQUAL(src.cb, my_dummy_cb);
 
 	CU_ASSERT_EQUAL(src.events, 0);
 

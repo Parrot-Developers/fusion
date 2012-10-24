@@ -12,7 +12,7 @@
 #include <io_src.h>
 
 int io_src_init(struct io_src *src, int fd, enum io_src_event type,
-	       io_callback_t *cb, io_src_cleanup_t *cleanup)
+	       io_src_cb_t *cb, io_src_cleanup_t *cleanup)
 {
 	if (NULL == src || -1 == fd || NULL == cb)
 		return -EINVAL;
@@ -27,7 +27,7 @@ int io_src_init(struct io_src *src, int fd, enum io_src_event type,
 
 	src->fd = fd;
 	src->type = type;
-	src->callback = cb;
+	src->cb = cb;
 	src->cleanup = cleanup;
 
 	return 0;

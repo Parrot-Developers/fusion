@@ -60,7 +60,7 @@ static void sig_cleanup(struct io_src *src)
 	src->fd = -1;
 }
 
-int io_src_sig_init(struct io_src_sig *sig, io_sig_callback_t *cb, unsigned nb,
+int io_src_sig_init(struct io_src_sig *sig, io_sig_cb_t *cb, unsigned nb,
 		...)
 {
 	int ret;

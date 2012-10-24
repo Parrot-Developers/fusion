@@ -43,7 +43,7 @@ static int add_source(struct io_mon *mon, struct io_src *src)
 {
 	int ret = -1;
 
-	if (NULL == src->callback)
+	if (NULL == src->cb)
 		return -EINVAL;
 
 	ret = set_non_blocking(src->fd);
@@ -234,7 +234,7 @@ int io_mon_process_events(struct io_mon *mon)
 		if (!(src->events & (src->active | IO_EPOLL_ERROR_EVENTS)))
 			continue;
 
-		ret = src->callback(src);
+		ret = src->cb(src);
 		if (0 != ret)
 			fprintf(stderr, "src->cb : %s\n", strerror(abs(ret)));
 

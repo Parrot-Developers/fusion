@@ -20,14 +20,14 @@
 struct io_src_sig;
 
 /**
- * @typedef io_sig_callback_t
+ * @typedef io_sig_cb_t
  * @brief Called when one of the monitored signals happens, with the
  * signalfd_siginfo field properly filled for use by the client
  * @param sig Signal source
  * @return errno compatible value, positive for only a warning, negative if the
  * source must be removed, 0 on success
  */
-typedef int (io_sig_callback_t)(struct io_src_sig *sig);
+typedef int (io_sig_cb_t)(struct io_src_sig *sig);
 
 /**
  * @typedef io_src_sig
@@ -39,7 +39,7 @@ struct io_src_sig {
 	/** signal mask state before the source setup, for being reinstalled */
 	sigset_t old_mask;
 	/** user callback, notified when one of the registered signals occur */
-	io_sig_callback_t *cb;
+	io_sig_cb_t *cb;
 	/** inner monitor source */
 	struct io_src src;
 	/** signal info structure, filled in before calling back the client */
@@ -55,7 +55,7 @@ struct io_src_sig {
  * @param nb Number of signals to mask
  * @return
  */
-int io_src_sig_init(struct io_src_sig *sig, io_sig_callback_t *cb, unsigned nb,
+int io_src_sig_init(struct io_src_sig *sig, io_sig_cb_t *cb, unsigned nb,
 		...);
 
 #endif /* IO_SRC_SIG_H_ */

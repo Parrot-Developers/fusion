@@ -37,7 +37,7 @@ enum io_src_event {
 struct io_src;
 
 /**
- * @typedef io_callback_t
+ * @typedef io_src_cb_t
  * @brief Callback notified when a source is ready to perform I/O. If an I/O
  * error occurs, the source is notified by mean of the callback and is
  * automatically removed once the callback returns.<br />
@@ -48,7 +48,7 @@ struct io_src;
  * @return Negative errno compatible value on error which implies source
  * removal, positive errno compatible value for a warning, 0 on success
  */
-typedef int (io_callback_t)(struct io_src *src);
+typedef int (io_src_cb_t)(struct io_src *src);
 
 /**
  * @typedef io_src_cleanup_t
@@ -70,7 +70,7 @@ struct io_src {
 	 */
 	enum io_src_event type;
 	/** callback responsible of this source */
-	io_callback_t *callback;
+	io_src_cb_t *cb;
 	/** callback called to cleanup when the source is removed */
 	io_src_cleanup_t *cleanup;
 
@@ -123,7 +123,7 @@ struct io_src {
  * @return Negative errno compatible value on error otherwise zero
  */
 int io_src_init(struct io_src *src, int fd, enum io_src_event type,
-		io_callback_t *cb, io_src_cleanup_t *cleanup);
+		io_src_cb_t *cb, io_src_cleanup_t *cleanup);
 
 /**
  * Cleans up a source (basically a memset...)
