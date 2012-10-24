@@ -43,7 +43,8 @@ struct io_src_sep;
  * @return errno compatible value, positive for only a warning, negative if the
  * source must be removed, 0 on success
  */
-typedef int (io_src_sep_cb_t)(struct io_src_sep *sep, char *chunk, unsigned len);
+typedef int (io_src_sep_cb_t)(struct io_src_sep *sep, char *chunk,
+		unsigned len);
 
 /**
  * @typedef io_src_sep

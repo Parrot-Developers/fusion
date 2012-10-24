@@ -237,7 +237,7 @@ static void testMON_PROCESS_EVENTS(void)
 			reached_state(&state, STATE_MSG1_RECEIVED);
 
 			/* monitor out to sent the second message */
-			r = io_mon_activate_out_source(mon,& src_out, 1);
+			r = io_mon_activate_out_source(mon, &src_out, 1);
 			CU_ASSERT_NOT_EQUAL(r, -1);
 		} else if (0 == strcmp(msg2, buf)) {
 			CU_ASSERT(0 == (state & STATE_MSG2_RECEIVED));
@@ -259,7 +259,7 @@ static void testMON_PROCESS_EVENTS(void)
 		CU_ASSERT_NOT_EQUAL_FATAL(r, -1);
 
 		/* disable out source when unneeded to avoid event loop panic */
-		r = io_mon_activate_out_source(mon,& src_out, 0);
+		r = io_mon_activate_out_source(mon, &src_out, 0);
 		CU_ASSERT_NOT_EQUAL(r, -1);
 
 		reached_state(&state, STATE_MSG2_SENT);

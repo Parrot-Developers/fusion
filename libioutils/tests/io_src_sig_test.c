@@ -130,8 +130,7 @@ out:
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT(sigsets_are_equals(&old_mask, &new_mask));
 
-	/* error use cases */
-	// TODO
+	/* error use cases TODO */
 
 }
 

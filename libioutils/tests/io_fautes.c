@@ -17,12 +17,7 @@
 #include <CUnit/Basic.h>
 
 #include <fautes.h>
-
-extern suite_t mon_suite;
-extern suite_t src_sep_suite;
-extern suite_t src_sig_suite;
-extern suite_t src_suite;
-extern suite_t utils_suite;
+#include "io_fautes.h"
 
 const char const *fautes_lib_name = "libioutils";
 
@@ -36,7 +31,6 @@ suite_t *libioutils_test_suites[] = {
 		NULL, /* NULL guard */
 };
 
-extern void libioutils_init_test_suites(void);
 void libioutils_init_test_suites(void)
 {
 	int default_active_state = 1;
