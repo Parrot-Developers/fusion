@@ -8,8 +8,7 @@
  */
 #include <fautes.h>
 
-extern suite_t dll_suite;
-extern suite_t node_suite;
+#include "rs_fautes.h"
 
 const char const *fautes_lib_name = "librs";
 
@@ -19,7 +18,6 @@ suite_t *librs_test_suites[] = {
 		NULL, /* NULL guard */
 };
 
-extern void librs_init_test_suites(void);
 void librs_init_test_suites(void)
 {
 	int default_active_state = 1;

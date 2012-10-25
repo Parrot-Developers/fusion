@@ -19,7 +19,7 @@
  * @param b Second node
  * @return 1 if a's and b's addresses are equal, non-zero otherwise
  */
-static int default_equals(rs_node_t *a, const rs_node_t *b)
+static int default_equals(struct rs_node *a, const struct rs_node *b)
 {
 	return a == b;
 }
@@ -28,17 +28,17 @@ static int default_equals(rs_node_t *a, const rs_node_t *b)
  * Default display method, displays the node address
  * @param node Node to display
  */
-static void default_print(rs_node_t *node)
+static void default_print(struct rs_node *node)
 {
 	fprintf(stderr, "%p\n", node);
 };
 
-static const rs_dll_vtable_t default_vtable = {
+static const struct rs_dll_vtable default_vtable = {
 		.equals = default_equals,
 		.print = default_print,
 };
 
-int rs_dll_init(rs_dll_t *dll, const rs_dll_vtable_t *vtable)
+int rs_dll_init(struct rs_dll *dll, const struct rs_dll_vtable *vtable)
 {
 	if (NULL == dll)
 		return -EINVAL;
@@ -57,12 +57,11 @@ int rs_dll_init(rs_dll_t *dll, const rs_dll_vtable_t *vtable)
 	return 0;
 }
 
-void rs_dll_dump(rs_dll_t *dll)
+void rs_dll_dump(struct rs_dll *dll)
 {
-	int display(rs_node_t *node,
-			__attribute__((unused)) void *data)
+	int display(struct rs_node *node, __attribute__((unused)) void *data)
 	{
-		void (*print)(rs_node_t *node) = data;
+		void (*print)(struct rs_node *node) = data;
 
 		print(node);
 
@@ -72,7 +71,7 @@ void rs_dll_dump(rs_dll_t *dll)
 	rs_node_foreach(dll->head, display, dll->vtable.print);
 }
 
-int rs_dll_push(rs_dll_t *dll, rs_node_t *node)
+int rs_dll_push(struct rs_dll *dll, struct rs_node *node)
 {
 	int err;
 
@@ -87,12 +86,12 @@ int rs_dll_push(rs_dll_t *dll, rs_node_t *node)
 	return err ? -EINVAL : 0;
 }
 
-unsigned rs_dll_get_count(rs_dll_t *dll)
+unsigned rs_dll_get_count(struct rs_dll *dll)
 {
 	return NULL == dll ? UINT_MAX : dll->count;
 }
 
-rs_node_t *rs_dll_find_match(rs_dll_t *dll, rs_node_match_cb_t match,
+struct rs_node *rs_dll_find_match(struct rs_dll *dll, rs_node_match_cb_t match,
 		void *data)
 {
 	if (NULL == dll || NULL == match)
@@ -101,16 +100,17 @@ rs_node_t *rs_dll_find_match(rs_dll_t *dll, rs_node_match_cb_t match,
 	return rs_node_find_match(dll->head, match, data);
 }
 
-rs_node_t *rs_dll_find(rs_dll_t *dll, rs_node_t *node)
+struct rs_node *rs_dll_find(struct rs_dll *dll, struct rs_node *node)
 {
-	int match(rs_node_t *n, const void *data) {
+	int match(struct rs_node *n, const void *data)
+	{
 		return dll->vtable.equals(n, data);
 	};
 
 	return rs_dll_find_match(dll, match, node);
 }
 
-rs_node_t *rs_dll_pop(rs_dll_t *dll)
+struct rs_node *rs_dll_pop(struct rs_dll *dll)
 {
 	if (NULL == dll)
 		return NULL;
@@ -118,9 +118,9 @@ rs_node_t *rs_dll_pop(rs_dll_t *dll)
 	return rs_dll_remove(dll, dll->head);
 }
 
-rs_node_t *rs_dll_next(rs_dll_t *dll)
+struct rs_node *rs_dll_next(struct rs_dll *dll)
 {
-	rs_node_t *next;
+	struct rs_node *next;
 
 	if (NULL == dll)
 		return NULL;
@@ -135,11 +135,11 @@ rs_node_t *rs_dll_next(rs_dll_t *dll)
 	return next;
 }
 
-rs_node_t *rs_dll_remove_match(rs_dll_t *dll,
+struct rs_node *rs_dll_remove_match(struct rs_dll *dll,
 		rs_node_match_cb_t match, void *data)
 {
-	rs_node_t *head_next_bkp = NULL;
-	rs_node_t *needle;
+	struct rs_node *head_next_bkp = NULL;
+	struct rs_node *needle;
 
 	if (NULL == dll || NULL == match)
 		return NULL;
@@ -159,18 +159,19 @@ rs_node_t *rs_dll_remove_match(rs_dll_t *dll,
 	return needle;
 }
 
-rs_node_t *rs_dll_remove(rs_dll_t *dll, rs_node_t *node)
+struct rs_node *rs_dll_remove(struct rs_dll *dll, struct rs_node *node)
 {
-	int match(rs_node_t *n, const void *data) {
+	int match(struct rs_node *n, const void *data)
+	{
 		return dll->vtable.equals(n, data);
 	};
 
 	return rs_dll_remove_match(dll, match, node);
 }
 
-int rs_dll_foreach(rs_dll_t *dll, rs_node_cb_t cb, void *data)
+int rs_dll_foreach(struct rs_dll *dll, rs_node_cb_t cb, void *data)
 {
-	rs_node_t *n;
+	struct rs_node *n;
 	int res = 0;
 
 	if (NULL == cb || NULL == dll)

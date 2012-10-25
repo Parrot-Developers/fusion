@@ -14,20 +14,14 @@
 #include <stddef.h>
 
 /**
- * @typedef rs_node_t
- * @brief Node of a doubly-linked list
- */
-typedef struct rs_node rs_node_t;
-
-/**
  * @struct rs_node
  * @brief Node of a doubly-linked list
  */
 struct rs_node {
 	/** next node in the list */
-	rs_node_t *next;
+	struct rs_node *next;
 	/** next node in the list */
-	rs_node_t *prev;
+	struct rs_node *prev;
 };
 
 /**
@@ -37,7 +31,7 @@ struct rs_node {
  * @param data User defined data. Can be NULL
  * @return Returns 1 if the node matches, 0 otherwise
  */
-typedef int (*rs_node_match_cb_t)(rs_node_t *node, const void *data);
+typedef int (*rs_node_match_cb_t)(struct rs_node *node, const void *data);
 
 /**
  * @typedef rs_node_cb_t
@@ -45,7 +39,7 @@ typedef int (*rs_node_match_cb_t)(rs_node_t *node, const void *data);
  * @param data User defined data
  * @return 0 on success, non-zero on error
  */
-typedef int (*rs_node_cb_t)(rs_node_t *node, void *data);
+typedef int (*rs_node_cb_t)(struct rs_node *node, void *data);
 
 /**
  * @def RS_NODE_MATCH_MEMBER
@@ -58,10 +52,10 @@ typedef int (*rs_node_cb_t)(rs_node_t *node, void *data);
  * @param node_member Name of the member containing the node
  */
 #define RS_NODE_MATCH_MEMBER(type, member, node_member) \
-int match_##member(rs_node_t *__n, const void *__d) \
+int match_##member(struct rs_node *__n, const void *__d) \
 { \
 	type *__o = container_of(__n, type, node_member); \
-	typeof(((type *)0)->member) *__v = (typeof(((type *)0)->member) *)__d; \
+	typeof(((type *)0)->member)*__v = (typeof(((type *)0)->member)*)__d; \
 	return __o->member == *__v; \
 }
 
@@ -70,7 +64,7 @@ int match_##member(rs_node_t *__n, const void *__d) \
  * @param node One node of the list
  * @return First node of the list
  */
-rs_node_t *rs_node_head(rs_node_t *node);
+struct rs_node *rs_node_head(struct rs_node *node);
 
 /**
  * Inserts a node before another one
@@ -78,7 +72,7 @@ rs_node_t *rs_node_head(rs_node_t *node);
  * @param node Node to insert
  * @return node if not NULL, next otherwise
  */
-rs_node_t *rs_node_insert(rs_node_t *next, rs_node_t *node);
+struct rs_node *rs_node_insert(struct rs_node *next, struct rs_node *node);
 
 /**
  * Pushes a node to a list whose head is given
@@ -87,7 +81,7 @@ rs_node_t *rs_node_insert(rs_node_t *next, rs_node_t *node);
  * @param node Node to push
  * @return -1 on error, 0 otherwise
  */
-int rs_node_push(rs_node_t **head, rs_node_t *node);
+int rs_node_push(struct rs_node **head, struct rs_node *node);
 
 /**
  * Removes the first node of a list whose head is given
@@ -95,28 +89,28 @@ int rs_node_push(rs_node_t **head, rs_node_t *node);
  * removal is performed
  * @return Node popped, NULL if none or on error
  */
-rs_node_t *rs_node_pop(rs_node_t **head);
+struct rs_node *rs_node_pop(struct rs_node **head);
 
 /**
  * Counts the number of elements contained on a list whose head is given.
  * Counting is performed forward
  * @param head Lists head. If it has previous elements, they won't be counted.
  */
-unsigned rs_node_count(rs_node_t *node);
+unsigned rs_node_count(struct rs_node *node);
 
 /**
  * Returns the next element of a given list
  * @param node Current node
  * @return Next node, NULL if none or node is NULL
  */
-rs_node_t *rs_node_next(rs_node_t *node);
+struct rs_node *rs_node_next(struct rs_node *node);
 
 /**
  * Returns the previous element of a given list
  * @param node Current node
  * @return Previous node, NULL if none or node is NULL
  */
-rs_node_t *rs_node_prev(rs_node_t *node);
+struct rs_node *rs_node_prev(struct rs_node *node);
 
 /**
  * Finds a node matching a given criteria on a list of whom any node is known
@@ -126,8 +120,8 @@ rs_node_t *rs_node_prev(rs_node_t *node);
  * @param data User data passed to the matching function
  * @return Node if found, NULL otherwise
  */
-rs_node_t *rs_node_find_match(rs_node_t *node, rs_node_match_cb_t match,
-		const void *data);
+struct rs_node *rs_node_find_match(struct rs_node *node,
+		rs_node_match_cb_t match, const void *data);
 
 /**
  * Removes a node from a list of whom any node is known
@@ -139,7 +133,7 @@ rs_node_t *rs_node_find_match(rs_node_t *node, rs_node_match_cb_t match,
  * must update the head reference, to point to the next element
  * @return Node removed if found, NULL otherwise or on error
  */
-rs_node_t *rs_node_remove(rs_node_t *list, rs_node_t *trash);
+struct rs_node *rs_node_remove(struct rs_node *list, struct rs_node *trash);
 
 /**
  * Removes a node matching a given criteria from a list of whom any node is
@@ -149,7 +143,7 @@ rs_node_t *rs_node_remove(rs_node_t *list, rs_node_t *trash);
  * @param data User data, passed to the matching function
  * @return Node removed if found, NULL otherwise or on error
  */
-rs_node_t *rs_node_remove_match(rs_node_t *list,
+struct rs_node *rs_node_remove_match(struct rs_node *list,
 		rs_node_match_cb_t match, const void *data);
 
 /**
@@ -160,6 +154,6 @@ rs_node_t *rs_node_remove_match(rs_node_t *list,
  * @param data User data, passe to each callback's call
  * @return 0 on success, or the first cb's call non-zero return value
  */
-int rs_node_foreach(rs_node_t *list, rs_node_cb_t cb, void *data);
+int rs_node_foreach(struct rs_node *list, rs_node_cb_t cb, void *data);
 
 #endif /* RS_NODE_H_ */

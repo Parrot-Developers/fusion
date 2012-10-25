@@ -18,16 +18,10 @@
  */
 struct rs_dll_vtable {
 	/** returns 0 if a equals b, non-zero otherwise */
-	int (*equals)(rs_node_t *a, const rs_node_t *b);
+	int (*equals)(struct rs_node *a, const struct rs_node *b);
 	/** displays the data associated with node */
-	void (*print)(rs_node_t *node);
+	void (*print)(struct rs_node *node);
 };
-
-/**
- * @typedef rs_dll_vtable_t
- * @brief User defined operation on list nodes
- */
-typedef struct rs_dll_vtable rs_dll_vtable_t;
 
 /**
  * @struct rs_dll
@@ -35,20 +29,14 @@ typedef struct rs_dll_vtable rs_dll_vtable_t;
  */
 struct rs_dll {
 	/** first element of the list */
-	rs_node_t *head;
+	struct rs_node *head;
 	/** cursor of the list, i.e. next element returned by rs_dll_next */
-	rs_node_t *cur;
+	struct rs_node *cur;
 	/** number of elements of the list */
 	unsigned count;
 	/** user defined operation on list nodes */
-	rs_dll_vtable_t vtable;
+	struct rs_dll_vtable vtable;
 };
-
-/**
- * @typedef rs_dll_t
- * @brief Implementation of a doubly-linked list
- */
-typedef struct rs_dll rs_dll_t;
 
 /**
  * Initializes the doubly linked list
@@ -57,13 +45,13 @@ typedef struct rs_dll rs_dll_t;
  * any of it's members
  * @return RS_ERROR_PARAM
  */
-int rs_dll_init(rs_dll_t *dll, const rs_dll_vtable_t *vtable);
+int rs_dll_init(struct rs_dll *dll, const struct rs_dll_vtable *vtable);
 
 /**
  * Dumps the content of the list, using the print method provided
  * @param dll Doubly linked list
  */
-void rs_dll_dump(rs_dll_t *dll);
+void rs_dll_dump(struct rs_dll *dll);
 
 /**
  * Adds an element to the list
@@ -71,13 +59,13 @@ void rs_dll_dump(rs_dll_t *dll);
  * @param node Node to push
  * @return RS_ERROR_PARAM
  */
-int rs_dll_push(rs_dll_t *dll, rs_node_t *node);
+int rs_dll_push(struct rs_dll *dll, struct rs_node *node);
 
 /**
  * @param dll Doubly linked list
  * @return Number of elements of the list, UINT_MAX in case of errors
  */
-unsigned rs_dll_get_count(rs_dll_t *dll);
+unsigned rs_dll_get_count(struct rs_dll *dll);
 
 /**
  * Searches a node in the list, based on the user defined equality method
@@ -85,7 +73,7 @@ unsigned rs_dll_get_count(rs_dll_t *dll);
  * @param node Node to find
  * @return Node if found, NULL otherwise
  */
-rs_node_t *rs_dll_find(rs_dll_t *dll, rs_node_t *node);
+struct rs_node *rs_dll_find(struct rs_dll *dll, struct rs_node *node);
 
 /**
  * Searches a node in the list, based on a matching callback
@@ -94,7 +82,7 @@ rs_node_t *rs_dll_find(rs_dll_t *dll, rs_node_t *node);
  * @param data User data, passed to the match callback
  * @return Node if found, NULL otherwise
  */
-rs_node_t *rs_dll_find_match(rs_dll_t *dll, rs_node_match_cb_t match,
+struct rs_node *rs_dll_find_match(struct rs_dll *dll, rs_node_match_cb_t match,
 		void *data);
 
 /**
@@ -102,7 +90,7 @@ rs_node_t *rs_dll_find_match(rs_dll_t *dll, rs_node_match_cb_t match,
  * @param dll Doubly linked list
  * @return First element of the list, un-chained, NULL on error
  */
-rs_node_t *rs_dll_pop(rs_dll_t *dll);
+struct rs_node *rs_dll_pop(struct rs_dll *dll);
 
 /**
  * When NULL is returned, the internal cursor is rewinded so that the next call
@@ -110,7 +98,7 @@ rs_node_t *rs_dll_pop(rs_dll_t *dll);
  * @param dll Doubly linked list
  * @return Next element of the list, NULL if none
  */
-rs_node_t *rs_dll_next(rs_dll_t *dll);
+struct rs_node *rs_dll_next(struct rs_dll *dll);
 
 /**
  * Unchains and returns a given element of the list
@@ -119,7 +107,7 @@ rs_node_t *rs_dll_next(rs_dll_t *dll);
  * vtable.compare()
  * @return Node if found, NULL otherwise or on error (NULL parameter)
  */
-rs_node_t *rs_dll_remove(rs_dll_t *dll, rs_node_t *node);
+struct rs_node *rs_dll_remove(struct rs_dll *dll, struct rs_node *node);
 
 /**
  * Unchains and returns a given element of the list
@@ -128,8 +116,8 @@ rs_node_t *rs_dll_remove(rs_dll_t *dll, rs_node_t *node);
  * @param data User data, passed to the match callback
  * @return Node if found, NULL otherwise or on error (NULL parameter)
  */
-rs_node_t *rs_dll_remove_match(rs_dll_t *dll, rs_node_match_cb_t match,
-		void *data);
+struct rs_node *rs_dll_remove_match(struct rs_dll *dll,
+		rs_node_match_cb_t match, void *data);
 
 /**
  * Applies a callback to each element of the list, in the list order
@@ -139,6 +127,6 @@ rs_node_t *rs_dll_remove_match(rs_dll_t *dll, rs_node_match_cb_t match,
  * @return RS_ERROR_PARAM if cb is NULL, or the first cb's error code which
  * isn't RS_ERROR_NONE
  */
-int rs_dll_foreach(rs_dll_t *dll, rs_node_cb_t cb, void *data);
+int rs_dll_foreach(struct rs_dll *dll, rs_node_cb_t cb, void *data);
 
 #endif /* RS_DLL_H_ */

@@ -19,31 +19,29 @@
 
 struct int_node {
 	int val;
-	rs_node_t node;
+	struct rs_node node;
 };
 
-typedef struct int_node int_node_t;
+#define to_int_node(p) container_of(p, struct int_node, node)
 
-#define to_int_node(p) container_of(p, int_node_t, node)
-
-static int int_node_test_equals(rs_node_t *node_a, void *int_node_b)
+static int int_node_test_equals(struct rs_node *node_a, void *int_node_b)
 {
-	int_node_t *int_node_a = to_int_node(node_a);
+	struct int_node *int_node_a = to_int_node(node_a);
 
 	if (NULL == node_a || NULL == int_node_b)
 		return 0;
 
-	return 0 == (int_node_a->val - ((int_node_t *)int_node_b)->val);
+	return 0 == (int_node_a->val - ((struct int_node *)int_node_b)->val);
 }
 
-static RS_NODE_MATCH_MEMBER(int_node_t, val, node)
+static RS_NODE_MATCH_MEMBER(struct int_node, val, node)
 
 static void testRS_NODE_HEAD(void)
 {
-	int_node_t int_node_a = {.val = 17,};
-	int_node_t int_node_b = {.val = 42,};
-	rs_node_t *list = NULL;
-	rs_node_t *head = NULL;
+	struct int_node int_node_a = {.val = 17,};
+	struct int_node int_node_b = {.val = 42,};
+	struct rs_node *list = NULL;
+	struct rs_node *head = NULL;
 	int err;
 
 	/* normal use cases */
@@ -65,11 +63,11 @@ static void testRS_NODE_HEAD(void)
 
 static void testRS_NODE_INSERT(void)
 {
-	int_node_t int_node_a = {.val = 17,};
-	int_node_t int_node_b = {.val = 42,};
-	int_node_t int_node_c = {.val = 666,};
-	rs_node_t *list = NULL;
-	rs_node_t *tmp = &(int_node_a.node);
+	struct int_node int_node_a = {.val = 17,};
+	struct int_node int_node_b = {.val = 42,};
+	struct int_node int_node_c = {.val = 666,};
+	struct rs_node *list = NULL;
+	struct rs_node *tmp = &(int_node_a.node);
 
 	/* normal use cases */
 	/* inserting to a NULL (empty) list returns a list composed of node */
@@ -103,10 +101,10 @@ static void testRS_NODE_INSERT(void)
 
 static void testRS_NODE_PUSH(void)
 {
-	int_node_t int_node_a = {.val = 17,};
-	int_node_t int_node_b = {.val = 42,};
-	int_node_t int_node_c = {.val = 666,};
-	rs_node_t *list = NULL;
+	struct int_node int_node_a = {.val = 17,};
+	struct int_node int_node_b = {.val = 42,};
+	struct int_node int_node_c = {.val = 666,};
+	struct rs_node *list = NULL;
 	int err;
 
 	/* normal use cases */
@@ -131,11 +129,11 @@ static void testRS_NODE_PUSH(void)
 
 static void testRS_NODE_POP(void)
 {
-	int_node_t int_node_a = {.val = 17,};
-	int_node_t int_node_b = {.val = 42,};
-	int_node_t int_node_c = {.val = 666,};
-	rs_node_t *list = NULL;
-	rs_node_t *node = NULL;
+	struct int_node int_node_a = {.val = 17,};
+	struct int_node int_node_b = {.val = 42,};
+	struct int_node int_node_c = {.val = 666,};
+	struct rs_node *list = NULL;
+	struct rs_node *node = NULL;
 
 	rs_node_push(&list, &(int_node_a.node));
 	rs_node_push(&list, &(int_node_b.node));
@@ -159,10 +157,10 @@ static void testRS_NODE_POP(void)
 
 static void testRS_NODE_COUNT(void)
 {
-	int_node_t int_node_a = {.val = 17,};
-	int_node_t int_node_b = {.val = 42,};
-	int_node_t int_node_c = {.val = 666,};
-	rs_node_t *list = NULL;
+	struct int_node int_node_a = {.val = 17,};
+	struct int_node int_node_b = {.val = 42,};
+	struct int_node int_node_c = {.val = 666,};
+	struct rs_node *list = NULL;
 	unsigned count;
 
 	/* normal use cases */
@@ -191,11 +189,11 @@ static void testRS_NODE_COUNT(void)
 
 static void testRS_NODE_NEXT(void)
 {
-	int_node_t int_node_a = {.val = 17,};
-	int_node_t int_node_b = {.val = 42,};
-	int_node_t int_node_c = {.val = 666,};
-	rs_node_t *list = NULL;
-	rs_node_t *node = NULL;
+	struct int_node int_node_a = {.val = 17,};
+	struct int_node int_node_b = {.val = 42,};
+	struct int_node int_node_c = {.val = 666,};
+	struct rs_node *list = NULL;
+	struct rs_node *node = NULL;
 
 	rs_node_push(&list, &(int_node_a.node));
 	rs_node_push(&list, &(int_node_b.node));
@@ -215,11 +213,11 @@ static void testRS_NODE_NEXT(void)
 
 static void testRS_NODE_PREV(void)
 {
-	int_node_t int_node_a = {.val = 17,};
-	int_node_t int_node_b = {.val = 42,};
-	int_node_t int_node_c = {.val = 666,};
-	rs_node_t *list = NULL;
-	rs_node_t *node = NULL;
+	struct int_node int_node_a = {.val = 17,};
+	struct int_node int_node_b = {.val = 42,};
+	struct int_node int_node_c = {.val = 666,};
+	struct rs_node *list = NULL;
+	struct rs_node *node = NULL;
 
 	rs_node_push(&list, &(int_node_a.node));
 	rs_node_push(&list, &(int_node_b.node));
@@ -240,12 +238,12 @@ static void testRS_NODE_PREV(void)
 
 static void testRS_NODE_FIND_MATCH(void)
 {
-	int_node_t int_node_a = {.val = 17,};
-	int_node_t int_node_b = {.val = 42,};
-	int_node_t int_node_c = {.val = 666,};
+	struct int_node int_node_a = {.val = 17,};
+	struct int_node int_node_b = {.val = 42,};
+	struct int_node int_node_c = {.val = 666,};
 	int val;
-	rs_node_t *haystack = NULL;
-	rs_node_t *needle = NULL;
+	struct rs_node *haystack = NULL;
+	struct rs_node *needle = NULL;
 
 	rs_node_push(&haystack, &(int_node_a.node));
 	rs_node_push(&haystack, &(int_node_b.node));
@@ -280,12 +278,12 @@ static void testRS_NODE_FIND_MATCH(void)
 
 static void testRS_NODE_REMOVE(void)
 {
-	int_node_t int_node_a = {.val = 17,};
-	int_node_t int_node_b = {.val = 42,};
-	int_node_t int_node_c = {.val = 666,};
-	int_node_t int_node_unknown = {.val = 666,};
-	rs_node_t *list = NULL;
-	rs_node_t *node = NULL;
+	struct int_node int_node_a = {.val = 17,};
+	struct int_node int_node_b = {.val = 42,};
+	struct int_node int_node_c = {.val = 666,};
+	struct int_node int_node_unknown = {.val = 666,};
+	struct rs_node *list = NULL;
+	struct rs_node *node = NULL;
 
 	rs_node_push(&list, &(int_node_a.node));
 	rs_node_push(&list, &(int_node_b.node));
@@ -313,11 +311,11 @@ static void testRS_NODE_REMOVE(void)
 static void testRS_NODE_REMOVE_MATCH(void)
 {
 	int val;
-	int_node_t int_node_a = {.val = 17,};
-	int_node_t int_node_b = {.val = 42,};
-	int_node_t int_node_c = {.val = 666,};
-	rs_node_t *list = NULL;
-	rs_node_t *node = NULL;
+	struct int_node int_node_a = {.val = 17,};
+	struct int_node int_node_b = {.val = 42,};
+	struct int_node int_node_c = {.val = 666,};
+	struct rs_node *list = NULL;
+	struct rs_node *node = NULL;
 
 	rs_node_push(&list, &(int_node_a.node));
 	rs_node_push(&list, &(int_node_b.node));
@@ -353,16 +351,16 @@ static void testRS_NODE_FOREACH(void)
 {
 	int val = 2;
 	int ret;
-	int_node_t int_node_a = {.val = 17,};
-	int_node_t int_node_b = {.val = 42,};
-	int_node_t int_node_c = {.val = 666,};
-	rs_node_t *list = NULL;
-	int cb(rs_node_t __attribute__((unused))*node,
+	struct int_node int_node_a = {.val = 17,};
+	struct int_node int_node_b = {.val = 42,};
+	struct int_node int_node_c = {.val = 666,};
+	struct rs_node *list = NULL;
+	int cb(struct rs_node __attribute__((unused))*node,
 			void __attribute__((unused))*data)
 	{
 		int *v = data;
 
-		int_node_t *in = to_int_node(node);
+		struct int_node *in = to_int_node(node);
 		in->val *= *v;
 
 		return 0;

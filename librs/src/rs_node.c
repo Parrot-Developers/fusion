@@ -10,19 +10,20 @@
 
 #include <rs_node.h>
 
-rs_node_t *rs_node_head(rs_node_t *node)
+struct rs_node *rs_node_head(struct rs_node *node)
 {
 	if (NULL == node)
 		return NULL;
 
-	for (; node->prev; node = rs_node_prev(node));
+	while (node->prev)
+		node = rs_node_prev(node);
 
 	return node;
 }
 
-rs_node_t *rs_node_insert(rs_node_t *next, rs_node_t *node)
+struct rs_node *rs_node_insert(struct rs_node *next, struct rs_node *node)
 {
-	rs_node_t *prev;
+	struct rs_node *prev;
 
 	if (NULL == node)
 		return next;
@@ -44,7 +45,7 @@ rs_node_t *rs_node_insert(rs_node_t *next, rs_node_t *node)
 	return node;
 }
 
-int rs_node_push(rs_node_t **head, rs_node_t *node)
+int rs_node_push(struct rs_node **head, struct rs_node *node)
 {
 	if (NULL == head)
 		return -1;
@@ -57,10 +58,10 @@ int rs_node_push(rs_node_t **head, rs_node_t *node)
 	return 0;
 }
 
-rs_node_t *rs_node_pop(rs_node_t **head)
+struct rs_node *rs_node_pop(struct rs_node **head)
 {
-	rs_node_t *next;
-	rs_node_t *res;
+	struct rs_node *next;
+	struct rs_node *res;
 
 	if (NULL == head || NULL == *head)
 		return NULL;
@@ -72,7 +73,7 @@ rs_node_t *rs_node_pop(rs_node_t **head)
 	return res;
 }
 
-unsigned rs_node_count(rs_node_t *node)
+unsigned rs_node_count(struct rs_node *node)
 {
 	unsigned res = node != NULL;
 
@@ -82,41 +83,43 @@ unsigned rs_node_count(rs_node_t *node)
 	return res;
 }
 
-rs_node_t *rs_node_next(rs_node_t *node)
+struct rs_node *rs_node_next(struct rs_node *node)
 {
 	return NULL == node ? NULL : node->next;
 }
 
-rs_node_t *rs_node_prev(rs_node_t *node)
+struct rs_node *rs_node_prev(struct rs_node *node)
 {
 	return NULL == node ? NULL : node->prev;
 }
 
-rs_node_t *rs_node_find_match(rs_node_t *node,
+struct rs_node *rs_node_find_match(struct rs_node *node,
 		rs_node_match_cb_t match, const void *data)
 {
 	if (NULL == node || NULL == match || NULL == data)
 		return NULL;
 
 	/* match */
-	for (; node && !match(node, data); node = rs_node_next(node));
+	while (node && !match(node, data))
+		node = rs_node_next(node);
 
 	return node;
 }
 
-rs_node_t *rs_node_remove(rs_node_t *list, rs_node_t *trash)
+struct rs_node *rs_node_remove(struct rs_node *list, struct rs_node *trash)
 {
-	int match(rs_node_t *node, const void *data) {
+	int match(struct rs_node *node, const void *data)
+	{
 		return node == data;
 	};
 
 	return rs_node_remove_match(list, match, trash);
 }
 
-rs_node_t *rs_node_remove_match(rs_node_t *list,
+struct rs_node *rs_node_remove_match(struct rs_node *list,
 		rs_node_match_cb_t match, const void *data)
 {
-	rs_node_t *needle;
+	struct rs_node *needle;
 
 	if (NULL == list || NULL == match)
 		return NULL;
@@ -136,7 +139,7 @@ rs_node_t *rs_node_remove_match(rs_node_t *list,
 	return needle;
 }
 
-int rs_node_foreach(rs_node_t *list, rs_node_cb_t cb, void *data)
+int rs_node_foreach(struct rs_node *list, rs_node_cb_t cb, void *data)
 {
 	int err = 0;
 

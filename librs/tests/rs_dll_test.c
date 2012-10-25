@@ -19,17 +19,15 @@
 
 struct int_node {
 	int val;
-	rs_node_t node;
+	struct rs_node node;
 };
 
-typedef struct int_node int_node_t;
+#define to_int_node(p) container_of(p, struct int_node, node)
 
-#define to_int_node(p) container_of(p, int_node_t, node)
-
-static int dll_test_equals(rs_node_t *a, const rs_node_t *b)
+static int dll_test_equals(struct rs_node *a, const struct rs_node *b)
 {
-	int_node_t *int_node_a = to_int_node(a);
-	int_node_t *int_node_b = to_int_node(b);
+	struct int_node *int_node_a = to_int_node(a);
+	struct int_node *int_node_b = to_int_node(b);
 
 	if (NULL == a || NULL == b)
 		return 0;
@@ -37,13 +35,13 @@ static int dll_test_equals(rs_node_t *a, const rs_node_t *b)
 	return 0 == (int_node_a->val - int_node_b->val);
 }
 
-static const rs_dll_vtable_t dll_test_vtable = {
+static const struct rs_dll_vtable dll_test_vtable = {
 		.equals = dll_test_equals,
 };
 
 static void testRS_DLL_INIT(void)
 {
-	rs_dll_t dll;
+	struct rs_dll dll;
 	int f_ret = 0;
 
 	/* normal use cases */
@@ -66,14 +64,14 @@ static void testRS_DLL_INIT(void)
 
 static void testRS_DLL_PUSH(void)
 {
-	int_node_t int_node_a = {.val = 17,};
-	int_node_t int_node_b = {.val = 42,};
-	int_node_t int_node_c = {.val = 666,};
-	rs_dll_t dll;
+	struct int_node int_node_a = {.val = 17,};
+	struct int_node int_node_b = {.val = 42,};
+	struct int_node int_node_c = {.val = 666,};
+	struct rs_dll dll;
 	int f_ret = 0;
-	int two_times_cb(rs_node_t *node, void *data)
+	int two_times_cb(struct rs_node *node, void *data)
 	{
-		int_node_t *in = to_int_node(node);
+		struct int_node *in = to_int_node(node);
 
 		CU_ASSERT_EQUAL_FATAL((uint32_t)data, 0xdeadbeef);
 		CU_ASSERT_PTR_NOT_NULL(node);
@@ -108,11 +106,11 @@ static void testRS_DLL_PUSH(void)
 
 static void testRS_DLL_GET_COUNT(void)
 {
-	int_node_t int_node_a = {.val = 17,};
-	int_node_t int_node_b = {.val = 42,};
-	int_node_t int_node_c = {.val = 666,};
+	struct int_node int_node_a = {.val = 17,};
+	struct int_node int_node_b = {.val = 42,};
+	struct int_node int_node_c = {.val = 666,};
 	unsigned count;
-	rs_dll_t dll;
+	struct rs_dll dll;
 	int f_ret = 0;
 
 	f_ret = rs_dll_init(&dll, &dll_test_vtable);
@@ -141,12 +139,12 @@ static void testRS_DLL_GET_COUNT(void)
 
 static void testRS_DLL_FIND(void)
 {
-	int_node_t int_node_a = {.val = 17,};
-	int_node_t int_node_b = {.val = 42,};
-	int_node_t int_node_c = {.val = 666,};
-	int_node_t int_needle;
-	rs_node_t *node;
-	rs_dll_t dll;
+	struct int_node int_node_a = {.val = 17,};
+	struct int_node int_node_b = {.val = 42,};
+	struct int_node int_node_c = {.val = 666,};
+	struct int_node int_needle;
+	struct rs_node *node;
+	struct rs_dll dll;
 	int f_ret = 0;
 
 	f_ret = rs_dll_init(&dll, &dll_test_vtable);
@@ -182,18 +180,18 @@ static void testRS_DLL_FIND(void)
 
 static void testRS_DLL_FIND_MATCH(void)
 {
-	int_node_t int_node_a = {.val = 17,};
-	int_node_t int_node_b = {.val = 42,};
-	int_node_t int_node_c = {.val = 666,};
-	int match_cb(rs_node_t *node, const void *data)
+	struct int_node int_node_a = {.val = 17,};
+	struct int_node int_node_b = {.val = 42,};
+	struct int_node int_node_c = {.val = 666,};
+	int match_cb(struct rs_node *node, const void *data)
 	{
 		int searched_value = (int)data;
-		int_node_t *int_node = to_int_node(node);
+		struct int_node *int_node = to_int_node(node);
 
 		return int_node->val == searched_value;
 	}
-	rs_node_t *node;
-	rs_dll_t dll;
+	struct rs_node *node;
+	struct rs_dll dll;
 	int f_ret = 0;
 
 	f_ret = rs_dll_init(&dll, &dll_test_vtable);
@@ -225,11 +223,11 @@ static void testRS_DLL_FIND_MATCH(void)
 
 static void testRS_DLL_POP(void)
 {
-	int_node_t int_node_a = {.val = 17,};
-	int_node_t int_node_b = {.val = 42,};
-	int_node_t int_node_c = {.val = 666,};
-	rs_node_t *node;
-	rs_dll_t dll;
+	struct int_node int_node_a = {.val = 17,};
+	struct int_node int_node_b = {.val = 42,};
+	struct int_node int_node_c = {.val = 666,};
+	struct rs_node *node;
+	struct rs_dll dll;
 	int f_ret = 0;
 
 	f_ret = rs_dll_init(&dll, &dll_test_vtable);
@@ -259,11 +257,11 @@ static void testRS_DLL_POP(void)
 
 static void testRS_DLL_NEXT(void)
 {
-	int_node_t int_node_a = {.val = 17,};
-	int_node_t int_node_b = {.val = 42,};
-	int_node_t int_node_c = {.val = 666,};
-	rs_node_t *node;
-	rs_dll_t dll;
+	struct int_node int_node_a = {.val = 17,};
+	struct int_node int_node_b = {.val = 42,};
+	struct int_node int_node_c = {.val = 666,};
+	struct rs_node *node;
+	struct rs_dll dll;
 	int f_ret = 0;
 
 	f_ret = rs_dll_init(&dll, &dll_test_vtable);
@@ -295,12 +293,12 @@ static void testRS_DLL_NEXT(void)
 
 static void testRS_DLL_REMOVE(void)
 {
-	int_node_t int_node_a = {.val = 17,};
-	int_node_t int_node_b = {.val = 42,};
-	int_node_t int_node_c = {.val = 666,};
-	int_node_t int_node_needle = {.val = 42,};
-	rs_node_t *node;
-	rs_dll_t dll;
+	struct int_node int_node_a = {.val = 17,};
+	struct int_node int_node_b = {.val = 42,};
+	struct int_node int_node_c = {.val = 666,};
+	struct int_node int_node_needle = {.val = 42,};
+	struct rs_node *node;
+	struct rs_dll dll;
 	int f_ret = 0;
 
 	f_ret = rs_dll_init(&dll, &dll_test_vtable);
@@ -345,18 +343,18 @@ static void testRS_DLL_REMOVE(void)
 
 static void testRS_DLL_REMOVE_MATCH(void)
 {
-	int_node_t int_node_a = {.val = 17,};
-	int_node_t int_node_b = {.val = 42,};
-	int_node_t int_node_c = {.val = 666,};
-	int_node_t needle = {.val = 42,};
-	rs_node_t *node;
+	struct int_node int_node_a = {.val = 17,};
+	struct int_node int_node_b = {.val = 42,};
+	struct int_node int_node_c = {.val = 666,};
+	struct int_node needle = {.val = 42,};
+	struct rs_node *node;
 	int odd;
-	rs_dll_t dll;
+	struct rs_dll dll;
 	int f_ret = 0;
-	int parity_cb(rs_node_t *n, const void *data)
+	int parity_cb(struct rs_node *n, const void *data)
 	{
 		int my_odd = *((int *)data);
-		int_node_t *int_node = to_int_node(n);
+		struct int_node *int_node = to_int_node(n);
 
 		if (my_odd)
 			return int_node->val % 2;
@@ -396,9 +394,9 @@ static void testRS_DLL_REMOVE_MATCH(void)
 
 static void testRS_DLL_FOREACH(void)
 {
-	rs_dll_t dll;
+	struct rs_dll dll;
 	int f_ret = 0;
-	int cb(rs_node_t __attribute__((unused))*node,
+	int cb(struct rs_node __attribute__((unused))*node,
 			void __attribute__((unused))*data)
 	{
 		/* do nothing */
