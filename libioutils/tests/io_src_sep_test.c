@@ -139,6 +139,8 @@ out:
 
 	/* cleanup */
 	io_mon_delete(&mon);
+	close(pipefds[0]);
+	close(pipefds[1]);
 }
 
 static const test_t tests[] = {
