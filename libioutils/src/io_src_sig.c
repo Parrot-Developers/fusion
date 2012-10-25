@@ -60,29 +60,35 @@ static void sig_cleanup(struct io_src *src)
 	src->fd = -1;
 }
 
-int io_src_sig_init(struct io_src_sig *sig, io_sig_cb_t *cb, unsigned nb,
-		...)
+int io_src_sig_init(struct io_src_sig *sig, io_sig_cb_t *cb, ...)
 {
 	int ret;
 	int fd;
+	int signo;
 	va_list args;
 	sigset_t *m;
 
-	if (NULL == sig || NULL == cb || 0 == nb)
+	if (NULL == sig || NULL == cb)
 		return -EINVAL;
+	va_start(args, cb);
+	signo = va_arg(args, int);
+	if (0 == signo) {
+		return -EINVAL;
+		va_end(args);
+	}
 	m = &(sig->mask);
 
 	memset(sig, 0, sizeof(*sig));
 
 	/* add all the signals to the mask */
 	sigemptyset(m);
-	va_start(args, nb);
-	while (nb--) {
-		ret = sigaddset(m, va_arg(args, int));
+	while (0 != signo) {
+		ret = sigaddset(m, signo);
 		if (-1 == ret) {
 			ret = -errno;
 			goto out;
 		}
+		signo = va_arg(args, int);
 	}
 	va_end(args);
 

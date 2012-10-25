@@ -79,7 +79,7 @@ static void testSRC_SIG_INIT(void)
 	sigemptyset(&old_mask);
 	ret = sigprocmask(SIG_SETMASK, NULL, &old_mask);
 	CU_ASSERT_EQUAL(ret, 0);
-	ret = io_src_sig_init(&src_sig, sig_cb, 2, SIGUSR1, SIGUSR2);
+	ret = io_src_sig_init(&src_sig, sig_cb, SIGUSR1, SIGUSR2, NULL);
 	CU_ASSERT_EQUAL(ret, 0);
 
 	ret = io_mon_add_source(mon, &(src_sig.src));

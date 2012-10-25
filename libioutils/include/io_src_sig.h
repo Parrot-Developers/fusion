@@ -34,14 +34,14 @@ typedef int (io_sig_cb_t)(struct io_src_sig *sig);
  * @brief Signal source type
  */
 struct io_src_sig {
+	/** inner monitor source */
+	struct io_src src;
 	/** masks of the signals being monitored by this source */
 	sigset_t mask;
 	/** signal mask state before the source setup, for being reinstalled */
 	sigset_t old_mask;
 	/** user callback, notified when one of the registered signals occur */
 	io_sig_cb_t *cb;
-	/** inner monitor source */
-	struct io_src src;
 	/** signal info structure, filled in before calling back the client */
 	struct signalfd_siginfo si;
 };
@@ -52,10 +52,11 @@ struct io_src_sig {
  * monitor, the signals are restored to their state before io_src_sig_init
  * @param sig Signal source to initialize
  * @param cb User calback, notified when a monitored signal occur
- * @param nb Number of signals to mask
- * @return
+ * @param ... List of signal, terminated by NULL, which corresponds to 0 or null
+ * signal
+ * @return errno compatible negative value
  */
-int io_src_sig_init(struct io_src_sig *sig, io_sig_cb_t *cb, unsigned nb,
-		...);
+int io_src_sig_init(struct io_src_sig *sig, io_sig_cb_t *cb, ...)
+	__attribute__ ((sentinel(0)));
 
 #endif /* IO_SRC_SIG_H_ */
