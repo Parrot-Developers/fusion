@@ -92,6 +92,25 @@ static int end_of_file(struct io_src_sep *sep)
 }
 
 /**
+ * Checks if the separator byt(s) is (are) found at a given position in a string
+ * @param sep Separator source
+ * @param c Current position in the string
+ * @return
+ */
+static int separator_found(struct io_src_sep *sep, char *c)
+{
+	return *c == sep->sep1 && (!sep->two_bytes || *(c + 1) == sep->sep2);
+}
+
+/**
+ * @def chunk_len
+ * @param sep Separator source
+ * @param c Current position in the string
+ * @return Length of the last chunk found, including separator(s)
+ */
+#define chunk_len(sep, c) (1 + (sep)->two_bytes + (c) - buf_read_start((sep)))
+
+/**
  * Source callback, reads the signal and notifies the client
  * @param src Underlying monitor source of the signal source
  */
@@ -119,8 +138,8 @@ static int sep_cb(struct io_src *src)
 	for (cur = buf_read_start(sep);
 			cur + sep->two_bytes < buf_write_start(sep);
 			cur++)
-		if (*cur == sep->sep1 && (!sep->two_bytes || *(cur + 1) == sep->sep2)) {
-			ret = notify_user(sep, 1 + sep->two_bytes + cur - buf_read_start(sep));
+		if (separator_found(sep, cur)) {
+			ret = notify_user(sep, chunk_len(sep, cur));
 			if (0 > ret)
 				return ret;
 			if (0 < ret)
