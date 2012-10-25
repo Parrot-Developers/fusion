@@ -121,6 +121,14 @@ out:
 	CU_ASSERT(state & STATE_SIGUSR1_RECEIVED);
 	CU_ASSERT(state & STATE_SIGUSR2_RECEIVED);
 
+	/* error use cases */
+	ret = io_src_sig_init(NULL, sig_cb, SIGUSR1, SIGUSR2, NULL);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+	ret = io_src_sig_init(&src_sig, NULL, SIGUSR1, SIGUSR2, NULL);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+	ret = io_src_sig_init(&src_sig, sig_cb, NULL);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+
 	/* cleanup */
 	io_mon_delete(&mon);
 
@@ -129,9 +137,6 @@ out:
 	ret = sigprocmask(SIG_SETMASK, NULL, &new_mask);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT(sigsets_are_equals(&old_mask, &new_mask));
-
-	/* error use cases TODO */
-
 }
 
 static const test_t tests[] = {
