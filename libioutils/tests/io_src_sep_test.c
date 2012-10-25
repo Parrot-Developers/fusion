@@ -27,26 +27,28 @@ static void reached_state(int *glob_state, int state)
 	*glob_state |= state;
 }
 
-#define SSEP "\n"
+static const int sep_mono[2] = {'\n', INT_MAX};
+#define SSEP_MONO "\n"
+static const int sep_double[2] = {'\r', '\n'};
+#define SSEP_DOUBLE "\r\n"
+
 #define CSEP '\n'
-#define MSG1 "lou lou lou, je cueille des pommes" SSEP
-#define MSG2 "lou lou lou, et toi itou" SSEP
-#define MSG3 SSEP
+#define MSG1 "lou lou lou, je cueille des pommes"
+#define MSG2 "lou lou lou, et toi itou"
+#define MSG3 ""
 #define MSG4 "lou lou lou, on s'met tous nus"
 
 /* main and only test. sends ourselves messages and check we receive them */
-static void testSRC_SEP_INIT(void)
+static void testSRC_SEP(const int sep_pair[2], const char *big_msg, size_t sz)
 {
 	int pipefds[2] = {-1, -1};
 	fd_set rfds;
-
 	int mon_fd;
 	int ret;
 	struct io_mon *mon;
 	struct io_src_sep src_sep;
 	bool loop = true;
 	struct timeval timeout;
-	char big_msg[] = MSG1 MSG2 MSG3 MSG4;
 #define STATE_START 0
 #define STATE_MSG1_RECEIVED 1
 #define STATE_MSG2_RECEIVED 2
@@ -54,8 +56,7 @@ static void testSRC_SEP_INIT(void)
 #define STATE_TIMER_EXPIRED 8
 #define STATE_ALL_DONE 15
 	int state = STATE_START;
-	int sep_cb(__attribute__((unused)) struct io_src_sep *sep, char *chunk,
-			__attribute__((unused)) unsigned len)
+	int sep_cb(struct io_src_sep *sep, char *chunk, unsigned len)
 	{
 /*		printf("received %u byte(s) : \"%.*s\"\n", len, len, chunk); */
 
@@ -66,6 +67,8 @@ static void testSRC_SEP_INIT(void)
 		if (0 == memcmp(chunk, MSG1, strlen(MSG1))) {
 			CU_ASSERT_EQUAL(state, STATE_START);
 			reached_state(&state, STATE_MSG1_RECEIVED);
+
+			CU_ASSERT_EQUAL(len, strlen(MSG1) + 1 + sep->two_bytes);
 		} else if (0 == memcmp(chunk, MSG2, strlen(MSG2))) {
 			CU_ASSERT_EQUAL(state, STATE_MSG1_RECEIVED);
 			reached_state(&state, STATE_MSG2_RECEIVED);
@@ -83,13 +86,14 @@ static void testSRC_SEP_INIT(void)
 	mon_fd = io_mon_get_fd(mon);
 	ret = pipe(pipefds);
 	CU_ASSERT_EQUAL(ret, 0);
-	ret = io_src_sep_init(&src_sep, pipefds[0], sep_cb, CSEP);
+	ret = io_src_sep_init(&src_sep, pipefds[0], sep_cb, sep_pair[0],
+			sep_pair[1]);
 	CU_ASSERT_EQUAL(ret, 0);
 
 	ret = io_mon_add_source(mon, &(src_sep.src));
 	CU_ASSERT_EQUAL(ret, 0);
 
-	ret = write(pipefds[1], big_msg, sizeof(big_msg));
+	ret = write(pipefds[1], big_msg, sz);
 	CU_ASSERT_NOT_EQUAL(ret, -1);
 
 	/* normal use case */
@@ -130,17 +134,33 @@ out:
 	CU_ASSERT(state & STATE_TIMER_EXPIRED);
 
 	/* error cases */
-	ret = io_src_sep_init(NULL, pipefds[0], sep_cb, CSEP);
+	ret = io_src_sep_init(NULL, pipefds[0], sep_cb, sep_pair[0],
+			sep_pair[1]);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_src_sep_init(&src_sep, -1, sep_cb, CSEP);
+	ret = io_src_sep_init(&src_sep, -1, sep_cb, sep_pair[0],
+			sep_pair[1]);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_src_sep_init(&src_sep, pipefds[0], NULL, CSEP);
+	ret = io_src_sep_init(&src_sep, pipefds[0], NULL, sep_pair[0],
+			sep_pair[1]);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	/* cleanup */
 	io_mon_delete(&mon);
 	close(pipefds[0]);
 	close(pipefds[1]);
+}
+
+
+static void testSRC_SEP_INIT(void)
+{
+#define BIG_MSG(sep) MSG1 sep MSG2 sep MSG3 sep MSG4
+	const char big_msg_mono[] = BIG_MSG(SSEP_MONO);
+	const char big_msg_double[] =  BIG_MSG(SSEP_DOUBLE);
+
+	/* test for linux-style line messages : ending with \n */
+	testSRC_SEP(sep_mono, big_msg_mono, strlen(big_msg_mono));
+	/* test for modem-style line messages : ending with \r\n (CRLF) */
+	testSRC_SEP(sep_double, big_msg_double, strlen(big_msg_double));
 }
 
 static const test_t tests[] = {

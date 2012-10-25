@@ -4,8 +4,8 @@
  * @author nicolas.carrier@parrot.com
  * @brief Separator source, for input. Bytes read are stored in an internal
  * buffer of size IO_SRC_SEP_SIZE and the client is notified each time a given
- * character separator is found, if the buffer is full or if end of file is
- * reached.
+ * separator or separator pair (for example \r\n) is found, if the buffer is
+ * full or if end of file is reached.
  *
  * Copyright (C) 2012 Parrot S.A.
  */
@@ -27,7 +27,9 @@ struct io_src_sep;
  * @typedef io_src_sep_cb_t
  * @brief User callback, called when :
  * <ul>
- *   <li>a complete line has been read from the source</li>
+ *   <li>
+ *     a complete line has been read from the source, including the separator
+ *   </li>
  *   <li>the buffer is full</li>
  *   <li>
  *     end of file is reached, in this case, it is called once more with a zero
@@ -51,8 +53,12 @@ typedef int (io_src_sep_cb_t)(struct io_src_sep *sep, char *chunk,
  * @brief Separator source type
  */
 struct io_src_sep {
-	/** separator byte */
-	char sep;
+	/** first separator byte */
+	char sep1;
+	/** second separator byte, INT_MAX for none */
+	char sep2;
+	/** 1 if the separator is made of two bytes, 0 otherwise */
+	int two_bytes;
 	/** user callback, notified when one of the registered signals occur */
 	io_src_sep_cb_t *cb;
 	/** inner monitor source */
@@ -74,10 +80,12 @@ struct io_src_sep {
  * @param sep_src Separator source to initialize
  * @param fd File descriptor
  * @param cb Callback called on each cunk of data, retrieved before a separator
- * @param sep Separator between the chunks of data
+ * @param sep1 First separator between the chunks of data (only one byte)
+ * @param sep2 second separator between the chunks of data, pass INT_MAX to use
+ * only one separator (only one byte)
  * @return Negative errno compatible value on error, 0 otherwise
  */
 int io_src_sep_init(struct io_src_sep *sep_src, int fd, io_src_sep_cb_t *cb,
-		char sep);
+		int sep1, int sep2);
 
 #endif /* IO_SRC_SEP_H_ */

@@ -13,6 +13,7 @@
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
+#include <limits.h>
 
 #include "io_mon.h"
 #include "io_src_sep.h"
@@ -115,13 +116,16 @@ static int sep_cb(struct io_src *src)
 	sep->up_to += sret;
 
 	/* search for a separator and notify for each occurrence */
-	for (cur = buf_read_start(sep); cur < buf_write_start(sep); cur++)
-		if (*cur == sep->sep) {
-			ret = notify_user(sep, 1 + cur - buf_read_start(sep));
+	for (cur = buf_read_start(sep);
+			cur + sep->two_bytes < buf_write_start(sep);
+			cur++)
+		if (*cur == sep->sep1 && (!sep->two_bytes || *(cur + 1) == sep->sep2)) {
+			ret = notify_user(sep, 1 + sep->two_bytes + cur - buf_read_start(sep));
 			if (0 > ret)
 				return ret;
 			if (0 < ret)
 				fprintf(stderr, "sep->cb: %s", strerror(-ret));
+			cur += sep->two_bytes;
 		}
 
 	/* buffer is full : notify */
@@ -148,7 +152,7 @@ static void sep_cleanup(struct io_src *src)
 }
 
 int io_src_sep_init(struct io_src_sep *sep_src, int fd, io_src_sep_cb_t *cb,
-		char sep)
+		int sep1, int sep2)
 {
 	if (NULL == sep_src || NULL == cb || -1 == fd)
 		return -EINVAL;
@@ -156,7 +160,9 @@ int io_src_sep_init(struct io_src_sep *sep_src, int fd, io_src_sep_cb_t *cb,
 	memset(sep_src, 0, sizeof(*sep_src));
 
 	sep_src->cb = cb;
-	sep_src->sep = sep;
+	sep_src->sep1 = sep1;
+	sep_src->sep2 = sep2;
+	sep_src->two_bytes = INT_MAX != sep2;
 
 	/* can fail only on parameters */
 	return io_src_init(&(sep_src->src), fd, IO_IN, sep_cb, sep_cleanup);
