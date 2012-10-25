@@ -11,6 +11,7 @@
 #define IO_FAUTES_H_
 
 extern suite_t mon_suite;
+extern suite_t src_msg_suite;
 extern suite_t src_sep_suite;
 extern suite_t src_sig_suite;
 extern suite_t src_suite;
