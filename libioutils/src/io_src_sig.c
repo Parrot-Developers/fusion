@@ -6,6 +6,9 @@
  *
  * Copyright (C) 2012 Parrot S.A.
  */
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif /* _GNU_SOURCE */
 #include <signal.h>
 #include <unistd.h>
 
@@ -34,7 +37,7 @@ static int sig_cb(struct io_src *src)
 	if (io_mon_has_error(src->events))
 		return -EIO;
 
-	ret = read(src->fd, &(sig->si), sizeof(sig->si));
+	ret = TEMP_FAILURE_RETRY(read(src->fd, &(sig->si), sizeof(sig->si)));
 	if (sizeof(sig->si) != ret)
 		return -errno;
 

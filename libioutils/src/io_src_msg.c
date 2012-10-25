@@ -6,6 +6,9 @@
  *
  * Copyright (C) 2012 Parrot S.A.
  */
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif /* _GNU_SOURCE */
 #include <unistd.h>
 
 #include <errno.h>
@@ -33,7 +36,7 @@ static int msg_cb(struct io_src *src)
 		return -EIO;
 
 	/* get some data */
-	sret = read(src->fd, msg->msg, msg->len);
+	sret = TEMP_FAILURE_RETRY(read(src->fd, msg->msg, msg->len));
 	if (-1 == sret)
 		return -errno;
 	if ((ssize_t)msg->len != sret)

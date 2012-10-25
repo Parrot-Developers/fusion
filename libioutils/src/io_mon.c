@@ -6,6 +6,9 @@
  *
  * Copyright (C) 2012 Parrot S.A.
  */
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif /* _GNU_SOURCE */
 #include <unistd.h>
 
 #include <errno.h>
@@ -220,7 +223,8 @@ int io_mon_process_events(struct io_mon *mon)
 		return -EINVAL;
 
 	/* doesn't block, because of the 0 timeout */
-	n = epoll_wait(mon->epollfd, events, MONITOR_MAX_SOURCES, 0);
+	n = TEMP_FAILURE_RETRY(epoll_wait(mon->epollfd, events,
+			MONITOR_MAX_SOURCES, 0));
 	if (-1 == n)
 		return -errno;
 

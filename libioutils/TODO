@@ -1,5 +1,4 @@
 remove the need for malloc (io_mon_new, io_mon_delete)
-manage EINTR in blocking calls, with GNU's magical macro
 manage uniformally errors
 // TODO pass message and error control
 check for regular files (EPERM epoll_ctl error)

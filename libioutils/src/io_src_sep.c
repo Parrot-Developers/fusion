@@ -8,6 +8,9 @@
  *
  * Copyright (C) 2012 Parrot S.A.
  */
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif /* _GNU_SOURCE */
 #include <unistd.h>
 
 #include <errno.h>
@@ -125,7 +128,8 @@ static int sep_cb(struct io_src *src)
 		return -EIO;
 
 	/* get some data */
-	sret = read(src->fd, buf_write_start(sep), to_read(sep));
+	sret = TEMP_FAILURE_RETRY(read(src->fd, buf_write_start(sep),
+			to_read(sep)));
 	if (-1 == sret)
 		return -errno;
 	if (0 == sret)
