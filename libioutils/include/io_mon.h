@@ -103,7 +103,14 @@ int io_mon_get_fd(struct io_mon *monitor);
 int io_mon_process_events(struct io_mon *mon);
 
 /**
- * De register sources and destroys monitor's allocated resources.
+ * Cleans up a monitor, unregister the sources and releases the resources
+ * @param mon Monitor context
+ * @return negative errno value on error, 0 otherwise
+ */
+int io_mon_clean(struct io_mon *mon);
+
+/**
+ * Calls io_mon_clean and free the context
  * @param monitor Monitor's context, NULL in output
  */
 void io_mon_delete(struct io_mon **mon);

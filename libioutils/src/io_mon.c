@@ -258,14 +258,12 @@ int io_mon_process_events(struct io_mon *mon)
 	return 0;
 }
 
-void io_mon_delete(struct io_mon **monitor)
+int io_mon_clean(struct io_mon *mon)
 {
-	struct io_mon *mon;
 	struct io_src *src;
 
-	if (NULL == monitor || NULL == *monitor)
-		return;
-	mon = *monitor;
+	if (NULL == mon)
+		return -EINVAL;
 
 	while (mon->source) {
 		src = to_src(mon->source);
@@ -275,6 +273,19 @@ void io_mon_delete(struct io_mon **monitor)
 	}
 
 	close(mon->epollfd);
-	free(mon);
+	memset(mon, 0, sizeof(*mon));
+	mon->epollfd = -1;
+
+	return 0;
+}
+
+void io_mon_delete(struct io_mon **monitor)
+{
+	if (NULL == monitor || NULL == *monitor)
+		return;
+
+	io_mon_clean(*monitor);
+
+	free(*monitor);
 	*monitor = NULL;
 }
