@@ -28,7 +28,7 @@ struct io_mon {
 	/** file descriptor for monitoring all the sources */
 	int epollfd;
 	/** sources list for I/O operations */
-	rs_node_t *source;
+	struct rs_node *source;
 	/** number of sources currently registered */
 	unsigned nb_sources;
 };
@@ -90,7 +90,7 @@ static int alter_source(int epfd, struct io_src *src, int op)
 static int remove_source(struct io_mon *mon, struct io_src *src)
 {
 	int ret;
-	rs_node_t *node;
+	struct rs_node *node;
 	struct io_src *old_src;
 
 	if (&(src->node) == mon->source)

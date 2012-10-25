@@ -89,7 +89,7 @@ struct io_src {
 	 */
 	enum io_src_event active;
 	/** node for linking */
-	rs_node_t node;
+	struct rs_node node;
 };
 
 /**
