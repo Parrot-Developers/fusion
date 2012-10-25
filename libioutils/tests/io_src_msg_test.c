@@ -44,9 +44,8 @@ static void testSRC_MSG_INIT(void)
 	int pipefds[2] = {-1, -1};
 	fd_set rfds;
 	struct msg msg;
-	int mon_fd;
 	int ret;
-	struct io_mon *mon;
+	struct io_mon mon;
 	struct io_src_msg src_msg;
 	bool loop = true;
 	struct timeval timeout;
@@ -94,15 +93,14 @@ static void testSRC_MSG_INIT(void)
 		return 0;
 	}
 
-	mon = io_mon_new();
-	CU_ASSERT_PTR_NOT_NULL(mon);
-	mon_fd = io_mon_get_fd(mon);
+	ret = io_mon_init(&mon);
+	CU_ASSERT_EQUAL(ret, 0);
 	ret = pipe(pipefds);
 	CU_ASSERT_EQUAL(ret, 0);
 	ret = io_src_msg_init(&src_msg, pipefds[0], &msg, sizeof(msg), msg_cb);
 	CU_ASSERT_EQUAL(ret, 0);
 
-	ret = io_mon_add_source(mon, &(src_msg.src));
+	ret = io_mon_add_source(&mon, &(src_msg.src));
 	CU_ASSERT_EQUAL(ret, 0);
 
 	ret = write(pipefds[1], &MSG1, sizeof(msg));
@@ -116,8 +114,8 @@ static void testSRC_MSG_INIT(void)
 
 		/* restore the read file descriptor set */
 		FD_ZERO(&rfds);
-		FD_SET(mon_fd, &rfds);
-		ret = select(mon_fd + 1, &rfds, NULL, NULL, &timeout);
+		FD_SET(mon.epollfd, &rfds);
+		ret = select(mon.epollfd + 1, &rfds, NULL, NULL, &timeout);
 
 		/* error, not normal */
 		CU_ASSERT_NOT_EQUAL(ret, -1);
@@ -129,7 +127,7 @@ static void testSRC_MSG_INIT(void)
 		if (0 == ret)
 			goto out;
 
-		ret = io_mon_process_events(mon);
+		ret = io_mon_process_events(&mon);
 		CU_ASSERT_EQUAL(ret, 0);
 		if (0 != ret)
 			goto out;
@@ -157,7 +155,7 @@ out:
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	/* cleanup */
-	io_mon_delete(&mon);
+	io_mon_clean(&mon);
 	close(pipefds[0]);
 	close(pipefds[1]);
 }

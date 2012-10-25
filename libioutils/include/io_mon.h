@@ -47,15 +47,6 @@ struct io_mon {
 int io_mon_init(struct io_mon *mon);
 
 /**
- * @brief Monitor creation and initialization
- *
- * Creates a monitoring context, ready for use to monitor IO events in an event
- * loop
- * @return Monitor context on success, NULL otherwise
- */
-struct io_mon *io_mon_new(void);
-
-/**
  * Add a source to the pool of sources we monitor. The monitoring is activated
  * automatically only for the input direction of the source, if relevant
  * @param mon Monitor's context
@@ -83,13 +74,6 @@ int io_mon_activate_out_source(struct io_mon *mon, struct io_src *src,
 		int active);
 
 /**
- * Returns the monitor's file descriptor for use in an I/O loop
- * @param mon Monitor context
- * @return Monitor's file descriptor, -1 on error
- */
-int io_mon_get_fd(struct io_mon *monitor);
-
-/**
  * When monitor's fd is ready for reading operation, a call to
  * io_mon_process_events will dispatch each event to the relevant
  * callback.<br />
@@ -108,12 +92,6 @@ int io_mon_process_events(struct io_mon *mon);
  * @return negative errno value on error, 0 otherwise
  */
 int io_mon_clean(struct io_mon *mon);
-
-/**
- * Calls io_mon_clean and free the context
- * @param monitor Monitor's context, NULL in output
- */
-void io_mon_delete(struct io_mon **mon);
 
 /*
  * candidates for implementation :

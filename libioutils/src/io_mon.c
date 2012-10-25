@@ -121,29 +121,15 @@ static int register_source(struct io_mon *mon, struct io_src *src)
 
 int io_mon_init(struct io_mon *mon)
 {
+	if (NULL == mon)
+		return -EINVAL;
+
 	memset(mon, 0, sizeof(*mon));
 	mon->epollfd = epoll_create1(EPOLL_CLOEXEC);
 	if (-1 == mon->epollfd)
 		return -errno;
 
 	return 0;
-}
-
-struct io_mon *io_mon_new(void)
-{
-	int ret;
-	struct io_mon *mon = NULL;
-
-	/* allocate resources */
-	mon = malloc(sizeof(*mon));
-	if (NULL == mon)
-		return NULL;
-
-	ret = io_mon_init(mon);
-	if (-1 == ret)
-		io_mon_delete(&mon);
-
-	return mon;
 }
 
 int io_mon_add_source(struct io_mon *mon, struct io_src *src)
@@ -194,14 +180,6 @@ int io_mon_activate_out_source(struct io_mon *mon, struct io_src *src,
 		src->active &= ~IO_OUT;
 
 	return alter_source(mon->epollfd, src, EPOLL_CTL_MOD);
-}
-
-int io_mon_get_fd(struct io_mon *mon)
-{
-	if (NULL == mon)
-		return -EINVAL;
-
-	return mon->epollfd;
 }
 
 int io_mon_process_events(struct io_mon *mon)
@@ -272,20 +250,10 @@ int io_mon_clean(struct io_mon *mon)
 			src->clean(src);
 	}
 
-	close(mon->epollfd);
+	if (-1 != mon->epollfd)
+		close(mon->epollfd);
 	memset(mon, 0, sizeof(*mon));
 	mon->epollfd = -1;
 
 	return 0;
-}
-
-void io_mon_delete(struct io_mon **monitor)
-{
-	if (NULL == monitor || NULL == *monitor)
-		return;
-
-	io_mon_clean(*monitor);
-
-	free(*monitor);
-	*monitor = NULL;
 }

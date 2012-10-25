@@ -18,16 +18,24 @@
 #include <fautes.h>
 #include <fautes_utils.h>
 
-static void testMON_NEW(void)
+static void testMON_INIT(void)
 {
-	struct io_mon *mon;
+	struct io_mon mon;
+	int ret;
 
 	/* normal use case */
-	mon = io_mon_new();
-	CU_ASSERT_PTR_NOT_NULL(mon);
+	ret = io_mon_init(&mon);
+	CU_ASSERT_EQUAL(ret, 0);
+	CU_ASSERT_NOT_EQUAL(mon.epollfd, -1);
+	CU_ASSERT_EQUAL(mon.nb_sources, 0);
+	CU_ASSERT_EQUAL(mon.source, NULL);
 
 	/* cleanup */
-	io_mon_delete(&mon);
+	io_mon_clean(&mon);
+
+	/* error use cases */
+	ret = io_mon_init(NULL);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
 }
 
 static int my_dummy_callback(__attribute__((unused)) struct io_src *src)
@@ -39,15 +47,15 @@ static void testMON_ADD_SOURCE(void)
 {
 	int pipefd[2] = {-1, -1};
 	int fd;
-	struct io_mon *mon;
+	struct io_mon mon;
 	struct io_src src_in;
 	struct io_src src_out;
 	struct io_src src_duplex;
 	int ret;
 	int flags;
 
-	mon = io_mon_new();
-	CU_ASSERT_PTR_NOT_NULL(mon);
+	ret = io_mon_init(&mon);
+	CU_ASSERT_EQUAL(ret, 0);
 	ret = pipe(pipefd);
 	CU_ASSERT_NOT_EQUAL_FATAL(ret, -1);
 	ret = io_src_init(&src_in, pipefd[0], IO_IN, my_dummy_callback, NULL);
@@ -60,19 +68,19 @@ static void testMON_ADD_SOURCE(void)
 	CU_ASSERT_EQUAL(ret, 0);
 
 	/* normal use cases */
-	ret = io_mon_add_source(mon, &src_in);
+	ret = io_mon_add_source(&mon, &src_in);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT(!!(src_in.active & IO_IN));
 	flags = fcntl(src_in.fd, F_GETFL, 0);
 	CU_ASSERT_EQUAL(!!(flags & O_NONBLOCK), 1);
 
-	ret = io_mon_add_source(mon, &src_out);
+	ret = io_mon_add_source(&mon, &src_out);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_EQUAL(src_out.active, 0);
 	flags = fcntl(src_out.fd, F_GETFL, 0);
 	CU_ASSERT_EQUAL(!!(flags & O_NONBLOCK), 1);
 
-	ret = io_mon_add_source(mon, &src_duplex);
+	ret = io_mon_add_source(&mon, &src_duplex);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT(!!(src_duplex.active & IO_IN));
 	flags = fcntl(src_duplex.fd, F_GETFL, 0);
@@ -81,11 +89,11 @@ static void testMON_ADD_SOURCE(void)
 	/* error use cases */
 	ret = io_mon_add_source(NULL, &src_out);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_mon_add_source(mon, NULL);
+	ret = io_mon_add_source(&mon, NULL);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	/* cleanup */
-	io_mon_delete(&mon);
+	io_mon_clean(&mon);
 	close(pipefd[0]);
 	close(pipefd[1]);
 	close(fd);
@@ -117,21 +125,21 @@ static void testMON_ACTIVATE_OUT_SOURCE(void)
 {
 	int pipefd[2] = {-1, -1};
 	int fd;
-	struct io_mon *mon;
+	struct io_mon mon;
 	struct io_src src_out;
 	struct io_src src_in;
 	struct io_src src_duplex;
 	int ret;
 
-	mon = io_mon_new();
-	CU_ASSERT_PTR_NOT_NULL(mon);
+	ret = io_mon_init(&mon);
+	CU_ASSERT_EQUAL(ret, 0);
 	ret = pipe(pipefd);
 	CU_ASSERT_NOT_EQUAL_FATAL(ret, -1);
 	ret = io_src_init(&src_in, pipefd[0], IO_IN, my_dummy_callback, NULL);
 	CU_ASSERT_EQUAL(ret, 0);
 	ret = io_src_init(&src_out, pipefd[1], IO_OUT, my_dummy_callback, NULL);
 	CU_ASSERT_EQUAL(ret, 0);
-	ret = io_mon_add_source(mon, &src_out);
+	ret = io_mon_add_source(&mon, &src_out);
 	CU_ASSERT_EQUAL(ret, 0);
 	fd = open("/dev/random", O_RDWR | O_CLOEXEC);
 	CU_ASSERT_NOT_EQUAL_FATAL(fd, -1);
@@ -139,63 +147,43 @@ static void testMON_ACTIVATE_OUT_SOURCE(void)
 	/* normal use cases */
 	/* output source */
 	CU_ASSERT_EQUAL(src_out.active, 0);
-	ret = io_mon_activate_out_source(mon, &src_out, 1);
+	ret = io_mon_activate_out_source(&mon, &src_out, 1);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_EQUAL(src_out.active, IO_OUT);
-	ret = io_mon_activate_out_source(mon, &src_out, 0);
+	ret = io_mon_activate_out_source(&mon, &src_out, 0);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_EQUAL(src_out.active, 0);
 
 	/* duplex source */
-	io_mon_delete(&mon);
-	mon = io_mon_new();
-	CU_ASSERT_PTR_NOT_NULL(mon);
+	io_mon_clean(&mon);
+	ret = io_mon_init(&mon);
+	CU_ASSERT_EQUAL(ret, 0);
 	ret = io_src_init(&src_duplex, fd, IO_DUPLEX, my_dummy_callback, NULL);
 	CU_ASSERT_EQUAL(ret, 0);
-	ret = io_mon_add_source(mon, &src_duplex);
+	ret = io_mon_add_source(&mon, &src_duplex);
 	CU_ASSERT_EQUAL(ret, 0);
 
 	CU_ASSERT_EQUAL(src_duplex.active, IO_IN);
-	ret = io_mon_activate_out_source(mon, &src_duplex, 1);
+	ret = io_mon_activate_out_source(&mon, &src_duplex, 1);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_EQUAL(src_duplex.active, IO_DUPLEX);
-	ret = io_mon_activate_out_source(mon, &src_duplex, 0);
+	ret = io_mon_activate_out_source(&mon, &src_duplex, 0);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_EQUAL(src_duplex.active, IO_IN);
 
 	/* error use cases */
 	ret = io_mon_activate_out_source(NULL, &src_duplex, 1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_mon_activate_out_source(mon, NULL, 1);
+	ret = io_mon_activate_out_source(&mon, NULL, 1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_mon_activate_out_source(mon, &src_in, 1);
+	ret = io_mon_activate_out_source(&mon, &src_in, 1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	/* cleanup */
-	io_mon_delete(&mon);
+	io_mon_clean(&mon);
 	close(pipefd[0]);
 	close(pipefd[1]);
 	close(fd);
-}
-
-static void testMON_GET_FD(void)
-{
-	int fd;
-	struct io_mon *mon;
-
-	mon = io_mon_new();
-	CU_ASSERT_PTR_NOT_NULL(mon);
-
-	/* normal use cases */
-	fd = io_mon_get_fd(mon);
-	CU_ASSERT(2 < fd);
-
-	/* error use cases */
-	fd = io_mon_get_fd(NULL);
-	CU_ASSERT(0 > fd);
-
-	/* cleanup */
-	io_mon_delete(&mon);
 }
 
 static void reached_state(int *glob_state, int state)
@@ -207,9 +195,8 @@ static void testMON_PROCESS_EVENTS(void)
 {
 	fd_set rfds;
 	int pipefd[2] = {-1, -1};
-	int mon_fd;
 	int ret;
-	struct io_mon *mon;
+	struct io_mon mon;
 	struct io_src src_out;
 	struct io_src src_in;
 	bool loop = true;
@@ -237,7 +224,7 @@ static void testMON_PROCESS_EVENTS(void)
 			reached_state(&state, STATE_MSG1_RECEIVED);
 
 			/* monitor out to sent the second message */
-			r = io_mon_activate_out_source(mon, &src_out, 1);
+			r = io_mon_activate_out_source(&mon, &src_out, 1);
 			CU_ASSERT_NOT_EQUAL(r, -1);
 		} else if (0 == strcmp(msg2, buf)) {
 			CU_ASSERT(0 == (state & STATE_MSG2_RECEIVED));
@@ -259,7 +246,7 @@ static void testMON_PROCESS_EVENTS(void)
 		CU_ASSERT_NOT_EQUAL_FATAL(r, -1);
 
 		/* disable out source when unneeded to avoid event loop panic */
-		r = io_mon_activate_out_source(mon, &src_out, 0);
+		r = io_mon_activate_out_source(&mon, &src_out, 0);
 		CU_ASSERT_NOT_EQUAL(r, -1);
 
 		reached_state(&state, STATE_MSG2_SENT);
@@ -272,9 +259,8 @@ static void testMON_PROCESS_EVENTS(void)
 		close(src->fd);
 	}
 
-	mon = io_mon_new();
-	CU_ASSERT_PTR_NOT_NULL(mon);
-	mon_fd = io_mon_get_fd(mon);
+	ret = io_mon_init(&mon);
+	CU_ASSERT_EQUAL(ret, 0);
 	ret = pipe(pipefd);
 	CU_ASSERT_NOT_EQUAL_FATAL(ret, -1);
 	ret = io_src_init(&src_in, pipefd[0], IO_IN, in_cb, NULL);
@@ -282,9 +268,9 @@ static void testMON_PROCESS_EVENTS(void)
 	ret = io_src_init(&src_out, pipefd[1], IO_OUT, out_cb, clean_cb);
 	CU_ASSERT_EQUAL(ret, 0);
 
-	ret = io_mon_add_source(mon, &src_out);
+	ret = io_mon_add_source(&mon, &src_out);
 	CU_ASSERT_EQUAL(ret, 0);
-	ret = io_mon_add_source(mon, &src_in);
+	ret = io_mon_add_source(&mon, &src_in);
 	CU_ASSERT_EQUAL(ret, 0);
 
 	/* normal use case */
@@ -298,8 +284,8 @@ static void testMON_PROCESS_EVENTS(void)
 
 		/* restore the read file descriptor set */
 		FD_ZERO(&rfds);
-		FD_SET(mon_fd, &rfds);
-		ret = select(mon_fd + 1, &rfds, NULL, NULL, &timeout);
+		FD_SET(mon.epollfd, &rfds);
+		ret = select(mon.epollfd + 1, &rfds, NULL, NULL, &timeout);
 
 		/* error, not normal */
 		CU_ASSERT_NOT_EQUAL(ret, -1);
@@ -310,7 +296,7 @@ static void testMON_PROCESS_EVENTS(void)
 		CU_ASSERT_NOT_EQUAL(ret, 0);
 		if (0 == ret)
 			goto out;
-		ret = io_mon_process_events(mon);
+		ret = io_mon_process_events(&mon);
 		CU_ASSERT_EQUAL(ret, 0);
 		if (0 != ret)
 			goto out;
@@ -326,29 +312,36 @@ out:
 	CU_ASSERT(state & STATE_PIPE_OUT_CLOSED);
 
 	/* cleanup */
-	io_mon_delete(&mon);
+	io_mon_clean(&mon);
 }
 
-static void testMON_DELETE(void)
+static void testMON_CLEAN(void)
 {
-	struct io_mon *mon;
+	struct io_mon mon;
+	int ret;
 
-	mon = io_mon_new();
-	CU_ASSERT_PTR_NOT_NULL(mon);
+	ret = io_mon_init(&mon);
+	CU_ASSERT_EQUAL(ret, 0);
 
-	/* normal use cases */
-	io_mon_delete(&mon);
-	CU_ASSERT_PTR_NULL(mon);
+	/* normal use case */
+	ret = io_mon_clean(&mon);
+	CU_ASSERT_EQUAL(ret, 0);
+	CU_ASSERT_EQUAL(mon.epollfd, -1);
+	CU_ASSERT_EQUAL(mon.nb_sources, 0);
+	CU_ASSERT_EQUAL(mon.source, NULL);
+
+	/* cleanup */
+	io_mon_clean(&mon);
 
 	/* error use cases */
-	io_mon_delete(&mon);
-	io_mon_delete(NULL);
+	ret = io_mon_clean(NULL);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
 }
 
 static const test_t tests[] = {
 		{
-				.fn = testMON_NEW,
-				.name = "io_mon_new"
+				.fn = testMON_INIT,
+				.name = "io_mon_init"
 		},
 		{
 				.fn = testMON_ADD_SOURCE,
@@ -363,16 +356,12 @@ static const test_t tests[] = {
 				.name = "io_mon_activate_out_source"
 		},
 		{
-				.fn = testMON_GET_FD,
-				.name = "io_mon_get_fd"
-		},
-		{
 				.fn = testMON_PROCESS_EVENTS,
 				.name = "io_mon_process_events"
 		},
 		{
-				.fn = testMON_DELETE,
-				.name = "io_mon_delete"
+				.fn = testMON_CLEAN,
+				.name = "io_mon_clean"
 		},
 
 		/* NULL guard */

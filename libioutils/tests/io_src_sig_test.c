@@ -44,9 +44,8 @@ static void testSRC_SIG_INIT(void)
 	sigset_t old_mask;
 	sigset_t new_mask;
 	fd_set rfds;
-	int mon_fd;
 	int ret;
-	struct io_mon *mon;
+	struct io_mon mon;
 	struct io_src_sig src_sig;
 	bool loop = true;
 	struct timeval timeout;
@@ -72,9 +71,8 @@ static void testSRC_SIG_INIT(void)
 		return 0;
 	}
 
-	mon = io_mon_new();
-	CU_ASSERT_PTR_NOT_NULL(mon);
-	mon_fd = io_mon_get_fd(mon);
+	ret = io_mon_init(&mon);
+	CU_ASSERT_EQUAL(ret, 0);
 	/* save sigmask for further use */
 	sigemptyset(&old_mask);
 	ret = sigprocmask(SIG_SETMASK, NULL, &old_mask);
@@ -82,7 +80,7 @@ static void testSRC_SIG_INIT(void)
 	ret = io_src_sig_init(&src_sig, sig_cb, SIGUSR1, SIGUSR2, NULL);
 	CU_ASSERT_EQUAL(ret, 0);
 
-	ret = io_mon_add_source(mon, &(src_sig.src));
+	ret = io_mon_add_source(&mon, &(src_sig.src));
 	CU_ASSERT_EQUAL(ret, 0);
 
 	ret = kill(getpid(), SIGUSR1);
@@ -96,8 +94,8 @@ static void testSRC_SIG_INIT(void)
 
 		/* restore the read file descriptor set */
 		FD_ZERO(&rfds);
-		FD_SET(mon_fd, &rfds);
-		ret = select(mon_fd + 1, &rfds, NULL, NULL, &timeout);
+		FD_SET(mon.epollfd, &rfds);
+		ret = select(mon.epollfd + 1, &rfds, NULL, NULL, &timeout);
 
 		/* error, not normal */
 		CU_ASSERT_NOT_EQUAL(ret, -1);
@@ -108,7 +106,7 @@ static void testSRC_SIG_INIT(void)
 		CU_ASSERT_NOT_EQUAL(ret, 0);
 		if (0 == ret)
 			goto out;
-		ret = io_mon_process_events(mon);
+		ret = io_mon_process_events(&mon);
 		CU_ASSERT_EQUAL(ret, 0);
 		if (0 != ret)
 			goto out;
@@ -130,7 +128,7 @@ out:
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	/* cleanup */
-	io_mon_delete(&mon);
+	io_mon_clean(&mon);
 
 	/* check sigmask hasn't changed */
 	sigemptyset(&new_mask);

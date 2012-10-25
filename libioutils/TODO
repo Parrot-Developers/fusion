@@ -1,4 +1,3 @@
-remove the need for malloc (io_mon_new, io_mon_delete)
-manage uniformally errors
+manage errors consistently
 // TODO pass message and error control
 check for regular files (EPERM epoll_ctl error)
