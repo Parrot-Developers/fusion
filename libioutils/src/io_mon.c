@@ -24,19 +24,6 @@
 #define MONITOR_MAX_SOURCES 10
 
 /**
- * @struct funk_monitor
- * @brief global monitor's context, handles the pool of sources and callbacks
- */
-struct io_mon {
-	/** file descriptor for monitoring all the sources */
-	int epollfd;
-	/** sources list for I/O operations */
-	struct rs_node *source;
-	/** number of sources currently registered */
-	unsigned nb_sources;
-};
-
-/**
  * Adds a source to the monitor
  * @param monitor Monitor context
  * @param source Monitor's source
@@ -132,25 +119,31 @@ static int register_source(struct io_mon *mon, struct io_src *src)
 	return alter_source(mon->epollfd, src, EPOLL_CTL_ADD);
 }
 
+int io_mon_init(struct io_mon *mon)
+{
+	memset(mon, 0, sizeof(*mon));
+	mon->epollfd = epoll_create1(EPOLL_CLOEXEC);
+	if (-1 == mon->epollfd)
+		return -errno;
+
+	return 0;
+}
+
 struct io_mon *io_mon_new(void)
 {
+	int ret;
 	struct io_mon *mon = NULL;
 
 	/* allocate resources */
-	mon = calloc(1, sizeof(*mon));
+	mon = malloc(sizeof(*mon));
 	if (NULL == mon)
 		return NULL;
-	memset(mon, 0, sizeof(*mon));
 
-	mon->epollfd = epoll_create1(EPOLL_CLOEXEC);
-	if (-1 == mon->epollfd)
-		goto out;
+	ret = io_mon_init(mon);
+	if (-1 == ret)
+		io_mon_delete(&mon);
 
 	return mon;
-out:
-	io_mon_delete(&mon);
-
-	return NULL;
 }
 
 int io_mon_add_source(struct io_mon *mon, struct io_src *src)

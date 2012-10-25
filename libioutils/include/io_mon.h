@@ -15,6 +15,19 @@
 #include <io_src.h>
 
 /**
+ * @struct io_mon
+ * @brief global monitor's context, handles the pool of sources and callbacks
+ */
+struct io_mon {
+	/** file descriptor for monitoring all the sources */
+	int epollfd;
+	/** sources list for I/O operations */
+	struct rs_node *source;
+	/** number of sources currently registered */
+	unsigned nb_sources;
+};
+
+/**
  * @def IO_EPOLL_ERROR_EVENTS
  * @brief Epoll events considered as an error when occurring on a source
  */
@@ -25,6 +38,13 @@
  * @brief Returns 1 if the epoll event set contains at least an error event
  */
 #define io_mon_has_error(events) (IO_EPOLL_ERROR_EVENTS & (events))
+
+/**
+ * Initializes a monitor context
+ * @param mon Monitor context to initialize
+ * @return negative errno value on error, 0 otherwise
+ */
+int io_mon_init(struct io_mon *mon);
 
 /**
  * @brief Monitor creation and initialization
