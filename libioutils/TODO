@@ -1,3 +1,2 @@
 manage errors consistently
 // TODO pass message and error control
-check for regular files (EPERM epoll_ctl error)

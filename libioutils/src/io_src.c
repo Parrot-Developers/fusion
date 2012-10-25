@@ -6,22 +6,33 @@
  *
  * Copyright (C) 2012 Parrot S.A.
  */
+#include <sys/stat.h>
+
 #include <errno.h>
 #include <string.h>
 
 #include <io_src.h>
 
 int io_src_init(struct io_src *src, int fd, enum io_src_event type,
-	       io_src_cb_t *cb, io_src_clean_t *clean)
+		io_src_cb_t *cb, io_src_clean_t *clean)
 {
+	struct stat st;
+	int ret;
 	if (NULL == src || -1 == fd || NULL == cb)
 		return -EINVAL;
 
 	/*
-	 * TODO check with fstat and the file type (S_ISREG etc...) that the
-	 * file des is pollable with epoll or return -EPERM as add source will
-	 * do later or add an abstraction with aoi or a read / write thread ?
+	 * regular files are not pollable with epoll and in general and when
+	 * they are (e.g. with select), they are never reported as WOULDBLOCK,
+	 * so sources can't be regular file file descriptor. Rather use a source
+	 * wrapping aio, or a thread
 	 */
+	ret = fstat(fd, &st);
+	if (-1 == ret)
+		return -errno;
+
+	if (S_ISREG(st.st_mode))
+		return -EBADF;
 
 	memset(src, 0, sizeof(*src));
 
