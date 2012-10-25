@@ -6,17 +6,8 @@
  *
  * Copyright (C) 2012 Parrot S.A.
  */
-#include <unistd.h>
-#include <signal.h>
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
-#include <CUnit/Automated.h>
-#include <CUnit/Basic.h>
-
 #include <fautes.h>
+
 #include "io_fautes.h"
 
 const char const *fautes_lib_name = "libioutils";
