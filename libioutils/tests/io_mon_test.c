@@ -266,7 +266,7 @@ static void testMON_PROCESS_EVENTS(void)
 
 		return 0;
 	}
-	void cleanup_cb(struct io_src *src)
+	void clean_cb(struct io_src *src)
 	{
 		reached_state(&state, STATE_PIPE_OUT_CLOSED);
 		close(src->fd);
@@ -279,7 +279,7 @@ static void testMON_PROCESS_EVENTS(void)
 	CU_ASSERT_NOT_EQUAL_FATAL(ret, -1);
 	ret = io_src_init(&src_in, pipefd[0], IO_IN, in_cb, NULL);
 	CU_ASSERT_EQUAL(ret, 0);
-	ret = io_src_init(&src_out, pipefd[1], IO_OUT, out_cb, cleanup_cb);
+	ret = io_src_init(&src_out, pipefd[1], IO_OUT, out_cb, clean_cb);
 	CU_ASSERT_EQUAL(ret, 0);
 
 	ret = io_mon_add_source(mon, &src_out);

@@ -49,7 +49,7 @@ static int msg_cb(struct io_src *src)
  * Callback called when the source is removed
  * @param src Underlying monitor source of the signal source
  */
-static void msg_cleanup(struct io_src *src)
+static void msg_clean(struct io_src *src)
 {
 	struct io_src_msg *msg;
 
@@ -75,5 +75,5 @@ int io_src_msg_init(struct io_src_msg *msg_src, int fd, void *msg, unsigned len,
 	msg_src->len = len;
 
 	/* can fail only on parameters */
-	return io_src_init(&(msg_src->src), fd, IO_IN, msg_cb, msg_cleanup);
+	return io_src_init(&(msg_src->src), fd, IO_IN, msg_cb, msg_clean);
 }

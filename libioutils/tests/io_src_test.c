@@ -20,7 +20,7 @@ static int my_dummy_cb(__attribute__((unused)) struct io_src *source)
 	return 0;
 }
 
-static void cleanup_cb(__attribute__((unused)) struct io_src *src)
+static void clean_cb(__attribute__((unused)) struct io_src *src)
 {
 
 }
@@ -41,12 +41,12 @@ static void testSRC_INIT(void)
 	/* put garbage in the struct */
 	ret = read(fd, &src, sizeof(src));
 	CU_ASSERT_EQUAL(ret, sizeof(src));
-	ret = io_src_init(&src, pipefd[0], IO_IN, my_dummy_cb, cleanup_cb);
+	ret = io_src_init(&src, pipefd[0], IO_IN, my_dummy_cb, clean_cb);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_EQUAL(src.fd, pipefd[0]);
 	CU_ASSERT_EQUAL(src.type, IO_IN);
 	CU_ASSERT_EQUAL(src.cb, my_dummy_cb);
-	CU_ASSERT_EQUAL(src.cleanup, cleanup_cb);
+	CU_ASSERT_EQUAL(src.clean, clean_cb);
 
 	CU_ASSERT_EQUAL(src.events, 0);
 

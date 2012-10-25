@@ -162,7 +162,7 @@ static int sep_cb(struct io_src *src)
  * Callback called when the source is removed
  * @param src Underlying monitor source of the signal source
  */
-static void sep_cleanup(struct io_src *src)
+static void sep_clean(struct io_src *src)
 {
 	struct io_src_sep *sep;
 
@@ -188,5 +188,5 @@ int io_src_sep_init(struct io_src_sep *sep_src, int fd, io_src_sep_cb_t *cb,
 	sep_src->two_bytes = INT_MAX != sep2;
 
 	/* can fail only on parameters */
-	return io_src_init(&(sep_src->src), fd, IO_IN, sep_cb, sep_cleanup);
+	return io_src_init(&(sep_src->src), fd, IO_IN, sep_cb, sep_clean);
 }

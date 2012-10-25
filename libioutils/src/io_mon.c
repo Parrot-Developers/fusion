@@ -248,9 +248,9 @@ int io_mon_process_events(struct io_mon *mon)
 			 * cleanup cb must be called AFTER unchaining so that
 			 * the client can do what he wants of it's context
 			 */
-			if (src->cleanup)
-				src->cleanup(src);
-			io_src_cleanup(src);
+			if (src->clean)
+				src->clean(src);
+			io_src_clean(src);
 		}
 		ret = 0;
 	}
@@ -268,8 +268,8 @@ int io_mon_clean(struct io_mon *mon)
 	while (mon->source) {
 		src = to_src(mon->source);
 		remove_source(mon, src);
-		if (src->cleanup)
-			src->cleanup(src);
+		if (src->clean)
+			src->clean(src);
 	}
 
 	close(mon->epollfd);

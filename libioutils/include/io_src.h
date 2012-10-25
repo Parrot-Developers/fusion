@@ -51,11 +51,11 @@ struct io_src;
 typedef int (io_src_cb_t)(struct io_src *src);
 
 /**
- * @typedef io_src_cleanup_t
+ * @typedef io_src_clean_t
  * @brief Callback called after the source has been removed from the monitor
  * @param src Source to cleanup
  */
-typedef void (io_src_cleanup_t)(struct io_src *src);
+typedef void (io_src_clean_t)(struct io_src *src);
 
 /**
  * @struct io_src
@@ -72,7 +72,7 @@ struct io_src {
 	/** callback responsible of this source */
 	io_src_cb_t *cb;
 	/** callback called to cleanup when the source is removed */
-	io_src_cleanup_t *cleanup;
+	io_src_clean_t *clean;
 
 	/**
 	 * epoll events which occurred on this source, set before the callback
@@ -119,16 +119,16 @@ struct io_src {
  * @param fd File descriptor of the source
  * @param type Type, in out or both
  * @param cb Callback notified whe fd is ready for I/O
- * @param cleanup Called to cleanup the source when removed
+ * @param clean Called to cleanup the source when removed
  * @return Negative errno compatible value on error otherwise zero
  */
 int io_src_init(struct io_src *src, int fd, enum io_src_event type,
-		io_src_cb_t *cb, io_src_cleanup_t *cleanup);
+		io_src_cb_t *cb, io_src_clean_t *clean);
 
 /**
  * Cleans up a source (basically a memset...)
  * @param src Source to cleanup
  */
-void io_src_cleanup(struct io_src *src);
+void io_src_clean(struct io_src *src);
 
 #endif /* IO_SOURCE_H_ */

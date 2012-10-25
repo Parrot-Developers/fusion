@@ -48,7 +48,7 @@ static int sig_cb(struct io_src *src)
  * Callback called when the source is removed
  * @param src Underlying monitor source of the signal source
  */
-static void sig_cleanup(struct io_src *src)
+static void sig_clean(struct io_src *src)
 {
 	struct io_src_sig *sig;
 
@@ -113,9 +113,9 @@ int io_src_sig_init(struct io_src_sig *sig, io_sig_cb_t *cb, ...)
 	sig->cb = cb;
 
 	/* can fail only on parameters */
-	return io_src_init(&(sig->src), fd, IO_IN, sig_cb, sig_cleanup);
+	return io_src_init(&(sig->src), fd, IO_IN, sig_cb, sig_clean);
 out:
-	sig_cleanup(&(sig->src));
+	sig_clean(&(sig->src));
 
 	return ret;
 }
