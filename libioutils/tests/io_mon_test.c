@@ -45,7 +45,7 @@ static int my_dummy_callback(__attribute__((unused)) struct io_src *src)
 
 static void my_dummy_clean(__attribute__((unused)) struct io_src *src)
 {
-	// do nothing
+	/* do nothing */
 }
 
 static void testMON_ADD_SOURCE(void)
@@ -63,13 +63,16 @@ static void testMON_ADD_SOURCE(void)
 	CU_ASSERT_EQUAL(ret, 0);
 	ret = pipe(pipefd);
 	CU_ASSERT_NOT_EQUAL_FATAL(ret, -1);
-	ret = io_src_init(&src_in, pipefd[0], IO_IN, my_dummy_callback, my_dummy_clean);
+	ret = io_src_init(&src_in, pipefd[0], IO_IN, my_dummy_callback,
+			my_dummy_clean);
 	CU_ASSERT_EQUAL(ret, 0);
-	ret = io_src_init(&src_out, pipefd[1], IO_OUT, my_dummy_callback, my_dummy_clean);
+	ret = io_src_init(&src_out, pipefd[1], IO_OUT, my_dummy_callback,
+			my_dummy_clean);
 	CU_ASSERT_EQUAL(ret, 0);
 	fd = open("/dev/random", O_RDWR | O_CLOEXEC);
 	CU_ASSERT_NOT_EQUAL_FATAL(fd, -1);
-	ret = io_src_init(&src_duplex, fd, IO_DUPLEX, my_dummy_callback, my_dummy_clean);
+	ret = io_src_init(&src_duplex, fd, IO_DUPLEX, my_dummy_callback,
+			my_dummy_clean);
 	CU_ASSERT_EQUAL(ret, 0);
 
 	/* normal use cases */
@@ -140,9 +143,11 @@ static void testMON_ACTIVATE_OUT_SOURCE(void)
 	CU_ASSERT_EQUAL(ret, 0);
 	ret = pipe(pipefd);
 	CU_ASSERT_NOT_EQUAL_FATAL(ret, -1);
-	ret = io_src_init(&src_in, pipefd[0], IO_IN, my_dummy_callback, my_dummy_clean);
+	ret = io_src_init(&src_in, pipefd[0], IO_IN, my_dummy_callback,
+			my_dummy_clean);
 	CU_ASSERT_EQUAL(ret, 0);
-	ret = io_src_init(&src_out, pipefd[1], IO_OUT, my_dummy_callback, my_dummy_clean);
+	ret = io_src_init(&src_out, pipefd[1], IO_OUT, my_dummy_callback,
+			my_dummy_clean);
 	CU_ASSERT_EQUAL(ret, 0);
 	ret = io_mon_add_source(&mon, &src_out);
 	CU_ASSERT_EQUAL(ret, 0);
@@ -163,7 +168,8 @@ static void testMON_ACTIVATE_OUT_SOURCE(void)
 	io_mon_clean(&mon);
 	ret = io_mon_init(&mon);
 	CU_ASSERT_EQUAL(ret, 0);
-	ret = io_src_init(&src_duplex, fd, IO_DUPLEX, my_dummy_callback, my_dummy_clean);
+	ret = io_src_init(&src_duplex, fd, IO_DUPLEX, my_dummy_callback,
+			my_dummy_clean);
 	CU_ASSERT_EQUAL(ret, 0);
 	ret = io_mon_add_source(&mon, &src_duplex);
 	CU_ASSERT_EQUAL(ret, 0);

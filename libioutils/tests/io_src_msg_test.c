@@ -42,7 +42,7 @@ struct my_msg_src {
 
 #define to_src_my_msg_src(p) container_of(p, struct my_msg_src, msg_src)
 
-static void my_msg_src_clean_cb(struct io_src *src)
+static void my_msg_src_clean(struct io_src *src)
 {
 	struct my_msg_src *my_src;
 
@@ -51,7 +51,6 @@ static void my_msg_src_clean_cb(struct io_src *src)
 	close(my_src->pipefds[0]);
 	close(my_src->pipefds[1]);
 	memset(my_src, 0, sizeof(my_src));
-	// TODO add call to parent cleanup function
 }
 
 static const struct msg MSG1 = {11, 11111, 11.111};
@@ -71,7 +70,6 @@ static int msg_cb(struct io_src_msg *src)
 {
 	int ret;
 	struct my_msg_src *my_src = to_src_my_msg_src(src);
-//		__attribute__((unused))struct msg *my_msg = src->msg;
 /*		printf("received : \"%d %d %f\"\n", my_msg->a, my_msg->b,
 			my_msg->c);*/
 
@@ -126,7 +124,7 @@ static void testSRC_MSG_INIT(void)
 	ret = io_src_msg_init(&(msg_src.msg_src),
 			msg_src.pipefds[0],
 			msg_cb,
-			my_msg_src_clean_cb,
+			my_msg_src_clean,
 			&(msg_src.msg),
 			sizeof(msg_src.msg));
 	CU_ASSERT_EQUAL(ret, 0);
@@ -175,19 +173,19 @@ out:
 
 	/* error cases */
 	ret = io_src_msg_init(NULL, msg_src.pipefds[0], msg_cb,
-			my_msg_src_clean_cb, &(msg_src.msg), sizeof(struct msg));
+			my_msg_src_clean, &(msg_src.msg), sizeof(struct msg));
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_src_msg_init(&(msg_src.msg_src), -1, msg_cb,
-			my_msg_src_clean_cb, &(msg_src.msg), sizeof(struct msg));
+			my_msg_src_clean, &(msg_src.msg), sizeof(struct msg));
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_src_msg_init(&(msg_src.msg_src), msg_src.pipefds[0], msg_cb,
-			my_msg_src_clean_cb, NULL, sizeof(struct msg));
+			my_msg_src_clean, NULL, sizeof(struct msg));
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_src_msg_init(&(msg_src.msg_src), msg_src.pipefds[0], msg_cb,
-			my_msg_src_clean_cb, &(msg_src.msg), 0);
+			my_msg_src_clean, &(msg_src.msg), 0);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_src_msg_init(&(msg_src.msg_src), msg_src.pipefds[0], NULL,
-			my_msg_src_clean_cb, &(msg_src.msg), sizeof(struct msg));
+			my_msg_src_clean, &(msg_src.msg), sizeof(struct msg));
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	/* cleanup */
