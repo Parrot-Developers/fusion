@@ -76,6 +76,12 @@ struct io_src_sep {
 };
 
 /**
+ * @def to_src
+ * @brief Convert a source to it's signal source container
+ */
+#define to_src_sep(p) container_of(p, struct io_src_sep, src)
+
+/**
  * Initializes a separator source
  * @param sep_src Separator source to initialize
  * @param fd File descriptor
@@ -86,6 +92,6 @@ struct io_src_sep {
  * @return Negative errno compatible value on error, 0 otherwise
  */
 int io_src_sep_init(struct io_src_sep *sep_src, int fd, io_src_sep_cb_t *cb,
-		int sep1, int sep2);
+		io_src_clean_t *clean, int sep1, int sep2);
 
 #endif /* IO_SRC_SEP_H_ */

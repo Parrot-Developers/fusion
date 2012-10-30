@@ -38,14 +38,39 @@ static const int sep_double[2] = {'\r', '\n'};
 #define MSG3 ""
 #define MSG4 "lou lou lou, on s'met tous nus"
 
+struct my_sep_src {
+	struct io_src_sep src_sep;
+	int pipefds[2];
+};
+
+#define to_my_src_sep(p) container_of(p, struct my_sep_src, src_sep)
+
+/**
+ * Callback called when the source is removed
+ * @param src Underlying monitor source of the signal source
+ */
+static void sep_clean(struct io_src *src)
+{
+	struct my_sep_src *my_sep;
+
+	if (NULL == src)
+		return;
+	my_sep = to_my_src_sep(to_src_sep(src));
+
+	close(my_sep->pipefds[0]);
+	close(my_sep->pipefds[1]);
+
+	memset(my_sep, 0, sizeof(*my_sep));
+	src->fd = -1;
+}
+
 /* main and only test. sends ourselves messages and check we receive them */
 static void testSRC_SEP(const int sep_pair[2], const char *big_msg, size_t sz)
 {
-	int pipefds[2] = {-1, -1};
 	fd_set rfds;
 	int ret;
 	struct io_mon mon;
-	struct io_src_sep src_sep;
+	struct my_sep_src src_sep;
 	bool loop = true;
 	struct timeval timeout;
 #define STATE_START 0
@@ -82,16 +107,16 @@ static void testSRC_SEP(const int sep_pair[2], const char *big_msg, size_t sz)
 
 	ret = io_mon_init(&mon);
 	CU_ASSERT_EQUAL(ret, 0);
-	ret = pipe(pipefds);
+	ret = pipe(src_sep.pipefds);
 	CU_ASSERT_EQUAL(ret, 0);
-	ret = io_src_sep_init(&src_sep, pipefds[0], sep_cb, sep_pair[0],
-			sep_pair[1]);
-	CU_ASSERT_EQUAL(ret, 0);
-
-	ret = io_mon_add_source(&mon, &(src_sep.src));
+	ret = io_src_sep_init(&(src_sep.src_sep), src_sep.pipefds[0], sep_cb,
+			sep_clean, sep_pair[0], sep_pair[1]);
 	CU_ASSERT_EQUAL(ret, 0);
 
-	ret = write(pipefds[1], big_msg, sz);
+	ret = io_mon_add_source(&mon, &(src_sep.src_sep.src));
+	CU_ASSERT_EQUAL(ret, 0);
+
+	ret = write(src_sep.pipefds[1], big_msg, sz);
 	CU_ASSERT_NOT_EQUAL(ret, -1);
 
 	/* normal use case */
@@ -132,20 +157,21 @@ out:
 	CU_ASSERT(state & STATE_TIMER_EXPIRED);
 
 	/* error cases */
-	ret = io_src_sep_init(NULL, pipefds[0], sep_cb, sep_pair[0],
-			sep_pair[1]);
+	ret = io_src_sep_init(NULL, src_sep.pipefds[0], sep_cb, sep_clean,
+			sep_pair[0], sep_pair[1]);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_src_sep_init(&src_sep, -1, sep_cb, sep_pair[0],
-			sep_pair[1]);
+	ret = io_src_sep_init(&(src_sep.src_sep), -1, sep_cb, sep_clean,
+			sep_pair[0], sep_pair[1]);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_src_sep_init(&src_sep, pipefds[0], NULL, sep_pair[0],
-			sep_pair[1]);
+	ret = io_src_sep_init(&(src_sep.src_sep), src_sep.pipefds[0], NULL,
+			sep_clean, sep_pair[0], sep_pair[1]);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+	ret = io_src_sep_init(&(src_sep.src_sep), src_sep.pipefds[0], sep_cb,
+			NULL, sep_pair[0], sep_pair[1]);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	/* cleanup */
 	io_mon_clean(&mon);
-	close(pipefds[0]);
-	close(pipefds[1]);
 }
 
 

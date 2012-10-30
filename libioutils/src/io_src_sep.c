@@ -22,12 +22,6 @@
 #include "io_src_sep.h"
 
 /**
- * @def to_src
- * @brief Convert a source to it's signal source container
- */
-#define to_src_sep(p) container_of(p, struct io_src_sep, src)
-
-/**
  * @def buf_write_start
  * @brief computes where the data newly read from the fd, must be written to
  * the buffer
@@ -158,26 +152,10 @@ static int sep_cb(struct io_src *src)
 	return 0;
 }
 
-/**
- * Callback called when the source is removed
- * @param src Underlying monitor source of the signal source
- */
-static void sep_clean(struct io_src *src)
-{
-	struct io_src_sep *sep;
-
-	if (NULL == src)
-		return;
-	sep = to_src_sep(src);
-
-	memset(sep, 0, sizeof(*sep));
-	src->fd = -1;
-}
-
 int io_src_sep_init(struct io_src_sep *sep_src, int fd, io_src_sep_cb_t *cb,
-		int sep1, int sep2)
+		io_src_clean_t *clean, int sep1, int sep2)
 {
-	if (NULL == sep_src || NULL == cb || -1 == fd)
+	if (NULL == sep_src || NULL == cb || -1 == fd || NULL == clean)
 		return -EINVAL;
 
 	memset(sep_src, 0, sizeof(*sep_src));
@@ -188,5 +166,5 @@ int io_src_sep_init(struct io_src_sep *sep_src, int fd, io_src_sep_cb_t *cb,
 	sep_src->two_bytes = INT_MAX != sep2;
 
 	/* can fail only on parameters */
-	return io_src_init(&(sep_src->src), fd, IO_IN, sep_cb, sep_clean);
+	return io_src_init(&(sep_src->src), fd, IO_IN, sep_cb, clean);
 }
