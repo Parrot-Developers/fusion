@@ -36,16 +36,17 @@ struct msg {
 
 struct my_msg_src {
 	struct msg msg;
-	struct io_src_msg src;
+	struct io_src_msg msg_src;
 	int pipefds[2];
 };
 
-#define to_src_my_msg_src(p) container_of(p, struct my_msg_src, src)
+#define to_src_my_msg_src(p) container_of(p, struct my_msg_src, msg_src)
 
 static void my_msg_src_clean_cb(struct io_src *src)
 {
-	struct io_src_msg *msg = to_src_msg(src);
-	struct my_msg_src *my_src = to_src_my_msg_src(msg);
+	struct my_msg_src *my_src;
+
+	my_src = to_src_my_msg_src(to_src_msg(src));
 
 	close(my_src->pipefds[0]);
 	close(my_src->pipefds[1]);
@@ -122,7 +123,7 @@ static void testSRC_MSG_INIT(void)
 	CU_ASSERT_EQUAL(ret, 0);
 	ret = pipe(msg_src.pipefds);
 	CU_ASSERT_EQUAL(ret, 0);
-	ret = io_src_msg_init(&(msg_src.src),
+	ret = io_src_msg_init(&(msg_src.msg_src),
 			msg_src.pipefds[0],
 			msg_cb,
 			my_msg_src_clean_cb,
@@ -130,7 +131,7 @@ static void testSRC_MSG_INIT(void)
 			sizeof(msg_src.msg));
 	CU_ASSERT_EQUAL(ret, 0);
 
-	ret = io_mon_add_source(&mon, &(msg_src.src.src));
+	ret = io_mon_add_source(&mon, &(msg_src.msg_src.src));
 	CU_ASSERT_EQUAL(ret, 0);
 
 	ret = write(msg_src.pipefds[1], &MSG1, sizeof(msg_src.msg));
@@ -173,15 +174,20 @@ out:
 	CU_ASSERT(state & STATE_MSG4_RECEIVED);
 
 	/* error cases */
-	ret = io_src_msg_init(NULL, msg_src.pipefds[0], msg_cb, my_msg_src_clean_cb, &(msg_src.msg), sizeof(struct msg));
+	ret = io_src_msg_init(NULL, msg_src.pipefds[0], msg_cb,
+			my_msg_src_clean_cb, &(msg_src.msg), sizeof(struct msg));
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_src_msg_init(&(msg_src.src), -1, msg_cb, my_msg_src_clean_cb, &(msg_src.msg), sizeof(struct msg));
+	ret = io_src_msg_init(&(msg_src.msg_src), -1, msg_cb,
+			my_msg_src_clean_cb, &(msg_src.msg), sizeof(struct msg));
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_src_msg_init(&(msg_src.src), msg_src.pipefds[0], msg_cb, my_msg_src_clean_cb, NULL, sizeof(struct msg));
+	ret = io_src_msg_init(&(msg_src.msg_src), msg_src.pipefds[0], msg_cb,
+			my_msg_src_clean_cb, NULL, sizeof(struct msg));
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_src_msg_init(&(msg_src.src), msg_src.pipefds[0], msg_cb, my_msg_src_clean_cb, &(msg_src.msg), 0);
+	ret = io_src_msg_init(&(msg_src.msg_src), msg_src.pipefds[0], msg_cb,
+			my_msg_src_clean_cb, &(msg_src.msg), 0);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_src_msg_init(&(msg_src.src), msg_src.pipefds[0], NULL, my_msg_src_clean_cb, &(msg_src.msg), sizeof(struct msg));
+	ret = io_src_msg_init(&(msg_src.msg_src), msg_src.pipefds[0], NULL,
+			my_msg_src_clean_cb, &(msg_src.msg), sizeof(struct msg));
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	/* cleanup */
