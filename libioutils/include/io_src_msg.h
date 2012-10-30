@@ -59,5 +59,5 @@ struct io_src_msg {
  * monitor
  * @return errno compatible negative value
  */
-int io_src_msg_init(struct io_src_msg *msg_src, int fd, void *msg, unsigned len,
-		io_src_msg_cb_t *cb, io_src_clean_t *clean);
+int io_src_msg_init(struct io_src_msg *msg_src, int fd, io_src_msg_cb_t *cb,
+		io_src_clean_t *clean, void *msg, unsigned len);
