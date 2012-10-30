@@ -57,7 +57,7 @@ static void testSRC_INIT(void)
 	/* put garbage in the struct */
 	ret = read(fd, &src, sizeof(src));
 	CU_ASSERT_EQUAL(ret, sizeof(src));
-	ret = io_src_init(&src, pipefd[1], IO_OUT, my_dummy_cb, NULL);
+	ret = io_src_init(&src, pipefd[1], IO_OUT, my_dummy_cb, clean_cb);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_EQUAL(src.fd, pipefd[1]);
 	CU_ASSERT_EQUAL(src.type, IO_OUT);
@@ -72,7 +72,7 @@ static void testSRC_INIT(void)
 	/* put garbage in the struct */
 	ret = read(fd, &src, sizeof(src));
 	CU_ASSERT_EQUAL(ret, sizeof(src));
-	ret = io_src_init(&src, fd, IO_DUPLEX, my_dummy_cb, NULL);
+	ret = io_src_init(&src, fd, IO_DUPLEX, my_dummy_cb, clean_cb);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_EQUAL(src.fd, fd);
 	CU_ASSERT_EQUAL(src.type, IO_DUPLEX);
@@ -85,19 +85,19 @@ static void testSRC_INIT(void)
 	CU_ASSERT_PTR_NULL(src.node.prev);
 
 	/* error use cases */
-	ret = io_src_init(NULL, pipefd[0], IO_IN, my_dummy_cb, NULL);
+	ret = io_src_init(NULL, pipefd[0], IO_IN, my_dummy_cb, clean_cb);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_src_init(&src, -1, IO_IN, my_dummy_cb, NULL);
+	ret = io_src_init(&src, -1, IO_IN, my_dummy_cb, clean_cb);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_src_init(&src, pipefd[0], IO_IN, NULL, NULL);
+	ret = io_src_init(&src, pipefd[0], IO_IN, NULL, clean_cb);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_src_init(NULL, pipefd[0], IO_IN, my_dummy_cb, NULL);
+	ret = io_src_init(&src, pipefd[0], IO_IN, my_dummy_cb, NULL);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	close(fd);
 	fd = open("toto", O_RDWR | O_CREAT);
 	CU_ASSERT_NOT_EQUAL(ret, -1);
-	ret = io_src_init(&src, fd, IO_IN, my_dummy_cb, NULL);
+	ret = io_src_init(&src, fd, IO_IN, my_dummy_cb, clean_cb);
 	CU_ASSERT_EQUAL(ret, -EBADF);
 
 	/* cleanup */

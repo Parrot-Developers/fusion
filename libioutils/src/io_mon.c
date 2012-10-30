@@ -226,9 +226,7 @@ int io_mon_process_events(struct io_mon *mon)
 			 * cleanup cb must be called AFTER unchaining so that
 			 * the client can do what he wants of it's context
 			 */
-			if (src->clean)
-				src->clean(src);
-			io_src_clean(src);
+			src->clean(src);
 		}
 		ret = 0;
 	}

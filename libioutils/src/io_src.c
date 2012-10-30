@@ -18,7 +18,7 @@ int io_src_init(struct io_src *src, int fd, enum io_src_event type,
 {
 	struct stat st;
 	int ret;
-	if (NULL == src || -1 == fd || NULL == cb)
+	if (NULL == src || -1 == fd || NULL == cb || NULL == clean)
 		return -EINVAL;
 
 	/*
@@ -42,10 +42,4 @@ int io_src_init(struct io_src *src, int fd, enum io_src_event type,
 	src->clean = clean;
 
 	return 0;
-}
-
-void io_src_clean(struct io_src *src)
-{
-	memset(src, 0, sizeof(*src));
-	src->fd = -1;
 }
