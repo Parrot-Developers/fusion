@@ -13,6 +13,7 @@
 #include <limits.h>
 #include <stdbool.h>
 #include <signal.h>
+#include <stddef.h>
 
 #include <CUnit/Basic.h>
 
@@ -33,77 +34,106 @@ struct msg {
 	double c;
 };
 
+struct my_msg_src {
+	struct msg msg;
+	struct io_src_msg src;
+	int pipefds[2];
+};
+
+#define to_src_my_msg_src(p) container_of(p, struct my_msg_src, src)
+
+static void my_msg_src_clean_cb(struct io_src *src)
+{
+	struct io_src_msg *msg = to_src_msg(src);
+	struct my_msg_src *my_src = to_src_my_msg_src(msg);
+
+	close(my_src->pipefds[0]);
+	close(my_src->pipefds[1]);
+	memset(my_src, 0, sizeof(my_src));
+	// TODO add call to parent cleanup function
+}
+
 static const struct msg MSG1 = {11, 11111, 11.111};
 static const struct msg MSG2 = {22, 22222, 22.222};
 static const struct msg MSG3 = {33, 33333, 33.333};
 static const struct msg MSG4 = {44, 44444, 44.444};
 
-/* main and only test. sends ourselves messages and check we receive them */
-static void testSRC_MSG_INIT(void)
-{
-	int pipefds[2] = {-1, -1};
-	fd_set rfds;
-	struct msg msg;
-	int ret;
-	struct io_mon mon;
-	struct io_src_msg src_msg;
-	bool loop = true;
-	struct timeval timeout;
 #define STATE_START 0
 #define STATE_MSG1_RECEIVED 1
 #define STATE_MSG2_RECEIVED 2
 #define STATE_MSG3_RECEIVED 4
 #define STATE_MSG4_RECEIVED 8
 #define STATE_ALL_DONE 15
-	int state = STATE_START;
-	int msg_cb(struct io_src_msg *src)
-	{
-		__attribute__((unused))struct msg *my_msg = src->msg;
+int state = STATE_START;
+
+static int msg_cb(struct io_src_msg *src)
+{
+	int ret;
+	struct my_msg_src *my_src = to_src_my_msg_src(src);
+//		__attribute__((unused))struct msg *my_msg = src->msg;
 /*		printf("received : \"%d %d %f\"\n", my_msg->a, my_msg->b,
-				my_msg->c);*/
+			my_msg->c);*/
 
-		CU_ASSERT_NOT_EQUAL(state, STATE_ALL_DONE);
+	CU_ASSERT_NOT_EQUAL(state, STATE_ALL_DONE);
 
-		if (0 == memcmp(src->msg, &MSG1, src->len)) {
-			CU_ASSERT_EQUAL(state, STATE_START);
-			reached_state(&state, STATE_MSG1_RECEIVED);
+	if (0 == memcmp(src->msg, &MSG1, src->len)) {
+		CU_ASSERT_EQUAL(state, STATE_START);
+		reached_state(&state, STATE_MSG1_RECEIVED);
 
-			ret = write(pipefds[1], &MSG2, sizeof(struct msg));
-			CU_ASSERT_NOT_EQUAL(ret, -1);
-		} else if (0 == memcmp(src->msg, &MSG2, src->len)) {
-			CU_ASSERT_EQUAL(state, STATE_MSG1_RECEIVED);
-			reached_state(&state, STATE_MSG2_RECEIVED);
+		ret = write(my_src->pipefds[1], &MSG2,
+				sizeof(struct msg));
+		CU_ASSERT_NOT_EQUAL(ret, -1);
+	} else if (0 == memcmp(src->msg, &MSG2, src->len)) {
+		CU_ASSERT_EQUAL(state, STATE_MSG1_RECEIVED);
+		reached_state(&state, STATE_MSG2_RECEIVED);
 
-			ret = write(pipefds[1], &MSG3, sizeof(struct msg));
-			CU_ASSERT_NOT_EQUAL(ret, -1);
-		} else if (0 == memcmp(src->msg, &MSG3, src->len)) {
-			CU_ASSERT_EQUAL(state, STATE_MSG1_RECEIVED |
-					STATE_MSG2_RECEIVED);
-			reached_state(&state, STATE_MSG3_RECEIVED);
+		ret = write(my_src->pipefds[1], &MSG3,
+				sizeof(struct msg));
+		CU_ASSERT_NOT_EQUAL(ret, -1);
+	} else if (0 == memcmp(src->msg, &MSG3, src->len)) {
+		CU_ASSERT_EQUAL(state, STATE_MSG1_RECEIVED |
+				STATE_MSG2_RECEIVED);
+		reached_state(&state, STATE_MSG3_RECEIVED);
 
-			ret = write(pipefds[1], &MSG4, sizeof(struct msg));
-			CU_ASSERT_NOT_EQUAL(ret, -1);
-		} else if (0 == memcmp(src->msg, &MSG4, src->len)) {
-			CU_ASSERT_EQUAL(state, STATE_MSG1_RECEIVED |
-					STATE_MSG2_RECEIVED |
-					STATE_MSG3_RECEIVED);
-			reached_state(&state, STATE_MSG4_RECEIVED);
-		}
-
-		return 0;
+		ret = write(my_src->pipefds[1], &MSG4,
+				sizeof(struct msg));
+		CU_ASSERT_NOT_EQUAL(ret, -1);
+	} else if (0 == memcmp(src->msg, &MSG4, src->len)) {
+		CU_ASSERT_EQUAL(state, STATE_MSG1_RECEIVED |
+				STATE_MSG2_RECEIVED |
+				STATE_MSG3_RECEIVED);
+		reached_state(&state, STATE_MSG4_RECEIVED);
 	}
+
+	return 0;
+}
+
+/* main and only test. sends ourselves messages and check we receive them */
+static void testSRC_MSG_INIT(void)
+{
+	fd_set rfds;
+	int ret;
+	struct io_mon mon;
+	struct my_msg_src msg_src;
+	bool loop = true;
+	struct timeval timeout;
 
 	ret = io_mon_init(&mon);
 	CU_ASSERT_EQUAL(ret, 0);
-	ret = pipe(pipefds);
+	ret = pipe(msg_src.pipefds);
 	CU_ASSERT_EQUAL(ret, 0);
-	ret = io_src_msg_init(&src_msg, pipefds[0], &msg, sizeof(msg), msg_cb);
+	ret = io_src_msg_init(&(msg_src.src),
+			msg_src.pipefds[0],
+			&(msg_src.msg),
+			sizeof(msg_src.msg),
+			msg_cb,
+			my_msg_src_clean_cb);
 	CU_ASSERT_EQUAL(ret, 0);
 
-	ret = io_mon_add_source(&mon, &(src_msg.src));
+	ret = io_mon_add_source(&mon, &(msg_src.src.src));
 	CU_ASSERT_EQUAL(ret, 0);
 
-	ret = write(pipefds[1], &MSG1, sizeof(msg));
+	ret = write(msg_src.pipefds[1], &MSG1, sizeof(msg_src.msg));
 	CU_ASSERT_NOT_EQUAL(ret, -1);
 
 	/* normal use case */
@@ -143,21 +173,19 @@ out:
 	CU_ASSERT(state & STATE_MSG4_RECEIVED);
 
 	/* error cases */
-	ret = io_src_msg_init(NULL, pipefds[0], &msg, sizeof(msg), msg_cb);
+	ret = io_src_msg_init(NULL, msg_src.pipefds[0], &(msg_src.msg), sizeof(struct msg), msg_cb, my_msg_src_clean_cb);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_src_msg_init(&src_msg, -1, &msg, sizeof(msg), msg_cb);
+	ret = io_src_msg_init(&(msg_src.src), -1, &(msg_src.msg), sizeof(struct msg), msg_cb, my_msg_src_clean_cb);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_src_msg_init(&src_msg, pipefds[0], NULL, sizeof(msg), msg_cb);
+	ret = io_src_msg_init(&(msg_src.src), msg_src.pipefds[0], NULL, sizeof(struct msg), msg_cb, my_msg_src_clean_cb);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_src_msg_init(&src_msg, pipefds[0], &msg, 0, msg_cb);
+	ret = io_src_msg_init(&(msg_src.src), msg_src.pipefds[0], &(msg_src.msg), 0, msg_cb, my_msg_src_clean_cb);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_src_msg_init(&src_msg, pipefds[0], &msg, sizeof(msg), NULL);
+	ret = io_src_msg_init(&(msg_src.src), msg_src.pipefds[0], &(msg_src.msg), sizeof(struct msg), NULL, my_msg_src_clean_cb);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	/* cleanup */
 	io_mon_clean(&mon);
-	close(pipefds[0]);
-	close(pipefds[1]);
 }
 
 static const test_t tests[] = {

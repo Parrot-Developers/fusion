@@ -15,6 +15,12 @@
 struct io_src_msg;
 
 /**
+ * @def to_src_msg
+ * @brief Convert a source to it's message source container
+ */
+#define to_src_msg(p) container_of(p, struct io_src_msg, src)
+
+/**
  * @typedef io_src_msg_cb_t
  * @brief Called when an entire message has been received
  * @param msg Message source
@@ -49,7 +55,9 @@ struct io_src_msg {
  * message just read
  * @param len Size of the msg buffer
  * @param cb Callback called when a message has been received, stored in msg
+ * @param clean Cleanup callback, called when the source is removed from the
+ * monitor
  * @return errno compatible negative value
  */
 int io_src_msg_init(struct io_src_msg *msg_src, int fd, void *msg, unsigned len,
-	       io_src_msg_cb_t *cb);
+		io_src_msg_cb_t *cb, io_src_clean_t *clean);
