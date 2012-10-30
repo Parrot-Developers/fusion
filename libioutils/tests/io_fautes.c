@@ -25,12 +25,10 @@ suite_t *libioutils_test_suites[] = {
 
 void libioutils_init_test_suites(void)
 {
-	int default_active_state = 1;
-
-	mon_suite.active = default_active_state;
-	src_msg_suite.active = default_active_state;
-	src_sep_suite.active = default_active_state;
-	src_sig_suite.active = default_active_state;
-	src_suite.active = default_active_state;
-	utils_suite.active = default_active_state;
+	mon_suite.active = 1;
+	src_msg_suite.active = 1;
+	src_sep_suite.active = 1;
+	src_sig_suite.active = 1;
+	src_suite.active = 1;
+	utils_suite.active = 1;
 }
