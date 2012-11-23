@@ -5,7 +5,7 @@
 I Description
 Fautes stands for Framework for AUto TESts. It provides tools for
 automatic unit testing of software libraries. It relies on libcunit and adds
-sugar arountd it.
+sugar around it.
 
 II Content
 This project consists in two independent parts
