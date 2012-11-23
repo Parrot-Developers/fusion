@@ -115,7 +115,7 @@ static suite_t **get_test_suite(const char *so_lib, void **lib_handle)
 	ret = get_sym(*lib_handle, names_buf, &sym);
 	if (-1 == ret)
 		goto out;
-	*(void **)(&init_fun) = sym;
+	init_fun = (init_fun_t)sym;
 	if (NULL != init_fun)
 		init_fun();
 
