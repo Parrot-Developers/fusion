@@ -18,6 +18,10 @@
 #include <fautes.h>
 #include <fautes_utils.h>
 
+#ifndef O_CLOEXEC
+#define O_CLOEXEC       02000000        /* set close_on_exec */
+#endif
+
 static void testMON_INIT(void)
 {
 	struct io_mon mon;

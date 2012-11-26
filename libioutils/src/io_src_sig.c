@@ -18,6 +18,7 @@
 
 #include "io_mon.h"
 #include "io_src_sig.h"
+#include "io_platform.h"
 
 /**
  * @def to_src

@@ -19,6 +19,7 @@
 #include <io_src.h>
 #include <io_mon.h>
 
+#include "io_platform.h"
 #include "io_utils.h"
 
 #define MONITOR_MAX_SOURCES 10
@@ -125,7 +126,7 @@ int io_mon_init(struct io_mon *mon)
 		return -EINVAL;
 
 	memset(mon, 0, sizeof(*mon));
-	mon->epollfd = epoll_create1(EPOLL_CLOEXEC);
+	mon->epollfd = io_epoll_create1(EPOLL_CLOEXEC);
 	if (-1 == mon->epollfd)
 		return -errno;
 
