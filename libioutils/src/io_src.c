@@ -18,7 +18,8 @@ int io_src_init(struct io_src *src, int fd, enum io_src_event type,
 {
 	struct stat st;
 	int ret;
-	if (NULL == src || -1 == fd || NULL == cb || NULL == clean)
+	if (NULL == src || -1 == fd || NULL == cb || NULL == clean
+			|| (type & ~IO_DUPLEX) || !(type & IO_DUPLEX))
 		return -EINVAL;
 
 	/*

@@ -97,6 +97,10 @@ static void testSRC_INIT(void)
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_src_init(&src, pipefd[0], IO_IN, my_dummy_cb, NULL);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
+	ret = io_src_init(&src, pipefd[0], 666, my_dummy_cb, clean_cb);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+	ret = io_src_init(&src, pipefd[0], 0, my_dummy_cb, clean_cb);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	close(fd);
 	fd = open("toto", O_RDWR | O_CREAT);

@@ -24,7 +24,7 @@ enum io_src_event {
 	IO_NONE = 0,
 	/** The source is an "IN" source, i.e. readable */
 	IO_IN = EPOLLIN,
-	/** The source is an "out" source, i.e. writable */
+	/** The source is an "OUT" source, i.e. writable */
 	IO_OUT = EPOLLOUT,
 	/** The source is a full duplex source, i.e. writable and readable */
 	IO_DUPLEX = EPOLLIN | EPOLLOUT,
@@ -117,7 +117,7 @@ struct io_src {
  * Initializes a source
  * @param src Source to initialize. Can't be NULL
  * @param fd File descriptor of the source
- * @param type Type, in out or both
+ * @param type Type, in, out or both
  * @param cb Callback notified whe fd is ready for I/O
  * @param clean Called to cleanup the source when removed
  * @return Negative errno compatible value on error otherwise zero
