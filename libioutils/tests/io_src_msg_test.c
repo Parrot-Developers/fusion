@@ -179,6 +179,9 @@ out:
 	CU_ASSERT(state & STATE_MSG3_RECEIVED);
 	CU_ASSERT(state & STATE_MSG4_RECEIVED);
 
+	/* cleanup */
+	io_mon_clean(&mon);
+
 	/* error cases */
 	ret = io_src_msg_init(NULL, msg_src.pipefds[0], IO_IN, msg_cb_read,
 			my_msg_src_clean, &(msg_src.msg), sizeof(struct msg));
@@ -197,9 +200,6 @@ out:
 			NULL, my_msg_src_clean, &(msg_src.msg),
 			sizeof(struct msg));
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-
-	/* cleanup */
-	io_mon_clean(&mon);
 }
 
 static int msg_cb_write(struct io_src_msg *src, enum io_src_event evt)
