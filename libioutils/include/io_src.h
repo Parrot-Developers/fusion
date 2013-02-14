@@ -125,4 +125,11 @@ struct io_src {
 int io_src_init(struct io_src *src, int fd, enum io_src_event type,
 		io_src_cb_t *cb, io_src_clean_t *clean);
 
+/**
+ * Reinitializes the source for further use, closing the file descriptor, then
+ * calls the user clean callback
+ * @param src Source to initialize. Can't be NULL
+ */
+void io_src_clean(struct io_src *src);
+
 #endif /* IO_SOURCE_H_ */

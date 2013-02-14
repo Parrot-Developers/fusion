@@ -194,9 +194,10 @@ int io_mon_process_events(struct io_mon *mon)
 	if (NULL == mon)
 		return -EINVAL;
 
-	/* doesn't block, because of the 0 timeout */
 	n = TEMP_FAILURE_RETRY(epoll_wait(mon->epollfd, events,
-			MONITOR_MAX_SOURCES, 0));
+			MONITOR_MAX_SOURCES,
+			0 /* don't block */
+			));
 	if (-1 == n)
 		return -errno;
 
@@ -224,10 +225,10 @@ int io_mon_process_events(struct io_mon *mon)
 				return ret;
 
 			/*
-			 * cleanup cb must be called AFTER unchaining so that
-			 * the client can do what he wants of it's context
+			 * cleanup cb must be done AFTER unchaining so that the
+			 * client can do what he wants of it's context
 			 */
-			src->clean(src);
+			io_src_clean(src);
 		}
 		ret = 0;
 	}
@@ -245,8 +246,7 @@ int io_mon_clean(struct io_mon *mon)
 	while (mon->source) {
 		src = to_src(mon->source);
 		remove_source(mon, src);
-		if (src->clean)
-			src->clean(src);
+		io_src_clean(src);
 	}
 
 	if (-1 != mon->epollfd)

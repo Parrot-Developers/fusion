@@ -8,6 +8,8 @@
  */
 #include <sys/stat.h>
 
+#include <unistd.h>
+
 #include <errno.h>
 #include <string.h>
 
@@ -43,4 +45,21 @@ int io_src_init(struct io_src *src, int fd, enum io_src_event type,
 	src->clean = clean;
 
 	return 0;
+}
+
+void io_src_clean(struct io_src *src)
+{
+	io_src_clean_t *clean;
+
+	if (NULL == src)
+		return;
+
+	if (-1 != src->fd)
+		close(src->fd);
+	clean = src->clean;
+	memset(src, 0, sizeof(*src));
+
+	src->fd = -1;
+	if (clean)
+		clean(src);
 }
