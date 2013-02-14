@@ -200,6 +200,14 @@ out:
 			NULL, my_msg_src_clean, &(msg_src.msg),
 			sizeof(struct msg));
 	CU_ASSERT_NOT_EQUAL(ret, 0);
+	ret = io_src_msg_init(&(msg_src.msg_src), msg_src.pipefds[0], 666,
+			msg_cb_read, my_msg_src_clean, &(msg_src.msg),
+			sizeof(struct msg));
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+	ret = io_src_msg_init(&(msg_src.msg_src), msg_src.pipefds[0], 0,
+			msg_cb_read, my_msg_src_clean, &(msg_src.msg),
+			sizeof(struct msg));
+	CU_ASSERT_NOT_EQUAL(ret, 0);
 }
 
 static int msg_cb_write(struct io_src_msg *src, enum io_src_event evt)
