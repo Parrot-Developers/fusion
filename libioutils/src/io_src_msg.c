@@ -82,6 +82,15 @@ static int msg_cb(struct io_src *src)
 
 	return out_msg(msg, src->fd);
 }
+
+int io_src_msg_set_next_message(struct io_src_msg *msg_src, const void *msg)
+{
+	if (NULL == msg_src || NULL == msg)
+		return -EINVAL;
+
+	msg_src->send_buf = msg;
+
+	return 0;
 }
 
 int io_src_msg_init(struct io_src_msg *msg_src, int fd, enum io_src_event type,

@@ -57,6 +57,15 @@ struct io_src_msg {
 };
 
 /**
+ * Facility function to set the next message to be sent on the next "OUT" event.
+ * Must be used in user callback on such events.
+ * @param msg_src Message source
+ * @param msg Points to a buffer containing the next mesage to send.
+ * @return errno compatible negative value on error, 0 on success
+ */
+int io_src_msg_set_next_message(struct io_src_msg *msg_src, const void *msg);
+
+/**
  * Initializes a message source.
  * @param msg_src Message source to initialize
  * @param fd File descriptor of the source
