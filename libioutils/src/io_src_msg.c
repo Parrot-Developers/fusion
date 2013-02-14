@@ -94,17 +94,17 @@ int io_src_msg_set_next_message(struct io_src_msg *msg_src, const void *msg)
 }
 
 int io_src_msg_init(struct io_src_msg *msg_src, int fd, enum io_src_event type,
-		io_src_msg_cb_t *cb, io_src_clean_t *clean, void *msg,
+		io_src_msg_cb_t *cb, io_src_clean_t *clean, void *rcv_buf,
 		unsigned len)
 {
-	if (NULL == msg_src || -1 == fd || NULL == msg || NULL == cb ||
+	if (NULL == msg_src || -1 == fd || NULL == rcv_buf || NULL == cb ||
 			0 == len)
 		return -EINVAL;
 
 	memset(msg_src, 0, sizeof(*msg_src));
 
 	msg_src->cb = cb;
-	msg_src->rcv_buf = msg;
+	msg_src->rcv_buf = rcv_buf;
 	msg_src->len = len;
 
 	/* can fail only on parameters */

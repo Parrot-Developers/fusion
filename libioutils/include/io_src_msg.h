@@ -63,7 +63,8 @@ struct io_src_msg {
  * @param msg Points to a buffer containing the next mesage to send.
  * @return errno compatible negative value on error, 0 on success
  */
-int io_src_msg_set_next_message(struct io_src_msg *msg_src, const void *msg);
+int io_src_msg_set_next_message(struct io_src_msg *msg_src, const void
+		*rcv_buf);
 
 /**
  * Initializes a message source.
@@ -72,12 +73,12 @@ int io_src_msg_set_next_message(struct io_src_msg *msg_src, const void *msg);
  * @param type Type, in, out or duplex
  * @param cb Callback called when a message has been received, stored in msg
  * @param clean Cleanup callback, called when the source is removed from the
- * @param msg Buffer able to receive a message, filled at each cb call with the
- * message just read
- * @param len Size of the msg buffer
+ * @param rcv_buf Buffer of size len, filled at each cb call with the message
+ * just read
+ * @param len Size of rcv_buf
  * monitor
  * @return errno compatible negative value on error, 0 on success
  */
 int io_src_msg_init(struct io_src_msg *msg_src, int fd, enum io_src_event type,
-		io_src_msg_cb_t *cb, io_src_clean_t *clean, void *msg,
+		io_src_msg_cb_t *cb, io_src_clean_t *clean, void *rcv_buf,
 		unsigned len);
