@@ -121,6 +121,9 @@ static suite_t **get_test_suite(const char *so_lib, void **lib_handle,
 
 	printf("Found test suite for library %s\n", *libname);
 out:
+	if (NULL == res)
+		dlclose(lib_handle);
+
 	return res;
 }
 
@@ -151,7 +154,6 @@ int main(int argc, char *argv[])
 		if (NULL == suite) {
 			fprintf(stderr, "Shared object %s does not contain a "
 					"valid Fautes test suite\n", *so_lib);
-			dlclose(lib_handle);
 			continue;
 		}
 
