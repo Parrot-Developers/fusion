@@ -61,7 +61,7 @@ static int out_msg(struct io_src_msg *msg, int fd)
 	if (-1 == sret)
 		return -errno;
 
-	return 0;
+	return ret;
 }
 /**
  * Source callback, either performs in or out operation, depending on the event
