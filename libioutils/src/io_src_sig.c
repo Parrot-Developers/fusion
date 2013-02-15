@@ -57,11 +57,13 @@ static void sig_clean(struct io_src *src)
 		return;
 	sig = to_src_sig(src);
 
-	close(sig->src.fd);
 	/* restore gently the signal mask */
 	sigprocmask(SIG_SETMASK, &(sig->old_mask), NULL);
-	memset(src, 0, sizeof(*src));
-	src->fd = -1;
+	sigemptyset(&(sig->mask));
+	sigemptyset(&(sig->old_mask));
+	sig->cb = NULL;
+
+	memset(&(sig->si), 0, sizeof(sig->si));
 }
 
 int io_src_sig_init(struct io_src_sig *sig, io_sig_cb_t *cb, ...)
