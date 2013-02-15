@@ -88,21 +88,21 @@ static int msg_cb_read(struct io_src_msg *src, enum io_src_event evt)
 	CU_ASSERT_NOT_EQUAL(state, STATE_ALL_DONE);
 	CU_ASSERT_EQUAL(evt, IO_IN);
 
-	if (0 == memcmp(src->rcv_buf, &MSG1, src->len)) {
+	if (0 == memcmp(&(my_src->msg), &MSG1, src->len)) {
 		CU_ASSERT_EQUAL(state, STATE_START);
 		reached_state(&state, STATE_MSG1_RECEIVED);
 
 		ret = write(my_src->pipefds[1], &MSG2,
 				sizeof(struct msg));
 		CU_ASSERT_NOT_EQUAL(ret, -1);
-	} else if (0 == memcmp(src->rcv_buf, &MSG2, src->len)) {
+	} else if (0 == memcmp(&(my_src->msg), &MSG2, src->len)) {
 		CU_ASSERT_EQUAL(state, STATE_MSG1_RECEIVED);
 		reached_state(&state, STATE_MSG2_RECEIVED);
 
 		ret = write(my_src->pipefds[1], &MSG3,
 				sizeof(struct msg));
 		CU_ASSERT_NOT_EQUAL(ret, -1);
-	} else if (0 == memcmp(src->rcv_buf, &MSG3, src->len)) {
+	} else if (0 == memcmp(&(my_src->msg), &MSG3, src->len)) {
 		CU_ASSERT_EQUAL(state, STATE_MSG1_RECEIVED |
 				STATE_MSG2_RECEIVED);
 		reached_state(&state, STATE_MSG3_RECEIVED);
@@ -110,7 +110,7 @@ static int msg_cb_read(struct io_src_msg *src, enum io_src_event evt)
 		ret = write(my_src->pipefds[1], &MSG4,
 				sizeof(struct msg));
 		CU_ASSERT_NOT_EQUAL(ret, -1);
-	} else if (0 == memcmp(src->rcv_buf, &MSG4, src->len)) {
+	} else if (0 == memcmp(&(my_src->msg), &MSG4, src->len)) {
 		CU_ASSERT_EQUAL(state, STATE_MSG1_RECEIVED |
 				STATE_MSG2_RECEIVED |
 				STATE_MSG3_RECEIVED);
