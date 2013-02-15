@@ -72,7 +72,7 @@ static const struct msg MSG4 = {44, 44444, 44.444};
 #define STATE_MSG3_RECEIVED 4
 #define STATE_MSG4_RECEIVED 8
 #define STATE_ALL_DONE 15
-int state;
+static int state;
 
 /*
  * message callback for the read tests, checks the messages received correspond
