@@ -50,8 +50,9 @@ int io_mon_init(struct io_mon *mon);
  * Add a source to the pool of sources we monitor. The monitoring is activated
  * automatically only for the input direction of the source, if relevant
  * @param mon Monitor's context
- * @param src Source to add, source's file descriptor must be unique across
- * sources. The file descriptor is forced non-blocking when added
+ * @param src Source to add, previously initialized. Source's file descriptor
+ * must be unique across sources. The file descriptor is forced non-blocking
+ * when added
  * @return negative errno value on error, 0 otherwise
  */
 int io_mon_add_source(struct io_mon *mon, struct io_src *src);
