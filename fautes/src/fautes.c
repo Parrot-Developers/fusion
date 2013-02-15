@@ -81,9 +81,9 @@ static int get_sym(void *lib_handle, const char *name, void **output)
 
 typedef void (*init_fun_t)(void);
 
-static suite_t **get_test_suite(const char *so_lib, void **lib_handle)
+static suite_t **get_test_suite(const char *so_lib, void **lib_handle,
+		char **libname)
 {
-	char *libname;
 	void *sym;
 	suite_t **res = NULL;
 	int ret;
@@ -101,17 +101,17 @@ static suite_t **get_test_suite(const char *so_lib, void **lib_handle)
 	ret = get_sym(*lib_handle, "fautes_lib_name", &sym);
 	if (-1 == ret)
 		goto out;
-	libname = *(char **)sym;
+	*libname = *(char **)sym;
 
 	/* get it's test suite */
-	snprintf(names_buf, 512, "%s_test_suites", libname);
+	snprintf(names_buf, 512, "%s_test_suites", *libname);
 	ret = get_sym(*lib_handle, names_buf, &sym);
 	if (-1 == ret)
 		goto out;
 	res = (suite_t **)sym;
 
 	/* if there is a suites initialization function, call it */
-	snprintf(names_buf, 512, "%s_init_test_suites", libname);
+	snprintf(names_buf, 512, "%s_init_test_suites", *libname);
 	ret = get_sym(*lib_handle, names_buf, &sym);
 	if (-1 == ret)
 		goto out;
@@ -119,7 +119,7 @@ static suite_t **get_test_suite(const char *so_lib, void **lib_handle)
 	if (NULL != init_fun)
 		init_fun();
 
-	printf("Found test suite for library %s\n", libname);
+	printf("Found test suite for library %s\n", *libname);
 out:
 	return res;
 }
@@ -131,6 +131,7 @@ int main(int argc, char *argv[])
 	suite_t **suite;
 	char **so_lib;
 	void *lib_handle;
+	char *libname;
 
 	if (argc <= 1) {
 		usage(argv[0]);
@@ -145,13 +146,8 @@ int main(int argc, char *argv[])
 	/* the first library path follows the progname or the xml flag */
 	so_lib = argv + 1 + xml;
 
-	/* TODO get rid of the following limitation by renaming the xml files */
-	if (xml && argc >= 3)
-		fprintf(stderr, "More than 1 library tested in xml mode, "
-				"resultant xml files will be overwritten\n");
-
 	do {
-		suite = get_test_suite(*so_lib, &lib_handle);
+		suite = get_test_suite(*so_lib, &lib_handle, &libname);
 		if (NULL == suite) {
 			fprintf(stderr, "Shared object %s does not contain a "
 					"valid Fautes test suite\n", *so_lib);
@@ -187,6 +183,7 @@ int main(int argc, char *argv[])
 		if (xml) {
 			/* Run all tests using the automated interface */
 			/* generates an xml output */
+			CU_set_output_filename(libname);
 			CU_automated_run_tests();
 			CU_list_tests_to_file();
 		} else {
