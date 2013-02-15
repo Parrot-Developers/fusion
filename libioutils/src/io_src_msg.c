@@ -29,11 +29,13 @@ static int in_msg(struct io_src_msg *msg, int fd)
 	ssize_t sret;
 
 	/* get some data */
-	sret = TEMP_FAILURE_RETRY(read(fd, msg->rcv_buf, msg->len));
-	if (-1 == sret)
-		return -errno;
-	if ((ssize_t)msg->len != sret)
-		return -EIO;
+	if (msg->perform_io) {
+		sret = TEMP_FAILURE_RETRY(read(fd, msg->rcv_buf, msg->len));
+		if (-1 == sret)
+			return -errno;
+		if ((ssize_t)msg->len != sret)
+			return -EIO;
+	} /* else, the source implementation performs input itself */
 
 	return msg->cb(msg, IO_IN);
 }
@@ -56,13 +58,16 @@ static int out_msg(struct io_src_msg *msg, int fd)
 	if (0 > ret)
 		return ret;
 
-	/* msg->msg contains the message to send */
-	sret = TEMP_FAILURE_RETRY(write(fd, msg->send_buf, msg->len));
-	if (-1 == sret)
-		return -errno;
+	if (msg->perform_io) {
+		/* msg->msg contains the message to send */
+		sret = TEMP_FAILURE_RETRY(write(fd, msg->send_buf, msg->len));
+		if (-1 == sret)
+			return -errno;
+	} /* else, the source implementation performs output itself */
 
 	return ret;
 }
+
 /**
  * Source callback, either performs in or out operation, depending on the event
  * type
@@ -117,7 +122,7 @@ int io_src_msg_set_next_message(struct io_src_msg *msg_src,
 
 int io_src_msg_init(struct io_src_msg *msg_src, int fd, enum io_src_event type,
 		io_src_msg_cb_t *cb, io_src_msg_clean_t *clean, void *rcv_buf,
-		unsigned len)
+		unsigned len, unsigned perform_io)
 {
 	if (NULL == msg_src || -1 == fd || NULL == rcv_buf || NULL == cb ||
 			0 == len)
@@ -129,6 +134,7 @@ int io_src_msg_init(struct io_src_msg *msg_src, int fd, enum io_src_event type,
 	msg_src->clean = clean;
 	msg_src->rcv_buf = rcv_buf;
 	msg_src->len = len;
+	msg_src->perform_io = perform_io;
 
 	/* can fail only on parameters */
 	return io_src_init(&(msg_src->src), fd, type, msg_cb, msg_clean);

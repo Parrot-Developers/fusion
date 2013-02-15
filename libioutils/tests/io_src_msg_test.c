@@ -142,7 +142,8 @@ static void testSRC_MSG_INIT_read(void)
 			msg_cb_read,
 			my_msg_src_clean,
 			&(msg_src.msg),
-			sizeof(msg_src.msg));
+			sizeof(msg_src.msg),
+			1);
 	CU_ASSERT_EQUAL(ret, 0);
 
 	ret = io_mon_add_source(&mon, &(msg_src.msg_src.src));
@@ -192,29 +193,31 @@ out:
 
 	/* error cases */
 	ret = io_src_msg_init(NULL, msg_src.pipefds[0], IO_IN, msg_cb_read,
-			my_msg_src_clean, &(msg_src.msg), sizeof(struct msg));
+			my_msg_src_clean, &(msg_src.msg), sizeof(struct msg),
+			1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_src_msg_init(&(msg_src.msg_src), -1, IO_IN, msg_cb_read,
-			my_msg_src_clean, &(msg_src.msg), sizeof(struct msg));
+			my_msg_src_clean, &(msg_src.msg), sizeof(struct msg),
+			1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_src_msg_init(&(msg_src.msg_src), msg_src.pipefds[0], IO_IN,
 			msg_cb_read, my_msg_src_clean, NULL,
-			sizeof(struct msg));
+			sizeof(struct msg), 1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_src_msg_init(&(msg_src.msg_src), msg_src.pipefds[0], IO_IN,
-			msg_cb_read, my_msg_src_clean, &(msg_src.msg), 0);
+			msg_cb_read, my_msg_src_clean, &(msg_src.msg), 0, 1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_src_msg_init(&(msg_src.msg_src), msg_src.pipefds[0], IO_IN,
 			NULL, my_msg_src_clean, &(msg_src.msg),
-			sizeof(struct msg));
+			sizeof(struct msg), 1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_src_msg_init(&(msg_src.msg_src), msg_src.pipefds[0], 666,
 			msg_cb_read, my_msg_src_clean, &(msg_src.msg),
-			sizeof(struct msg));
+			sizeof(struct msg), 1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_src_msg_init(&(msg_src.msg_src), msg_src.pipefds[0], 0,
 			msg_cb_read, my_msg_src_clean, &(msg_src.msg),
-			sizeof(struct msg));
+			sizeof(struct msg), 1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 }
 
@@ -259,7 +262,8 @@ static void testSRC_MSG_INIT_write(void)
 			msg_cb_write,
 			my_msg_src_clean,
 			&(msg_src.msg),
-			sizeof(msg_src.msg));
+			sizeof(msg_src.msg),
+			1);
 	CU_ASSERT_EQUAL(ret, 0);
 
 	ret = io_mon_add_source(&mon, &(msg_src.msg_src.src));
@@ -331,21 +335,23 @@ out:
 
 	/* error cases */
 	ret = io_src_msg_init(NULL, msg_src.pipefds[0], IO_OUT, msg_cb_read,
-			my_msg_src_clean, &(msg_src.msg), sizeof(struct msg));
+			my_msg_src_clean, &(msg_src.msg), sizeof(struct msg),
+			1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_src_msg_init(&(msg_src.msg_src), -1, IO_OUT, msg_cb_read,
-			my_msg_src_clean, &(msg_src.msg), sizeof(struct msg));
+			my_msg_src_clean, &(msg_src.msg), sizeof(struct msg),
+			1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_src_msg_init(&(msg_src.msg_src), msg_src.pipefds[0], IO_OUT,
-			msg_cb_read, my_msg_src_clean, NULL,
-			sizeof(struct msg));
+			msg_cb_read, my_msg_src_clean, NULL, sizeof(struct msg),
+			1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_src_msg_init(&(msg_src.msg_src), msg_src.pipefds[0], IO_OUT,
-			msg_cb_read, my_msg_src_clean, &(msg_src.msg), 0);
+			msg_cb_read, my_msg_src_clean, &(msg_src.msg), 0, 1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_src_msg_init(&(msg_src.msg_src), msg_src.pipefds[0], IO_OUT,
 			NULL, my_msg_src_clean, &(msg_src.msg),
-			sizeof(struct msg));
+			sizeof(struct msg), 1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 }
