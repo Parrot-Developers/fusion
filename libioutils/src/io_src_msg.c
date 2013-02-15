@@ -83,16 +83,6 @@ static int msg_cb(struct io_src *src)
 	return out_msg(msg, src->fd);
 }
 
-int io_src_msg_set_next_message(struct io_src_msg *msg_src, const void *msg)
-{
-	if (NULL == msg_src || NULL == msg)
-		return -EINVAL;
-
-	msg_src->send_buf = msg;
-
-	return 0;
-}
-
 /**
  * Clean callback, called by io_src_clean. Resets all the sources fields then
  * calls user io_src_msg_clean_t callback
@@ -112,6 +102,17 @@ static void msg_clean(struct io_src *src)
 		msg->clean(msg);
 
 	msg->clean = NULL;
+}
+
+int io_src_msg_set_next_message(struct io_src_msg *msg_src,
+		const void *send_buf)
+{
+	if (NULL == msg_src || NULL == send_buf)
+		return -EINVAL;
+
+	msg_src->send_buf = send_buf;
+
+	return 0;
 }
 
 int io_src_msg_init(struct io_src_msg *msg_src, int fd, enum io_src_event type,
