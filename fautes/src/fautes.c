@@ -155,6 +155,7 @@ int main(int argc, char *argv[])
 		if (NULL == suite) {
 			fprintf(stderr, "Shared object %s does not contain a "
 					"valid Fautes test suite\n", *so_lib);
+			dlclose(lib_handle);
 			continue;
 		}
 
@@ -164,6 +165,7 @@ int main(int argc, char *argv[])
 		if (CUE_SUCCESS != cu_err) {
 			fprintf(stderr, "CU_initialize_registry %s\n",
 					CU_get_error_msg());
+			dlclose(lib_handle);
 			return CU_get_error();
 		}
 
@@ -174,6 +176,7 @@ int main(int argc, char *argv[])
 				if (CUE_SUCCESS != cu_err) {
 					fprintf(stderr, "CU_initialize_registry %s\n",
 							CU_get_error_msg());
+					dlclose(lib_handle);
 					return CU_get_error();
 				}
 			} else {
