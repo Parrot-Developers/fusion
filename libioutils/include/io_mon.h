@@ -94,9 +94,10 @@ int io_mon_process_events(struct io_mon *mon);
 int io_mon_clean(struct io_mon *mon);
 
 /*
+ * TODO
  * candidates for implementation :
  *    io_mon_update_source
- *    io_mon_remove_source
+ *    io_mon_remove_source (which call clean ?)
  *    plus maybe tests like IS_READ, IS_WRITE IS_ERROR ...
  */
 

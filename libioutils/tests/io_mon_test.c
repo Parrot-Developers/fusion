@@ -206,6 +206,10 @@ static void reached_state(int *glob_state, int state)
 	*glob_state |= state;
 }
 
+/*
+ * Note : an "src->cb : Input/output error" is normal and results from error
+ * test cases
+ */
 static void testMON_PROCESS_EVENTS(void)
 {
 	fd_set rfds;
@@ -223,7 +227,7 @@ static void testMON_PROCESS_EVENTS(void)
 #define STATE_MSG1_RECEIVED 1
 #define STATE_MSG2_SENT 2
 #define STATE_MSG2_RECEIVED 4
-#define STATE_PIPE_OUT_CLOSED 8
+#define STATE_CLEANED 8
 #define STATE_ALL_DONE 15
 	int state = STATE_START;
 	int in_cb(struct io_src *src)
@@ -270,8 +274,7 @@ static void testMON_PROCESS_EVENTS(void)
 	}
 	void clean_cb(struct io_src *src)
 	{
-		reached_state(&state, STATE_PIPE_OUT_CLOSED);
-		close(src->fd);
+		reached_state(&state, STATE_CLEANED);
 	}
 
 	ret = io_mon_init(&mon);
@@ -324,7 +327,7 @@ out:
 	CU_ASSERT(state & STATE_MSG1_RECEIVED);
 	CU_ASSERT(state & STATE_MSG2_SENT);
 	CU_ASSERT(state & STATE_MSG2_RECEIVED);
-	CU_ASSERT(state & STATE_PIPE_OUT_CLOSED);
+	CU_ASSERT(state & STATE_CLEANED);
 
 	/* cleanup */
 	io_mon_clean(&mon);
