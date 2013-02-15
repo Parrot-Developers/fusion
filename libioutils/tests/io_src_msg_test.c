@@ -42,15 +42,23 @@ struct my_msg_src {
 
 #define to_src_my_msg_src(p) container_of(p, struct my_msg_src, msg_src)
 
-static void my_msg_src_clean(struct io_src *src)
+static void my_msg_src_clean(struct io_src_msg *msg)
 {
 	struct my_msg_src *my_src;
 
-	my_src = to_src_my_msg_src(to_src_msg(src));
+	my_src = to_src_my_msg_src(msg);
 
-	close(my_src->pipefds[0]);
-	close(my_src->pipefds[1]);
-	memset(my_src, 0, sizeof(my_src));
+	/*
+	 * don't close the source fd, it has been closed by the underlying
+	 * source's clean callback
+	 */
+	if (!(msg->src.type & IO_IN))
+		close(my_src->pipefds[0]);
+	if (!(msg->src.type & IO_OUT))
+		close(my_src->pipefds[1]);
+
+	memset(&(my_src->msg), 0, sizeof(struct msg));
+	my_src->pipefds[0] = my_src->pipefds[1] = -1;
 }
 
 static const struct msg MSG1 = {11, 11111, 11.111};
@@ -311,6 +319,9 @@ static void testSRC_MSG_INIT_write(void)
 		loop = STATE_ALL_DONE != state;
 	}
 
+	/* cleanup */
+	io_mon_clean(&mon);
+
 out:
 	/* debriefing */
 	CU_ASSERT(state & STATE_MSG1_RECEIVED);
@@ -337,8 +348,6 @@ out:
 			sizeof(struct msg));
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 
-	/* cleanup */
-	io_mon_clean(&mon);
 }
 
 static void testSRC_MSG_SET_NEXT_MESSAGE(void)

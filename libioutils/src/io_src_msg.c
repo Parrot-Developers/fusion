@@ -93,8 +93,29 @@ int io_src_msg_set_next_message(struct io_src_msg *msg_src, const void *msg)
 	return 0;
 }
 
+/**
+ * Clean callback, called by io_src_clean. Resets all the sources fields then
+ * calls user io_src_msg_clean_t callback
+ * @param src Source to clean, previously cleaned by io_src_clean (i.e. with fd
+ * already closed)
+ */
+static void msg_clean(struct io_src *src)
+{
+	struct io_src_msg *msg = to_src_msg(src);
+
+	msg->cb = NULL;
+	msg->rcv_buf = NULL;
+	msg->send_buf = NULL;
+	msg->len = 0;
+
+	if (msg->clean)
+		msg->clean(msg);
+
+	msg->clean = NULL;
+}
+
 int io_src_msg_init(struct io_src_msg *msg_src, int fd, enum io_src_event type,
-		io_src_msg_cb_t *cb, io_src_clean_t *clean, void *rcv_buf,
+		io_src_msg_cb_t *cb, io_src_msg_clean_t *clean, void *rcv_buf,
 		unsigned len)
 {
 	if (NULL == msg_src || -1 == fd || NULL == rcv_buf || NULL == cb ||
@@ -104,9 +125,10 @@ int io_src_msg_init(struct io_src_msg *msg_src, int fd, enum io_src_event type,
 	memset(msg_src, 0, sizeof(*msg_src));
 
 	msg_src->cb = cb;
+	msg_src->clean = clean;
 	msg_src->rcv_buf = rcv_buf;
 	msg_src->len = len;
 
 	/* can fail only on parameters */
-	return io_src_init(&(msg_src->src), fd, type, msg_cb, clean);
+	return io_src_init(&(msg_src->src), fd, type, msg_cb, msg_clean);
 }

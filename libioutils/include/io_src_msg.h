@@ -37,6 +37,14 @@ struct io_src_msg;
 typedef int (io_src_msg_cb_t)(struct io_src_msg *src, enum io_src_event evt);
 
 /**
+ * User callback for cleaning the io_src_msg. It's responsibility is to clean
+ * user defined fields. src_msg's fields cleanup is performed automatically,
+ * including file descriptor closing.
+ * @param src Message source to clean
+ */
+typedef void (io_src_msg_clean_t)(struct io_src_msg *src);
+
+/**
  * @typedef io_src_msg
  * @brief Message source type
  */
@@ -45,6 +53,11 @@ struct io_src_msg {
 	struct io_src src;
 	/** user callback, notified when I/O is possible */
 	io_src_msg_cb_t *cb;
+	/**
+	 * user clean callback, called when io_mon_clean is called , after the
+	 * underlying source itself has been cleaned
+	 */
+	io_src_msg_clean_t *clean;
 	/** fixed-length of the messages to read/write */
 	unsigned len;
 	/**
@@ -80,5 +93,5 @@ int io_src_msg_set_next_message(struct io_src_msg *msg_src, const void
  * @return errno compatible negative value on error, 0 on success
  */
 int io_src_msg_init(struct io_src_msg *msg_src, int fd, enum io_src_event type,
-		io_src_msg_cb_t *cb, io_src_clean_t *clean, void *rcv_buf,
+		io_src_msg_cb_t *cb, io_src_msg_clean_t *clean, void *rcv_buf,
 		unsigned len);
