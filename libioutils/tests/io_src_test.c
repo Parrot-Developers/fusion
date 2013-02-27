@@ -103,8 +103,8 @@ static void testSRC_INIT(void)
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	close(fd);
-	fd = open("toto", O_RDWR | O_CREAT);
-	CU_ASSERT_NOT_EQUAL(ret, -1);
+	fd = open("/tmp/toto", O_RDWR | O_CREAT);
+	CU_ASSERT_NOT_EQUAL(fd, -1);
 	ret = io_src_init(&src, fd, IO_IN, my_dummy_cb, clean_cb);
 	CU_ASSERT_EQUAL(ret, -EBADF);
 
@@ -112,7 +112,7 @@ static void testSRC_INIT(void)
 	close(pipefd[0]);
 	close(pipefd[1]);
 	close(fd);
-	unlink("toto");
+	unlink("/tmp/toto");
 }
 
 static void testTO_SRC(void)
