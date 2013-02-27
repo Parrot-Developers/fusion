@@ -134,6 +134,14 @@ int io_mon_init(struct io_mon *mon)
 	return 0;
 }
 
+int io_mon_get_fd(struct io_mon *mon)
+{
+	if (NULL == mon)
+		return -EINVAL;
+
+	return mon->epollfd;
+}
+
 int io_mon_add_source(struct io_mon *mon, struct io_src *src)
 {
 	int ret = 0;

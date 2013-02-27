@@ -47,6 +47,13 @@ struct io_mon {
 int io_mon_init(struct io_mon *mon);
 
 /**
+ * Gets the underlying file descriptor of the monitor
+ * @param mon Monitor
+ * @return file descriptor, negative errno-compatible value on error
+ */
+int io_mon_get_fd(struct io_mon *mon);
+
+/**
  * Add a source to the pool of sources we monitor. The monitoring is activated
  * automatically only for the input direction of the source, if relevant
  * @param mon Monitor's context

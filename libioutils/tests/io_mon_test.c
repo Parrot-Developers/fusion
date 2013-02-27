@@ -42,6 +42,26 @@ static void testMON_INIT(void)
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 }
 
+static void testMON_GET_FD(void)
+{
+	struct io_mon mon;
+	int ret;
+	int fd;
+
+	/* normal use case */
+	ret = io_mon_init(&mon);
+	CU_ASSERT_EQUAL(ret, 0);
+	fd = io_mon_get_fd(&mon);
+	CU_ASSERT_EQUAL(fd, mon.epollfd);
+
+	/* cleanup */
+	io_mon_clean(&mon);
+
+	/* error use cases */
+	ret = io_mon_get_fd(NULL);
+	CU_ASSERT_EQUAL(ret, -EINVAL);
+}
+
 static int my_dummy_callback(__attribute__((unused)) struct io_src *src)
 {
 	return 0;
@@ -360,6 +380,10 @@ static const test_t tests[] = {
 		{
 				.fn = testMON_INIT,
 				.name = "io_mon_init"
+		},
+		{
+				.fn = testMON_GET_FD,
+				.name = "io_mon_get_fd"
 		},
 		{
 				.fn = testMON_ADD_SOURCE,
