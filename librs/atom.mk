@@ -7,6 +7,8 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := librs
+LOCAL_DESCRIPTION := Library implementing some base sets in a robust way
+LOCAL_CATEGORY_PATH := libs
 
 LOCAL_EXPORT_C_INCLUDES  := $(LOCAL_PATH)/include
 
