@@ -95,7 +95,8 @@ int io_src_msg_uas_init(struct io_src_msg_uas *uas_src, io_src_msg_uas_cb_t *cb,
  * @param uas UAS source
  * @return io_src of the UAS source
  */
-static inline struct io_src *io_src_msg_uas_get_source(struct io_src_msg_uas *uas)
+static inline struct io_src *io_src_msg_uas_get_source(struct io_src_msg_uas
+		*uas)
 {
 	return NULL == uas ? NULL : io_src_msg_get_source(&(uas->src_msg));
 }

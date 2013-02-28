@@ -60,4 +60,14 @@ struct io_src_sig {
 int io_src_sig_init(struct io_src_sig *sig, io_sig_cb_t *cb, ...)
 	__attribute__ ((sentinel(0)));
 
+/**
+ * Returns the underlying io_src of the signal source
+ * @param sig Signal source
+ * @return io_src of the signal source
+ */
+static inline struct io_src *io_src_sig_get_source(struct io_src_sig *sig)
+{
+	return NULL == sig ? NULL : &(sig->src);
+}
+
 #endif /* IO_SRC_SIG_H_ */

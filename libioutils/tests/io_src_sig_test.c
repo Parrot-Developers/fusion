@@ -34,7 +34,7 @@ static int sigsets_are_equals(sigset_t *mask1, sigset_t *mask2)
 }
 
 /*
- * main and only test. sends ourselves signals and check we receive them :
+ * Main test. sends ourselves signals and check we receive them :
  *   * send / received a sigusr1
  *   * send / received a sigusr2
  * then exit
@@ -137,10 +137,43 @@ out:
 	CU_ASSERT(sigsets_are_equals(&old_mask, &new_mask));
 }
 
+static void testSRC_SIG_GET_SOURCE(void)
+{
+	int ret;
+	struct io_src_sig sig_src;
+	struct io_src *src;
+
+	int dummy_cb(struct io_src_sig *src)
+	{
+		return 0;
+	}
+
+	/* normal use cases */
+	ret = io_src_sig_init(&(sig_src),
+			dummy_cb,
+			SIGHUP,
+			NULL /* NULL sentinel */
+			);
+	CU_ASSERT_EQUAL(ret, 0);
+	src = io_src_sig_get_source(&(sig_src));
+	CU_ASSERT_EQUAL(src, &(sig_src.src));
+
+	/* cleanup */
+	io_src_clean(src);
+
+	/* error use cases */
+	src = io_src_sig_get_source(NULL);
+	CU_ASSERT_EQUAL(src, NULL);
+}
+
 static const test_t tests[] = {
 		{
 				.fn = testSRC_SIG_INIT,
 				.name = "io_src_sig_init"
+		},
+		{
+				.fn = testSRC_SIG_GET_SOURCE,
+				.name = "io_src_sig_get_source"
 		},
 
 		/* NULL guard */
