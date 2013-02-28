@@ -98,6 +98,7 @@ static void testSRC_MSG_SET_NEXT_MESSAGE(void)
 static int msg_cb_read(struct io_src_msg *src, enum io_src_event evt)
 {
 	int ret;
+	void *msg;
 	struct my_msg_src *my_src = to_src_my_msg_src(src);
 /*		printf("received : \"%d %d %f\"\n", my_msg->a, my_msg->b,
 			my_msg->c);*/
@@ -105,21 +106,29 @@ static int msg_cb_read(struct io_src_msg *src, enum io_src_event evt)
 	CU_ASSERT_NOT_EQUAL(state, STATE_ALL_DONE);
 	CU_ASSERT_EQUAL(evt, IO_IN);
 
-	if (0 == memcmp(&(my_src->msg), &MSG1, src->len)) {
+	/*
+	 * note : what follows isn't really necessary, one can directly use :
+	 *     my_src->msg
+	 * but it's cleaner for public API
+	 */
+	ret = io_src_msg_get_message(src, &msg);
+	CU_ASSERT_EQUAL(ret, 0);
+
+	if (0 == memcmp(msg, &MSG1, src->len)) {
 		CU_ASSERT_EQUAL(state, STATE_START);
 		reached_state(&state, STATE_MSG1_RECEIVED);
 
 		ret = write(my_src->pipefds[1], &MSG2,
 				sizeof(struct msg));
 		CU_ASSERT_NOT_EQUAL(ret, -1);
-	} else if (0 == memcmp(&(my_src->msg), &MSG2, src->len)) {
+	} else if (0 == memcmp(msg, &MSG2, src->len)) {
 		CU_ASSERT_EQUAL(state, STATE_MSG1_RECEIVED);
 		reached_state(&state, STATE_MSG2_RECEIVED);
 
 		ret = write(my_src->pipefds[1], &MSG3,
 				sizeof(struct msg));
 		CU_ASSERT_NOT_EQUAL(ret, -1);
-	} else if (0 == memcmp(&(my_src->msg), &MSG3, src->len)) {
+	} else if (0 == memcmp(msg, &MSG3, src->len)) {
 		CU_ASSERT_EQUAL(state, STATE_MSG1_RECEIVED |
 				STATE_MSG2_RECEIVED);
 		reached_state(&state, STATE_MSG3_RECEIVED);
@@ -127,7 +136,7 @@ static int msg_cb_read(struct io_src_msg *src, enum io_src_event evt)
 		ret = write(my_src->pipefds[1], &MSG4,
 				sizeof(struct msg));
 		CU_ASSERT_NOT_EQUAL(ret, -1);
-	} else if (0 == memcmp(&(my_src->msg), &MSG4, src->len)) {
+	} else if (0 == memcmp(msg, &MSG4, src->len)) {
 		CU_ASSERT_EQUAL(state, STATE_MSG1_RECEIVED |
 				STATE_MSG2_RECEIVED |
 				STATE_MSG3_RECEIVED);
@@ -408,6 +417,25 @@ static void testSRC_MSG_GET_SOURCE(void)
 	CU_ASSERT_EQUAL(src, NULL);
 }
 
+static void testSRC_MSG_GET_MESSAGE(void)
+{
+	int ret;
+	void *msg;
+	struct io_src_msg src;
+
+	src.rcv_buf = (void *)0xDEADBEEF;
+
+	ret = io_src_msg_get_message(&src, &msg);
+	CU_ASSERT_NOT_EQUAL(ret, -1);
+	CU_ASSERT_PTR_EQUAL(msg, src.rcv_buf);
+
+	/* error use cases */
+	ret = io_src_msg_get_message(NULL, &msg);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+	ret = io_src_msg_get_message(&src, NULL);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+}
+
 static const test_t tests[] = {
 		{
 				.fn = testSRC_MSG_SET_NEXT_MESSAGE,
@@ -424,6 +452,10 @@ static const test_t tests[] = {
 		{
 				.fn = testSRC_MSG_GET_SOURCE,
 				.name = "io_src_msg_get_source"
+		},
+		{
+				.fn = testSRC_MSG_GET_MESSAGE,
+				.name = "io_src_msg_get_message"
 		},
 
 		/* NULL guard */

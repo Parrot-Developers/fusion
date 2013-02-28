@@ -120,6 +120,16 @@ int io_src_msg_set_next_message(struct io_src_msg *msg_src,
 	return 0;
 }
 
+int io_src_msg_get_message(struct io_src_msg *msg_src, void **msg)
+{
+	if (NULL == msg_src || NULL == msg)
+		return -EINVAL;
+
+	*msg = msg_src->rcv_buf;
+
+	return 0;
+}
+
 int io_src_msg_init(struct io_src_msg *msg_src, int fd, enum io_src_event type,
 		io_src_msg_cb_t *cb, io_src_msg_clean_t *clean, void *rcv_buf,
 		unsigned len, unsigned perform_io)

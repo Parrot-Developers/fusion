@@ -89,6 +89,15 @@ int io_src_msg_set_next_message(struct io_src_msg *msg_src,
 		const void *send_buf);
 
 /**
+ * Gets the address of the receive buffer
+ * @param msg_src Message source
+ * @param msg In output, contains the address of the receive buffer. Can't be
+ * NULL
+ * @return errno compatible negative value on error, 0 on success
+ */
+int io_src_msg_get_message(struct io_src_msg *msg_src, void **msg);
+
+/**
  * Initializes a message source.
  * @param msg_src Message source to initialize
  * @param fd File descriptor of the source
