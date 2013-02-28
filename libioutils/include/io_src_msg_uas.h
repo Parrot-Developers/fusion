@@ -90,4 +90,14 @@ int io_src_msg_uas_init(struct io_src_msg_uas *uas_src, io_src_msg_uas_cb_t *cb,
 		io_src_msg_uas_clean_t *clean, void *rcv_buf, unsigned len,
 		const char *fmt, ...) __attribute__((format(printf, 6, 7)));
 
+/**
+ * Returns the underlying io_src of the UAS source
+ * @param uas UAS source
+ * @return io_src of the UAS source
+ */
+static inline struct io_src *io_src_msg_uas_get_source(struct io_src_msg_uas *uas)
+{
+	return NULL == uas ? NULL : io_src_msg_get_source(&(uas->src_msg));
+}
+
 #endif /* IO_SRC_MSG_UAS_H_ */

@@ -164,10 +164,51 @@ out:
 	/* error use cases */
 }
 
+static void testSRC_MSG_UAS_GET_SOURCE(void)
+{
+	int ret;
+	struct io_src_msg_uas uas_src;
+	struct io_src *src;
+	char buf[22];
+
+	int dummy_cb(struct io_src_msg_uas *src, enum io_src_event evt)
+	{
+		return 0;
+	}
+
+	void dummy_clean(struct io_src_msg_uas *msg)
+	{
+
+	}
+
+	/* normal use cases */
+	ret = io_src_msg_uas_init(&(uas_src),
+			dummy_cb,
+			dummy_clean,
+			buf,
+			22,
+			"my_socket_name");
+	CU_ASSERT_EQUAL(ret, 0);
+	src = io_src_msg_uas_get_source(&(uas_src));
+	CU_ASSERT_EQUAL(src, &(uas_src.src_msg.src));
+
+	/* cleanup */
+	io_src_clean(src);
+
+	/* error use cases */
+	src = io_src_msg_uas_get_source(NULL);
+	CU_ASSERT_EQUAL(src, NULL);
+}
+
 static const test_t tests[] = {
+		/* TODO add set next message test */
 		{
 				.fn = testSRC_MSG_UAS_INIT,
 				.name = "io_src_msg_uas_init"
+		},
+		{
+				.fn = testSRC_MSG_UAS_GET_SOURCE,
+				.name = "io_src_msg_uas_get_source"
 		},
 
 		/* NULL guard */
