@@ -94,4 +94,14 @@ struct io_src_sep {
 int io_src_sep_init(struct io_src_sep *sep_src, int fd, io_src_sep_cb_t *cb,
 		io_src_clean_t *clean, int sep1, int sep2);
 
+/**
+ * Returns the underlying io_src of the separator source
+ * @param sep Separator source
+ * @return io_src of the separator source
+ */
+static inline struct io_src *io_src_sep_get_source(struct io_src_sep *sep)
+{
+	return NULL == sep ? NULL : &(sep->src);
+}
+
 #endif /* IO_SRC_SEP_H_ */

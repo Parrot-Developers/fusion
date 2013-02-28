@@ -187,10 +187,49 @@ static void testSRC_SEP_INIT(void)
 	testSRC_SEP(sep_double, big_msg_double, strlen(big_msg_double));
 }
 
+static void testSRC_SEP_GET_SOURCE(void)
+{
+	int ret;
+	struct io_src_sep sep_src;
+	struct io_src *src;
+
+	int dummy_cb(struct io_src_sep *sep, char *chunk, unsigned len)
+	{
+		return 0;
+	}
+
+	void dummy_clean(struct io_src *src)
+	{
+
+	}
+
+	/* normal use cases */
+	ret = io_src_sep_init(&(sep_src),
+			STDIN_FILENO,
+			dummy_cb,
+			dummy_clean,
+			'x',
+			INT_MAX);
+	CU_ASSERT_EQUAL(ret, 0);
+	src = io_src_sep_get_source(&(sep_src));
+	CU_ASSERT_EQUAL(src, &(sep_src.src));
+
+	/* cleanup */
+	io_src_clean(src);
+
+	/* error use cases */
+	src = io_src_sep_get_source(NULL);
+	CU_ASSERT_EQUAL(src, NULL);
+}
+
 static const test_t tests[] = {
 		{
 				.fn = testSRC_SEP_INIT,
 				.name = "io_src_sep_init"
+		},
+		{
+				.fn = testSRC_SEP_GET_SOURCE,
+				.name = "io_src_sep_get_source"
 		},
 
 		/* NULL guard */
