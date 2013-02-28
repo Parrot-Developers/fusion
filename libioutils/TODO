@@ -1,2 +1,3 @@
 manage errors consistently
 // TODO pass message and error control
+manage cleanup consistently

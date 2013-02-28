@@ -83,6 +83,10 @@ static void uas_clean(struct io_src_msg *src)
 		uas->clean(uas);
 
 	uas->clean = NULL;
+	/*
+	 * TODO there is no way to properly shutdown() the socket before close
+	 * which is mandatory. A change in the API is needed there
+	 */
 }
 
 int io_src_msg_uas_set_next_message(struct io_src_msg_uas *uas_src,
