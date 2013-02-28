@@ -109,8 +109,10 @@ int io_src_msg_uas_init(struct io_src_msg_uas *uas_src, io_src_msg_uas_cb_t *cb,
 	memset(uas_src, 0, sizeof(*uas_src));
 
 	sockfd = socket(AF_UNIX, SOCK_DGRAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
-	if (sockfd < 0)
-		return -errno;
+	if (sockfd < 0) {
+		ret = -errno;
+		goto out;
+	}
 
 	uas_src->addr.sun_path[0] = '\0';
 	va_start(args, fmt);
@@ -132,6 +134,7 @@ int io_src_msg_uas_init(struct io_src_msg_uas *uas_src, io_src_msg_uas_cb_t *cb,
 			uas_clean, rcv_buf, len, 0);
 
 out:
-	close(sockfd);
-	return -1;
+	if (-1 != sockfd)
+		close(sockfd);
+	return ret;
 }
