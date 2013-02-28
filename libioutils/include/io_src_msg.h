@@ -6,6 +6,10 @@
  *
  * Copyright (C) 2012 Parrot S.A.
  */
+
+#ifndef IO_SRC_MSG_H_
+#define IO_SRC_MSG_H_
+
 #include "io_src.h"
 
 /**
@@ -102,3 +106,5 @@ int io_src_msg_set_next_message(struct io_src_msg *msg_src,
 int io_src_msg_init(struct io_src_msg *msg_src, int fd, enum io_src_event type,
 		io_src_msg_cb_t *cb, io_src_msg_clean_t *clean, void *rcv_buf,
 		unsigned len, unsigned perform_io);
+
+#endif /* IO_SRC_MSG_H_ */
