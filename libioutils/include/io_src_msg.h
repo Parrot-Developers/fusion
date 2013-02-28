@@ -107,4 +107,14 @@ int io_src_msg_init(struct io_src_msg *msg_src, int fd, enum io_src_event type,
 		io_src_msg_cb_t *cb, io_src_msg_clean_t *clean, void *rcv_buf,
 		unsigned len, unsigned perform_io);
 
+/**
+ * Returns the underlying io_src of the message source
+ * @param msg Message source
+ * @return io_src of the message source
+ */
+static inline struct io_src *io_src_msg_get_source(struct io_src_msg *msg)
+{
+	return NULL == msg ? NULL : &(msg->src);
+}
+
 #endif /* IO_SRC_MSG_H_ */

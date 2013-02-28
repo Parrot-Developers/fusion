@@ -373,6 +373,41 @@ out:
 
 }
 
+static void testSRC_MSG_GET_SOURCE(void)
+{
+	int ret;
+	struct io_src_msg msg_src;
+	struct io_src *src;
+	char buf[22];
+
+	int dummy_cb(struct io_src_msg *src, enum io_src_event evt)
+	{
+		return 0;
+	}
+
+	void dummy_clean(struct io_src_msg *msg)
+	{
+
+	}
+
+	/* normal use cases */
+	ret = io_src_msg_init(&(msg_src),
+			STDOUT_FILENO,
+			IO_OUT,
+			dummy_cb,
+			dummy_clean,
+			buf,
+			22,
+			1);
+	CU_ASSERT_EQUAL(ret, 0);
+	src = io_src_msg_get_source(&(msg_src));
+	CU_ASSERT_EQUAL(src, &(msg_src.src));
+
+	/* error use cases */
+	src = io_src_msg_get_source(NULL);
+	CU_ASSERT_EQUAL(src, NULL);
+}
+
 static const test_t tests[] = {
 		{
 				.fn = testSRC_MSG_SET_NEXT_MESSAGE,
@@ -385,6 +420,10 @@ static const test_t tests[] = {
 		{
 				.fn = testSRC_MSG_INIT_write,
 				.name = "io_src_msg_init write"
+		},
+		{
+				.fn = testSRC_MSG_GET_SOURCE,
+				.name = "io_src_msg_get_source"
 		},
 
 		/* NULL guard */
