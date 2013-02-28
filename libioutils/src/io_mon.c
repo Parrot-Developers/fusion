@@ -13,6 +13,7 @@
 
 #include <errno.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 #include <inttypes.h>
@@ -158,6 +159,29 @@ int io_mon_add_source(struct io_mon *mon, struct io_src *src)
 	src->active = src->type & ~IO_OUT;
 
 	return register_source(mon, src);
+}
+
+int io_mon_add_sources(struct io_mon *mon, ...)
+{
+	struct io_src *src;
+	va_list args;
+	int ret;
+
+	if (NULL == mon)
+		return -EINVAL;
+
+	va_start(args, mon);
+	do {
+		src = va_arg(args, struct io_src *);
+		if (NULL == src)
+			break;
+		ret = io_mon_add_source(mon, src);
+		if (0 != ret)
+			return ret;
+	} while (1);
+	va_end(args);
+
+	return 0;
 }
 
 void io_mon_dump_epoll_event(uint32_t events)

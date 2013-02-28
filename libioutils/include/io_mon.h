@@ -65,6 +65,18 @@ int io_mon_get_fd(struct io_mon *mon);
 int io_mon_add_source(struct io_mon *mon, struct io_src *src);
 
 /**
+ * Add sources to the pool of sources we monitor. The monitoring is activated
+ * automatically only for the input direction of each source, if relevant
+ * @param mon Monitor's context
+ * @param ... Sources to add, previously initialized. Source's file descriptor
+ * must be unique across sources. The file descriptor is forced non-blocking
+ * when added. A NULL source must end the list.
+ * @return negative errno value on error, 0 otherwise
+ */
+int io_mon_add_sources(struct io_mon *mon, ...)
+	__attribute__ ((sentinel(0)));
+
+/**
  * Dumps the events in an epoll event flag set
  * @param events Epoll events set
  */

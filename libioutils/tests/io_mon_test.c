@@ -131,6 +131,64 @@ static void testMON_ADD_SOURCE(void)
 	close(fd);
 }
 
+static void testMON_ADD_SOURCES(void)
+{
+	int pipefd[2] = {-1, -1};
+	int fd;
+	struct io_mon mon;
+	struct io_src src_in;
+	struct io_src src_out;
+	struct io_src src_duplex;
+	int ret;
+	int flags;
+
+	ret = io_mon_init(&mon);
+	CU_ASSERT_EQUAL(ret, 0);
+	ret = pipe(pipefd);
+	CU_ASSERT_NOT_EQUAL_FATAL(ret, -1);
+	ret = io_src_init(&src_in, pipefd[0], IO_IN, my_dummy_callback,
+			my_dummy_clean);
+	CU_ASSERT_EQUAL(ret, 0);
+	ret = io_src_init(&src_out, pipefd[1], IO_OUT, my_dummy_callback,
+			my_dummy_clean);
+	CU_ASSERT_EQUAL(ret, 0);
+	fd = open("/dev/random", O_RDWR | O_CLOEXEC);
+	CU_ASSERT_NOT_EQUAL_FATAL(fd, -1);
+	ret = io_src_init(&src_duplex, fd, IO_DUPLEX, my_dummy_callback,
+			my_dummy_clean);
+	CU_ASSERT_EQUAL(ret, 0);
+
+	/* normal use cases */
+	ret = io_mon_add_sources(&mon,
+			&src_in,
+			&src_out,
+			&src_duplex,
+			NULL /* NULL sentinel */
+			);
+	CU_ASSERT_EQUAL(ret, 0);
+	flags = fcntl(src_in.fd, F_GETFL, 0);
+	CU_ASSERT_EQUAL(!!(flags & O_NONBLOCK), 1);
+	flags = fcntl(src_out.fd, F_GETFL, 0);
+	CU_ASSERT_EQUAL(!!(flags & O_NONBLOCK), 1);
+	flags = fcntl(src_duplex.fd, F_GETFL, 0);
+	CU_ASSERT_EQUAL(!!(flags & O_NONBLOCK), 1);
+	CU_ASSERT(!!(src_in.active & IO_IN));
+	CU_ASSERT_EQUAL(src_out.active, 0);
+	CU_ASSERT(!!(src_duplex.active & IO_IN));
+
+	/* error use cases */
+	ret = io_mon_add_sources(NULL, &src_out, NULL);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+	ret = io_mon_add_source(&mon, NULL);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+
+	/* cleanup */
+	io_mon_clean(&mon);
+	close(pipefd[0]);
+	close(pipefd[1]);
+	close(fd);
+}
+
 static void testMON_DUMP_EPOLL_EVENT(void)
 {
 	char str[1024];
@@ -388,6 +446,10 @@ static const test_t tests[] = {
 		{
 				.fn = testMON_ADD_SOURCE,
 				.name = "io_mon_add_source"
+		},
+		{
+				.fn = testMON_ADD_SOURCES,
+				.name = "io_mon_add_sources"
 		},
 		{
 				.fn = testMON_DUMP_EPOLL_EVENT,
