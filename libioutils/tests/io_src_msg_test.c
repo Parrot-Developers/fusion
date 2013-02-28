@@ -74,6 +74,23 @@ static const struct msg MSG4 = {44, 44444, 44.444};
 #define STATE_ALL_DONE 15
 static int state;
 
+static void testSRC_MSG_SET_NEXT_MESSAGE(void)
+{
+	int ret;
+	char msg[1024];
+	struct io_src_msg src;
+
+	ret = io_src_msg_set_next_message(&src, &msg);
+	CU_ASSERT_NOT_EQUAL(ret, -1);
+	CU_ASSERT_PTR_EQUAL(src.send_buf, &msg);
+
+	/* error use cases */
+	ret = io_src_msg_set_next_message(NULL, &msg);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+	ret = io_src_msg_set_next_message(&src, NULL);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+}
+
 /*
  * message callback for the read tests, checks the messages received correspond
  * to what is expected ant sends the next one
@@ -356,35 +373,18 @@ out:
 
 }
 
-static void testSRC_MSG_SET_NEXT_MESSAGE(void)
-{
-	int ret;
-	char msg[1024];
-	struct io_src_msg src;
-
-	ret = io_src_msg_set_next_message(&src, &msg);
-	CU_ASSERT_NOT_EQUAL(ret, -1);
-	CU_ASSERT_PTR_EQUAL(src.send_buf, &msg);
-
-	/* error use cases */
-	ret = io_src_msg_set_next_message(NULL, &msg);
-	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_src_msg_set_next_message(&src, NULL);
-	CU_ASSERT_NOT_EQUAL(ret, 0);
-}
-
 static const test_t tests[] = {
 		{
-				.fn = testSRC_MSG_INIT_write,
-				.name = "io_src_msg_init write"
+				.fn = testSRC_MSG_SET_NEXT_MESSAGE,
+				.name = "io_src_msg_set_next_message"
 		},
 		{
 				.fn = testSRC_MSG_INIT_read,
 				.name = "io_src_msg_init read"
 		},
 		{
-				.fn = testSRC_MSG_SET_NEXT_MESSAGE,
-				.name = "io_src_msg_set_next_message"
+				.fn = testSRC_MSG_INIT_write,
+				.name = "io_src_msg_init write"
 		},
 
 		/* NULL guard */
