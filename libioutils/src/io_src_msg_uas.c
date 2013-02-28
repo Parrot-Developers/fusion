@@ -98,6 +98,14 @@ int io_src_msg_uas_set_next_message(struct io_src_msg_uas *uas_src,
 	return io_src_msg_set_next_message(&(uas_src->src_msg), rcv_buf);
 }
 
+int io_src_msg_uas_get_message(struct io_src_msg_uas *uas_src, void **msg)
+{
+	if (NULL == uas_src || NULL == msg)
+		return -EINVAL;
+
+	return io_src_msg_get_message(&(uas_src->src_msg), msg);
+}
+
 int io_src_msg_uas_init(struct io_src_msg_uas *uas_src, io_src_msg_uas_cb_t *cb,
 		io_src_msg_uas_clean_t *clean, void *rcv_buf, unsigned len,
 		const char *fmt, ...)
@@ -140,5 +148,6 @@ int io_src_msg_uas_init(struct io_src_msg_uas *uas_src, io_src_msg_uas_cb_t *cb,
 out:
 	if (-1 != sockfd)
 		close(sockfd);
+
 	return ret;
 }

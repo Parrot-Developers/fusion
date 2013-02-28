@@ -200,6 +200,25 @@ static void testSRC_MSG_UAS_GET_SOURCE(void)
 	CU_ASSERT_EQUAL(src, NULL);
 }
 
+static void testSRC_MSG_UAS_GET_MESSAGE(void)
+{
+	int ret;
+	void *msg;
+	struct io_src_msg_uas src;
+
+	src.src_msg.rcv_buf = (void *)0xDEADBEEF;
+
+	ret = io_src_msg_uas_get_message(&src, &msg);
+	CU_ASSERT_NOT_EQUAL(ret, -1);
+	CU_ASSERT_PTR_EQUAL(msg, src.src_msg.rcv_buf);
+
+	/* error use cases */
+	ret = io_src_msg_uas_get_message(NULL, &msg);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+	ret = io_src_msg_uas_get_message(&src, NULL);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+}
+
 static const test_t tests[] = {
 		/* TODO add set next message test */
 		{
@@ -209,6 +228,10 @@ static const test_t tests[] = {
 		{
 				.fn = testSRC_MSG_UAS_GET_SOURCE,
 				.name = "io_src_msg_uas_get_source"
+		},
+		{
+				.fn = testSRC_MSG_UAS_GET_MESSAGE,
+				.name = "io_src_msg_uas_get_message"
 		},
 
 		/* NULL guard */

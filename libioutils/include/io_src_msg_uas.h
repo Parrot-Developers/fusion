@@ -76,6 +76,15 @@ int io_src_msg_uas_set_next_message(struct io_src_msg_uas *uas_src,
 		const void *rcv_buf);
 
 /**
+ * Gets the address of the receive buffer
+ * @param uas_src Message source
+ * @param msg In output, contains the address of the receive buffer. Can't be
+ * NULL
+ * @return errno compatible negative value on error, 0 on success
+ */
+int io_src_msg_uas_get_message(struct io_src_msg_uas *uas_src, void **msg);
+
+/**
  * Initializes a bidirectional message source, from an UAS.
  * @param uas_src Message source to initialize
  * @param uas_src UAS source
