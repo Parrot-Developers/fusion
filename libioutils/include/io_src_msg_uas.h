@@ -7,6 +7,10 @@
  *
  * Copyright (C) 2012 Parrot S.A.
  */
+
+#ifndef IO_SRC_MSG_UAS_H_
+#define IO_SRC_MSG_UAS_H_
+
 #include <sys/un.h>
 
 #include "io_src_msg.h"
@@ -85,3 +89,5 @@ int io_src_msg_uas_set_next_message(struct io_src_msg_uas *uas_src,
 int io_src_msg_uas_init(struct io_src_msg_uas *uas_src, io_src_msg_uas_cb_t *cb,
 		io_src_msg_uas_clean_t *clean, void *rcv_buf, unsigned len,
 		const char *fmt, ...) __attribute__((format(printf, 6, 7)));
+
+#endif /* IO_SRC_MSG_UAS_H_ */
