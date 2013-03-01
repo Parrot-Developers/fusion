@@ -10,7 +10,7 @@
 
 #include <CUnit/Basic.h>
 
-#include <io_src_msg_uas.h>
+#include <io_src_msg_uad.h>
 #include <io_mon.h>
 
 #include <fautes.h>
