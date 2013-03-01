@@ -15,7 +15,7 @@ const char const *fautes_lib_name = "libioutils";
 suite_t *libioutils_test_suites[] = {
 		&mon_suite,
 		&src_msg_suite,
-		&src_msg_uas_suite,
+		&src_msg_uad_suite,
 		&src_sep_suite,
 		&src_sig_suite,
 		&src_suite,
@@ -28,7 +28,7 @@ void libioutils_init_test_suites(void)
 {
 	mon_suite.active = 1;
 	src_msg_suite.active = 1;
-	src_msg_uas_suite.active = 1;
+	src_msg_uad_suite.active = 1;
 	src_sep_suite.active = 1;
 	src_sig_suite.active = 1;
 	src_suite.active = 1;

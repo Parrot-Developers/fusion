@@ -1,5 +1,5 @@
 /**
- * @file io_src_msg_uas.c
+ * @file io_src_msg_uad.c
  * @date 24 oct. 2012
  * @author nicolas.carrier@parrot.com
  * @brief Source for reading / writing fixed length messages
@@ -22,10 +22,10 @@
 #include "io_src_msg_uas.h"
 
 /**
- * @def to_src_msg_uas
+ * @def to_src_msg_uad
  * @brief Convert a source to it's message source container
  */
-#define to_src_msg_uas(p) container_of(p, struct io_src_msg_uas, src_msg)
+#define to_src_msg_uad(p) container_of(p, struct io_src_msg_uad, src_msg)
 
 /**
  * Called when the underlying io_src_msg has I/O ready. Performs I/O via
@@ -35,11 +35,11 @@
  * @return errno compatible value, positive for only a warning, negative if the
  * source must be removed, 0 on success
  */
-static int uas_cb(struct io_src_msg *src, enum io_src_event evt)
+static int uad_cb(struct io_src_msg *src, enum io_src_event evt)
 {
 	int ret;
 	ssize_t sret;
-	struct io_src_msg_uas *msg_uas_src = to_src_msg_uas(src);
+	struct io_src_msg_uad *uad = to_src_msg_uad(src);
 
 	if (IO_IN != evt && IO_OUT != evt)
 		return -EINVAL;
@@ -50,14 +50,14 @@ static int uas_cb(struct io_src_msg *src, enum io_src_event evt)
 		if (-1 == sret)
 			return -errno;
 	}
-	ret = msg_uas_src->cb(msg_uas_src, evt);
+	ret = uad->cb(uad, evt);
 	if (0 > ret)
 		return ret;
 	if (IO_OUT == evt) {
 		sret = TEMP_FAILURE_RETRY(sendto(src->src.fd, src->send_buf,
 				src->len, 0,
-				(const struct sockaddr *)&(msg_uas_src->addr),
-				sizeof(msg_uas_src->addr)));
+				(const struct sockaddr *)&(uad->addr),
+				sizeof(uad->addr)));
 		if (-1 == sret)
 			return -errno;
 	}
@@ -68,57 +68,57 @@ static int uas_cb(struct io_src_msg *src, enum io_src_event evt)
 /**
  * Clean callback, called on io_src_clean, automatically on source removal due
  * to error and monitor clean. Resets all the sources fields then calls user
- * io_src_msg_uas_clean_t callback
+ * io_src_msg_uad_clean_t callback
  * @param src Source to clean, previously cleaned by io_src_clean (i.e. with fd
  * already closed)
  */
-static void uas_clean(struct io_src_msg *src)
+static void uad_clean(struct io_src_msg *src)
 {
-	struct io_src_msg_uas *uas = to_src_msg_uas(src);
+	struct io_src_msg_uad *uad = to_src_msg_uad(src);
 
-	uas->cb = NULL;
-	memset(&(uas->addr), 0, sizeof(uas->addr));
+	uad->cb = NULL;
+	memset(&(uad->addr), 0, sizeof(uad->addr));
 
-	if (uas->clean)
-		uas->clean(uas);
+	if (uad->clean)
+		uad->clean(uad);
 
-	uas->clean = NULL;
+	uad->clean = NULL;
 	/*
 	 * TODO there is no way to properly shutdown() the socket before close
 	 * which is mandatory. A change in the API is needed there
 	 */
 }
 
-int io_src_msg_uas_set_next_message(struct io_src_msg_uas *uas_src,
+int io_src_msg_uad_set_next_message(struct io_src_msg_uad *uad,
 		const void *rcv_buf)
 {
-	if (NULL == uas_src)
+	if (NULL == uad)
 		return -EINVAL;
 
-	return io_src_msg_set_next_message(&(uas_src->src_msg), rcv_buf);
+	return io_src_msg_set_next_message(&(uad->src_msg), rcv_buf);
 }
 
-int io_src_msg_uas_get_message(struct io_src_msg_uas *uas_src, void **msg)
+int io_src_msg_uad_get_message(struct io_src_msg_uad *uad, void **msg)
 {
-	if (NULL == uas_src || NULL == msg)
+	if (NULL == uad || NULL == msg)
 		return -EINVAL;
 
-	return io_src_msg_get_message(&(uas_src->src_msg), msg);
+	return io_src_msg_get_message(&(uad->src_msg), msg);
 }
 
-int io_src_msg_uas_init(struct io_src_msg_uas *uas_src, io_src_msg_uas_cb_t *cb,
-		io_src_msg_uas_clean_t *clean, void *rcv_buf, unsigned len,
+int io_src_msg_uad_init(struct io_src_msg_uad *uad, io_src_msg_uad_cb_t *cb,
+		io_src_msg_uad_clean_t *clean, void *rcv_buf, unsigned len,
 		const char *fmt, ...)
 {
 	int sockfd;
 	va_list args;
 	int ret;
 
-	if (NULL == uas_src || NULL == rcv_buf || 0 == len || NULL == cb ||
+	if (NULL == uad || NULL == rcv_buf || 0 == len || NULL == cb ||
 			NULL == fmt || '\0' == *fmt)
 		return -EINVAL;
 
-	memset(uas_src, 0, sizeof(*uas_src));
+	memset(uad, 0, sizeof(*uad));
 
 	sockfd = socket(AF_UNIX, SOCK_DGRAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
 	if (sockfd < 0) {
@@ -126,24 +126,24 @@ int io_src_msg_uas_init(struct io_src_msg_uas *uas_src, io_src_msg_uas_cb_t *cb,
 		goto out;
 	}
 
-	uas_src->addr.sun_path[0] = '\0';
+	uad->addr.sun_path[0] = '\0';
 	va_start(args, fmt);
-	vsnprintf(uas_src->addr.sun_path + 1, UNIX_PATH_MAX - 1, fmt, args);
+	vsnprintf(uad->addr.sun_path + 1, UNIX_PATH_MAX - 1, fmt, args);
 	va_end(args);
-	uas_src->addr.sun_family = AF_UNIX;
-	ret = bind(sockfd, (struct sockaddr *) &(uas_src->addr),
-			sizeof(uas_src->addr));
+	uad->addr.sun_family = AF_UNIX;
+	ret = bind(sockfd, (struct sockaddr *) &(uad->addr),
+			sizeof(uad->addr));
 	if (ret < 0) {
 		ret = -errno;
 		goto out;
 	}
 
-	uas_src->cb = cb;
-	uas_src->clean = clean;
+	uad->cb = cb;
+	uad->clean = clean;
 
 	/* can fail only on parameters */
-	return io_src_msg_init(&(uas_src->src_msg), sockfd, IO_DUPLEX, uas_cb,
-			uas_clean, rcv_buf, len, 0);
+	return io_src_msg_init(&(uad->src_msg), sockfd, IO_DUPLEX, uad_cb,
+			uad_clean, rcv_buf, len, 0);
 
 out:
 	if (-1 != sockfd)
