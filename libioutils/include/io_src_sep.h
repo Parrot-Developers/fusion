@@ -15,6 +15,10 @@
 
 #include "io_src.h"
 
+/**
+ * @def IO_SRC_SEP_SIZE
+ * @brief Maximum size of a message that can be reads
+ */
 #define IO_SRC_SEP_SIZE 1024
 
 /**
