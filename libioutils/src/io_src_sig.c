@@ -19,6 +19,7 @@
 #include "io_mon.h"
 #include "io_src_sig.h"
 #include "io_platform.h"
+#include "io_utils.h"
 
 /**
  * @def to_src
@@ -38,7 +39,7 @@ static int sig_cb(struct io_src *src)
 	if (io_mon_has_error(src->events))
 		return -EIO;
 
-	ret = TEMP_FAILURE_RETRY(read(src->fd, &(sig->si), sizeof(sig->si)));
+	ret = io_read(src->fd, &(sig->si), sizeof(sig->si));
 	if (sizeof(sig->si) != ret)
 		return -errno;
 

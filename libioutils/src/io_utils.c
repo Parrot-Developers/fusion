@@ -6,10 +6,20 @@
  *
  * Copyright (C) 2012 Parrot S.A.
  */
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif /* _GNU_SOURCE */
+#include <unistd.h>
+
 #include <fcntl.h>
 #include <errno.h>
 
 #include "io_utils.h"
+
+ssize_t io_read(int fd, void *buf, size_t count)
+{
+	return TEMP_FAILURE_RETRY(read(fd, buf, count));
+}
 
 int set_non_blocking(int fd)
 {

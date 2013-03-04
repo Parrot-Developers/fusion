@@ -20,6 +20,7 @@
 
 #include "io_mon.h"
 #include "io_src_sep.h"
+#include "io_utils.h"
 
 /**
  * @def buf_write_start
@@ -122,8 +123,7 @@ static int sep_cb(struct io_src *src)
 		return -EIO;
 
 	/* get some data */
-	sret = TEMP_FAILURE_RETRY(read(src->fd, buf_write_start(sep),
-			to_read(sep)));
+	sret = io_read(src->fd, buf_write_start(sep), to_read(sep));
 	if (-1 == sret)
 		return -errno;
 	if (0 == sret)

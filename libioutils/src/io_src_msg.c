@@ -16,6 +16,7 @@
 
 #include "io_mon.h"
 #include "io_src_msg.h"
+#include "io_utils.h"
 
 /**
  * Receives a message and notifies it to the client
@@ -30,7 +31,7 @@ static int in_msg(struct io_src_msg *msg, int fd)
 
 	/* get some data */
 	if (msg->perform_io) {
-		sret = TEMP_FAILURE_RETRY(read(fd, msg->rcv_buf, msg->len));
+		sret = io_read(fd, msg->rcv_buf, msg->len);
 		if (-1 == sret)
 			return -errno;
 		if ((ssize_t)msg->len != sret)
