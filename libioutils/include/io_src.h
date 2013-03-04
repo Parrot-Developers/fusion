@@ -126,6 +126,16 @@ int io_src_init(struct io_src *src, int fd, enum io_src_event type,
 		io_src_cb_t *cb, io_src_clean_t *clean);
 
 /**
+ * Returns the underlying file descriptor of a given source
+ * @param src Source to retrieve the file descriptor of
+ * @return -1 in case of error, otherwise, file descriptor of the source
+ */
+static inline int io_src_get_fd(struct io_src *src)
+{
+	return NULL == src ? -1 : src->fd;
+}
+
+/**
  * Reinitializes the source for further use, closing the file descriptor, then
  * calls the user clean callback
  * @param src Source to initialize. Can't be NULL

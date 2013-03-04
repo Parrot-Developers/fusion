@@ -120,6 +120,30 @@ static void testTO_SRC(void)
 	CU_ASSERT_EQUAL(to_src(&(src.node)), &src);
 }
 
+void testSRC_GET_FD(void)
+{
+	int ret;
+	struct io_src src;
+	int fd;
+	int pipefd[2] = {-1, -1};
+
+	ret = pipe(pipefd);
+	CU_ASSERT_NOT_EQUAL_FATAL(ret, -1);
+
+	/* normal use case */
+	ret = io_src_init(&src, pipefd[0], IO_IN, my_dummy_cb, clean_cb);
+	CU_ASSERT_EQUAL(ret, 0);
+	fd = io_src_get_fd(&src);
+	CU_ASSERT_EQUAL(fd, pipefd[0]);
+
+	/* error use case */
+	ret = io_src_get_fd(NULL);
+	CU_ASSERT_EQUAL(ret, -1);
+
+	io_src_clean(&src);
+	close(pipefd[1]);
+}
+
 static const test_t tests[] = {
 		{
 				.fn = testSRC_INIT,
@@ -128,6 +152,10 @@ static const test_t tests[] = {
 		{
 				.fn = testTO_SRC,
 				.name = "to_src"
+		},
+		{
+				.fn = testSRC_GET_FD,
+				.name = "io_src_get_fd"
 		},
 
 		/* NULL guard */
