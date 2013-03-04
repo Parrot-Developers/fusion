@@ -189,6 +189,7 @@ static void testSRC_SEP_GET_SOURCE(void)
 	int ret;
 	struct io_src_sep sep_src;
 	struct io_src *src;
+	int pipefd[2] = {-1, -1};
 
 	int dummy_cb(struct io_src_sep *sep, char *chunk, unsigned len)
 	{
@@ -200,9 +201,12 @@ static void testSRC_SEP_GET_SOURCE(void)
 
 	}
 
+	ret = pipe(pipefd);
+	CU_ASSERT_NOT_EQUAL_FATAL(ret, -1);
+
 	/* normal use cases */
 	ret = io_src_sep_init(&(sep_src),
-			STDIN_FILENO,
+			pipefd[0],
 			dummy_cb,
 			dummy_clean,
 			'x',
@@ -213,6 +217,7 @@ static void testSRC_SEP_GET_SOURCE(void)
 
 	/* cleanup */
 	io_src_clean(src);
+	close(pipefd[1]);
 
 	/* error use cases */
 	src = io_src_sep_get_source(NULL);
