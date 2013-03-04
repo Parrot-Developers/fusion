@@ -16,6 +16,12 @@
 
 #include "io_utils.h"
 
+ssize_t io_epoll_wait(int epfd, struct epoll_event *events, int maxevents,
+		int timeout)
+{
+	return TEMP_FAILURE_RETRY(epoll_wait(epfd, events, maxevents, timeout));
+}
+
 ssize_t io_read(int fd, void *buf, size_t count)
 {
 	return TEMP_FAILURE_RETRY(read(fd, buf, count));

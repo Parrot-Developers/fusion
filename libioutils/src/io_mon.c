@@ -227,10 +227,10 @@ int io_mon_process_events(struct io_mon *mon)
 	if (NULL == mon)
 		return -EINVAL;
 
-	n = TEMP_FAILURE_RETRY(epoll_wait(mon->epollfd, events,
-			MONITOR_MAX_SOURCES,
+	/* retrieve events */
+	n = io_epoll_wait(mon->epollfd, events, MONITOR_MAX_SOURCES,
 			0 /* don't block */
-			));
+			);
 	if (-1 == n)
 		return -errno;
 
