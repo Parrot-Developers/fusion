@@ -140,6 +140,8 @@ int main(int argc, char *argv[])
 	char **so_lib;
 	void *lib_handle;
 	char *libname;
+	unsigned tests_failed = 0;
+	int failure;
 
 	if (argc <= 1) {
 		usage(argv[0]);
@@ -198,6 +200,7 @@ int main(int argc, char *argv[])
 			/* results are echoed to standard output */
 			CU_basic_set_mode(CU_BRM_VERBOSE);
 			CU_basic_run_tests();
+			tests_failed += CU_get_number_of_tests_failed();
 		}
 
 		CU_cleanup_registry();
@@ -211,5 +214,7 @@ int main(int argc, char *argv[])
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
 
-	return CU_get_error();
+	failure = CU_get_error() != CUE_SUCCESS || tests_failed != 0;
+
+	return failure ? EXIT_FAILURE : EXIT_SUCCESS;
 }
