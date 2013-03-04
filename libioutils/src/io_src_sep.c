@@ -109,13 +109,58 @@ static int separator_found(struct io_src_sep *sep, char *c)
 #define chunk_len(sep, c) (1 + (sep)->two_bytes + (c) - buf_read_start((sep)))
 
 /**
+ * Searches each separator occurrences and notifies user of each corresponding
+ * chunk
+ * @param sep Separator source
+ * @return First critical error code from user callback
+ */
+static int parse(struct io_src_sep *sep)
+{
+	int ret;
+	char *cur = NULL;
+
+	for (cur = buf_read_start(sep);
+			cur + sep->two_bytes < buf_write_start(sep);
+			cur++)
+		if (separator_found(sep, cur)) {
+			ret = notify_user(sep, chunk_len(sep, cur));
+			if (0 > ret)
+				return ret;
+			if (0 < ret)
+				fprintf(stderr, "sep->cb: %s", strerror(-ret));
+			cur += sep->two_bytes;
+		}
+
+	return 0;
+}
+
+/**
+ * Consumes all that can be consumes from the data we have read so far
+ * @param sep Separator source
+ * @return First critical error code from user callback
+ */
+static int consume(struct io_src_sep *sep)
+{
+	int ret;
+
+	/* search for a separator and notify for each occurrence */
+	ret = parse(sep);
+	if (0 > ret)
+		return ret;
+
+	/* buffer is full : notify */
+	if (already_read(sep) == IO_SRC_SEP_SIZE)
+		return notify_user(sep, already_read(sep));
+
+	return 0;
+}
+
+/**
  * Source callback, reads the signal and notifies the client
  * @param src Underlying monitor source of the signal source
  */
 static int sep_cb(struct io_src *src)
 {
-	int ret;
-	char *cur = NULL;
 	ssize_t sret;
 	struct io_src_sep *sep = to_src_sep(src);
 
@@ -132,24 +177,7 @@ static int sep_cb(struct io_src *src)
 	/* something has been read */
 	sep->up_to += sret;
 
-	/* search for a separator and notify for each occurrence */
-	for (cur = buf_read_start(sep);
-			cur + sep->two_bytes < buf_write_start(sep);
-			cur++)
-		if (separator_found(sep, cur)) {
-			ret = notify_user(sep, chunk_len(sep, cur));
-			if (0 > ret)
-				return ret;
-			if (0 < ret)
-				fprintf(stderr, "sep->cb: %s", strerror(-ret));
-			cur += sep->two_bytes;
-		}
-
-	/* buffer is full : notify */
-	if (already_read(sep) == IO_SRC_SEP_SIZE)
-		return notify_user(sep, already_read(sep));
-
-	return 0;
+	return consume(sep);
 }
 
 int io_src_sep_init(struct io_src_sep *sep_src, int fd, io_src_sep_cb_t *cb,
