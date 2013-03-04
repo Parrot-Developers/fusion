@@ -118,8 +118,8 @@ struct io_src {
  * @param src Source to initialize. Can't be NULL
  * @param fd File descriptor of the source
  * @param type Type, in, out or both
- * @param cb Callback notified whe fd is ready for I/O
- * @param clean Called to cleanup the source when removed
+ * @param cb Callback notified when fd is ready for I/O
+ * @param clean Called to cleanup the source when removed. Can be NULL.
  * @return Negative errno compatible value on error otherwise zero
  */
 int io_src_init(struct io_src *src, int fd, enum io_src_event type,
