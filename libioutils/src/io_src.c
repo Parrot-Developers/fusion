@@ -15,14 +15,27 @@
 
 #include <io_src.h>
 
-/* TODO implementation of init_args_are_invalid */
+/**
+ * Checks if the arguments of io_src_init are valid
+ * @param src Source to initialize. Can't be NULL
+ * @param fd File descriptor of the source
+ * @param type Type, in, out or both
+ * @param cb Callback notified when fd is ready for I/O
+ * @return 1 if one argument at least is invalid, 0 otherwise
+ */
+static int init_args_are_invalid(struct io_src *src, int fd,
+		enum io_src_event type, io_src_cb_t *cb)
+{
+	return NULL == src || -1 == fd || (type & ~IO_DUPLEX) ||
+			!(type & IO_DUPLEX) || NULL == cb;
+}
+
 int io_src_init(struct io_src *src, int fd, enum io_src_event type,
 		io_src_cb_t *cb, io_src_clean_t *clean)
 {
 	struct stat st;
 	int ret;
-	if (NULL == src || -1 == fd || NULL == cb || (type & ~IO_DUPLEX) ||
-			!(type & IO_DUPLEX))
+	if (init_args_are_invalid(src, fd,type, cb))
 		return -EINVAL;
 
 	/*
