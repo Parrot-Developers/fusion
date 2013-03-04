@@ -91,6 +91,11 @@ static suite_t **get_test_suite(const char *so_lib, void **lib_handle,
 	init_fun_t init_fun;
 
 	/* load the library to test */
+	/*
+	 * TODO it would be cool if we could try to find the lib automatically
+	 * by it's name, e.g. : say ioutils would find automatically
+	 * /usr/lib/libioutils.so
+	 */
 	*lib_handle = dlopen(so_lib, RTLD_LAZY);
 	if (NULL == lib_handle) {
 		fprintf(stderr, "%s\n", dlerror());

@@ -8,7 +8,7 @@
  * the skel module are prefixed with "mylib_skel_"
  * @note naming conventions are not mandatory but strongly encouraged...
  *
- * Copyright (C) 2012 Parrot S.A.
+ * Copyright (C) 2013 Parrot S.A.
  */
 #include <CUnit/Basic.h>
 
@@ -70,7 +70,7 @@ static int clean_skel_suite(void)
 	return 0; /* return non-zero on error */
 }
 
-suite_t src_suite = {
+suite_t skel_suite = {
 		 /* name of the module, corresponds to the functions prefix */
 		.name = "mylib_skel",
 		.init = init_skel_suite,
