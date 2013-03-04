@@ -155,7 +155,7 @@ static int sep_cb(struct io_src *src)
 int io_src_sep_init(struct io_src_sep *sep_src, int fd, io_src_sep_cb_t *cb,
 		io_src_clean_t *clean, int sep1, int sep2)
 {
-	if (NULL == sep_src || NULL == cb || -1 == fd || NULL == clean)
+	if (NULL == sep_src || NULL == cb || -1 == fd)
 		return -EINVAL;
 
 	memset(sep_src, 0, sizeof(*sep_src));

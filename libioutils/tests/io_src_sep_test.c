@@ -166,9 +166,6 @@ out:
 	ret = io_src_sep_init(&(src_sep.src_sep), src_sep.pipefds[0], NULL,
 			sep_clean, sep_pair[0], sep_pair[1]);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_src_sep_init(&(src_sep.src_sep), src_sep.pipefds[0], sep_cb,
-			NULL, sep_pair[0], sep_pair[1]);
-	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	/* cleanup */
 	io_mon_clean(&mon);

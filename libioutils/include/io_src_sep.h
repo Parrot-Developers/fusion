@@ -89,7 +89,8 @@ struct io_src_sep {
  * Initializes a separator source
  * @param sep_src Separator source to initialize
  * @param fd File descriptor
- * @param cb Callback called on each cunk of data, retrieved before a separator
+ * @param cb Callback called on each chunk of data, retrieved before a separator
+ * @param clean Called to cleanup the source when removed. Can be NULL.
  * @param sep1 First separator between the chunks of data (only one byte)
  * @param sep2 second separator between the chunks of data, pass INT_MAX to use
  * only one separator (only one byte)
