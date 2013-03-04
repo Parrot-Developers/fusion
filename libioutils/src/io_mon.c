@@ -122,6 +122,88 @@ static int register_source(struct io_mon *mon, struct io_src *src)
 	return alter_source(mon->epollfd, src, EPOLL_CTL_ADD);
 }
 
+/**
+ * Says if a source still has events pending mathching at least one of the
+ * events it is registered for and the error events
+ * @param src Source
+ * @return Non-zero if there is still events to process, 0 otherwise
+ */
+static int has_events_pending(struct io_src *src)
+{
+	return (src->events & (src->active | IO_EPOLL_ERROR_EVENTS));
+}
+
+/**
+ * Notifies client of an I/O event and checks for errors.
+ * @param mon Monitor
+ * @param src Source
+ * @param event Event to process
+ * @return negative errno-compatible value on error from the client callback, 0
+ * otherwise
+ */
+static int process_event(struct io_mon *mon, struct io_src *src,
+		struct epoll_event *event)
+{
+	int ret;
+
+	/*
+	 * if during processing, sources are altered, some events may
+	 * have become irrelevant and must be filtered out
+	 */
+	if (!has_events_pending(src))
+		return 0;
+
+	ret = src->cb(src);
+	if (0 != ret)
+		fprintf(stderr, "src->cb : %s\n", strerror(abs(ret)));
+
+	/*
+	 * a negative return from the callback says the source must be
+	 * removed. The removal is also forced when any I/O error occur
+	 */
+	if (0 > ret || (io_mon_has_error(event->events))) {
+		remove_source(mon, src);
+
+		/*
+		 * cleanup cb must be done AFTER unchaining so that the
+		 * client can do what he wants of it's context
+		 */
+		io_src_clean(src);
+
+		return ret;
+	}
+
+	return 0;
+}
+
+/**
+ * Notifies clients of an I/O events and checks for errors.
+ * @param mon Monitor
+ * @param n Number of events to process
+ * @param events List of the events to process
+ * @return First critical error from a client callback, 0 on success
+ */
+static int do_process_events(struct io_mon *mon, int n,
+		struct epoll_event *events)
+{
+	int ret = 0;
+	int i = 0;
+	struct io_src *src = NULL;
+	struct epoll_event *event;
+
+	for (i = 0; i < n; i++) {
+		event = events + i;
+		src = event->data.ptr;
+		src->events = event->events;
+
+		ret = process_event(mon, src, event);
+		if (0 > ret)
+			return ret;
+	}
+
+	return 0;
+}
+
 int io_mon_init(struct io_mon *mon)
 {
 	if (NULL == mon)
@@ -219,10 +301,7 @@ int io_mon_activate_out_source(struct io_mon *mon, struct io_src *src,
 int io_mon_process_events(struct io_mon *mon)
 {
 	int n = 0;
-	int i = 0;
 	struct epoll_event events[MONITOR_MAX_SOURCES];
-	int ret = 0;
-	struct io_src *src = NULL;
 
 	if (NULL == mon)
 		return -EINVAL;
@@ -234,39 +313,7 @@ int io_mon_process_events(struct io_mon *mon)
 	if (-1 == n)
 		return -errno;
 
-	for (i = 0; i < n; i++) {
-		src = events[i].data.ptr;
-		src->events = events[i].events;
-		/*
-		 * if during processing, sources are altered, some events may
-		 * have become irrelevant and must be filtered out
-		 */
-		if (!(src->events & (src->active | IO_EPOLL_ERROR_EVENTS)))
-			continue;
-
-		ret = src->cb(src);
-		if (0 != ret)
-			fprintf(stderr, "src->cb : %s\n", strerror(abs(ret)));
-
-		/*
-		 * a negative return from the callback says the source must be
-		 * removed. The removal is also forced when any I/O error occur
-		 */
-		if (0 > ret || (io_mon_has_error(events[i].events))) {
-			ret = remove_source(mon, src);
-			if (0 != ret)
-				return ret;
-
-			/*
-			 * cleanup cb must be done AFTER unchaining so that the
-			 * client can do what he wants of it's context
-			 */
-			io_src_clean(src);
-		}
-		ret = 0;
-	}
-
-	return 0;
+	return do_process_events(mon, n, events);
 }
 
 int io_mon_clean(struct io_mon *mon)
