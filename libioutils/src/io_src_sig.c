@@ -103,6 +103,34 @@ static int sig_init_args_are_invalid(struct io_src_sig *sig, io_sig_cb_t *cb,
 	return NULL == sig || NULL == cb || 0 == signo;
 }
 
+/**
+ * Configures the signal fd of the source
+ * @param m Mask of signals to monitor with the signalfd
+ * @param old_mask Points to a sigset_t where the old signal mask is stored for
+ * further re-installation
+ * @return signalfd on success, negative errno-compatible value on error
+ */
+static int build_sfd(sigset_t *m, sigset_t *old_mask)
+{
+	int ret;
+	int fd;
+
+	/*
+	 * block signals so that they aren't handled according to their default
+	 * dispositions
+	 */
+	ret = sigprocmask(SIG_BLOCK, m, old_mask);
+	if (-1 == ret)
+		return -errno;
+
+	/* set up signal fd */
+	fd = signalfd(-1, m, SFD_NONBLOCK | SFD_CLOEXEC);
+	if (0 > fd)
+		return -errno;
+
+	return 0 > fd ? -errno : fd;
+}
+
 int io_src_sig_init(struct io_src_sig *sig, io_sig_cb_t *cb, ...)
 {
 	int ret;
@@ -126,20 +154,9 @@ int io_src_sig_init(struct io_src_sig *sig, io_sig_cb_t *cb, ...)
 	if (0 > ret)
 		return ret;
 
-	/*
-	 * block signals so that they aren't handled according to their default
-	 * dispositions
-	 */
-	ret = sigprocmask(SIG_BLOCK, m, &(sig->old_mask));
-	if (-1 == ret)
-		return -errno;
-
-	/* set up signal fd */
-	fd = signalfd(-1, m, SFD_NONBLOCK | SFD_CLOEXEC);
-	if (-1 == fd) {
-		ret = -errno;
+	fd = build_sfd(m, &(sig->old_mask));
+	if (0 > fd)
 		goto out;
-	}
 
 	sig->cb = cb;
 
