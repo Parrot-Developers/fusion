@@ -89,6 +89,14 @@ static void uad_clean(struct io_src_msg *src)
 	 */
 }
 
+static int uad_init_args_are_invalid(struct io_src_msg_uad *uad,
+		io_src_msg_uad_cb_t *cb, void *rcv_buf, unsigned len,
+		const char *fmt)
+{
+	return NULL == uad || NULL == cb || NULL == rcv_buf || 0 == len ||
+			NULL == fmt || '\0' == *fmt;
+}
+
 int io_src_msg_uad_set_next_message(struct io_src_msg_uad *uad,
 		const void *rcv_buf)
 {
@@ -114,17 +122,14 @@ int io_src_msg_uad_init(struct io_src_msg_uad *uad, io_src_msg_uad_cb_t *cb,
 	va_list args;
 	int ret;
 
-	if (NULL == uad || NULL == rcv_buf || 0 == len || NULL == cb ||
-			NULL == fmt || '\0' == *fmt)
+	if (uad_init_args_are_invalid(uad, cb, rcv_buf, len, fmt))
 		return -EINVAL;
 
 	memset(uad, 0, sizeof(*uad));
 
 	sockfd = socket(AF_UNIX, SOCK_DGRAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
-	if (sockfd < 0) {
-		ret = -errno;
-		goto out;
-	}
+	if (sockfd < 0)
+		return -errno;
 
 	uad->addr.sun_path[0] = '\0';
 	va_start(args, fmt);
@@ -146,8 +151,7 @@ int io_src_msg_uad_init(struct io_src_msg_uad *uad, io_src_msg_uad_cb_t *cb,
 			uad_clean, rcv_buf, len, 0);
 
 out:
-	if (-1 != sockfd)
-		close(sockfd);
+	close(sockfd);
 
 	return ret;
 }
