@@ -130,7 +130,7 @@ static int register_source(struct io_mon *mon, struct io_src *src)
  */
 static int has_events_pending(struct io_src *src)
 {
-	return (src->events & (src->active | IO_EPOLL_ERROR_EVENTS));
+	return src->events & (src->active | IO_EPOLL_ERROR_EVENTS);
 }
 
 /**

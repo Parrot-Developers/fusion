@@ -35,7 +35,7 @@ int io_src_init(struct io_src *src, int fd, enum io_src_event type,
 {
 	struct stat st;
 	int ret;
-	if (init_args_are_invalid(src, fd,type, cb))
+	if (init_args_are_invalid(src, fd, type, cb))
 		return -EINVAL;
 
 	/*
