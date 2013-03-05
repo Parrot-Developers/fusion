@@ -29,6 +29,60 @@
 #define to_src_msg_uad(p) container_of(p, struct io_src_msg_uad, src_msg)
 
 /**
+ * Performs input
+ * @param uad Source
+ * @return errno compatible value, positive for only a warning, negative if the
+ * source must be removed, 0 on success
+ */
+static int process_in_event(struct io_src_msg_uad *uad)
+{
+	ssize_t sret;
+
+	sret = io_recvfrom(uad->src_msg.src.fd, uad->src_msg.rcv_buf,
+			uad->src_msg.len, 0, NULL, NULL);
+	if (-1 == sret)
+		return -errno;
+	return uad->cb(uad, IO_IN);
+}
+
+/**
+ * Performs output
+ * @param uad Source
+ * @return errno compatible value, positive for only a warning, negative if the
+ * source must be removed, 0 on success
+ */
+static int process_out_event(struct io_src_msg_uad *uad)
+{
+	int ret;
+	ssize_t sret;
+
+	ret = uad->cb(uad, IO_OUT);
+	if (0 > ret)
+		return ret;
+	sret = io_sendto(uad->src_msg.src.fd, uad->src_msg.send_buf,
+			uad->src_msg.len, 0,
+			(const struct sockaddr *)&(uad->addr),
+			sizeof(uad->addr));
+	if (-1 == sret)
+		return -errno;
+
+	return 0;
+}
+
+/**
+ * Performs I/O, after arguments are already verified
+ * @param uad Source
+ * @param evt Either IO_IN or IO_OUT, not both
+ * @return errno compatible value, positive for only a warning, negative if the
+ * source must be removed, 0 on success
+ */
+static int process_event(struct io_src_msg_uad *uad, enum io_src_event evt)
+{
+	/* here evt is either IO_IN or IO_OUT, not both */
+	return IO_IN == evt ? process_in_event(uad) : process_out_event(uad);
+}
+
+/**
  * Called when the underlying io_src_msg has I/O ready. Performs I/O via
  * recvfrom / sendto
  * @param src Source
@@ -38,31 +92,12 @@
  */
 static int uad_cb(struct io_src_msg *src, enum io_src_event evt)
 {
-	int ret;
-	ssize_t sret;
 	struct io_src_msg_uad *uad = to_src_msg_uad(src);
 
 	if (IO_IN != evt && IO_OUT != evt)
 		return -EINVAL;
 
-	if (IO_IN == evt) {
-		sret = io_recvfrom(src->src.fd, src->rcv_buf, src->len, 0, NULL,
-				NULL);
-		if (-1 == sret)
-			return -errno;
-	}
-	ret = uad->cb(uad, evt);
-	if (0 > ret)
-		return ret;
-	if (IO_OUT == evt) {
-		sret = io_sendto(src->src.fd, src->send_buf, src->len, 0,
-				(const struct sockaddr *)&(uad->addr),
-				sizeof(uad->addr));
-		if (-1 == sret)
-			return -errno;
-	}
-
-	return ret;
+	return process_event(uad, evt);
 }
 
 /**
