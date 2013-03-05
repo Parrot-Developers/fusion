@@ -39,12 +39,4 @@ ssize_t io_recvfrom(int sockfd, void *buf, size_t len, int flags,
 ssize_t io_sendto(int sockfd, const void *buf, size_t len, int flags,
 		const struct sockaddr *dest_addr, socklen_t addrlen);
 
-/**
- * Sets a file descriptor non-blocking
- * @param fd File descriptor
- * @return errno compatible negative value on error, 0 otherwise
- * @see fcntl
- */
-int set_non_blocking(int fd);
-
 #endif /* IO_UTILS_H_ */

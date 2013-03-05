@@ -40,21 +40,3 @@ ssize_t io_sendto(int sockfd, const void *buf, size_t len, int flags,
 	return TEMP_FAILURE_RETRY(sendto(sockfd, buf, len, flags, dest_addr,
 			addrlen));
 }
-
-int set_non_blocking(int fd)
-{
-	int flags;
-	int ret;
-
-	flags = fcntl(fd, F_GETFL, 0);
-	if (-1 == flags)
-		flags = 0;
-	if (!(flags & O_NONBLOCK)) {
-		ret = fcntl(fd, F_SETFL, flags | O_NONBLOCK);
-		if (0 != ret)
-			return -errno;
-	}
-
-	return 0;
-}
-

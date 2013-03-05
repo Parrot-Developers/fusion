@@ -19,7 +19,6 @@ suite_t *libioutils_test_suites[] = {
 		&src_sep_suite,
 		&src_sig_suite,
 		&src_suite,
-		&utils_suite,
 
 		NULL, /* NULL guard */
 };
@@ -32,5 +31,4 @@ void libioutils_init_test_suites(void)
 	src_sep_suite.active = 1;
 	src_sig_suite.active = 1;
 	src_suite.active = 1;
-	utils_suite.active = 1;
 }

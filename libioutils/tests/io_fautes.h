@@ -16,7 +16,6 @@ extern suite_t src_msg_uad_suite;
 extern suite_t src_sep_suite;
 extern suite_t src_sig_suite;
 extern suite_t src_suite;
-extern suite_t utils_suite;
 
 void libioutils_init_test_suites(void);
 

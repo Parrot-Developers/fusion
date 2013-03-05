@@ -27,6 +27,29 @@
 #define MONITOR_MAX_SOURCES 10
 
 /**
+ * Sets a file descriptor non-blocking
+ * @param fd File descriptor
+ * @return errno compatible negative value on error, 0 otherwise
+ * @see fcntl
+ */
+static int set_non_blocking(int fd)
+{
+	int flags;
+	int ret;
+
+	flags = fcntl(fd, F_GETFL, 0);
+	if (-1 == flags)
+		flags = 0;
+	if (!(flags & O_NONBLOCK)) {
+		ret = fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+		if (0 != ret)
+			return -errno;
+	}
+
+	return 0;
+}
+
+/**
  * Adds a source to the monitor
  * @param monitor Monitor context
  * @param source Monitor's source
