@@ -9,6 +9,8 @@
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif /* _GNU_SOURCE */
+#include <sys/wait.h>
+
 #include <unistd.h>
 
 #include <fcntl.h>
@@ -39,4 +41,9 @@ ssize_t io_sendto(int sockfd, const void *buf, size_t len, int flags,
 {
 	return TEMP_FAILURE_RETRY(sendto(sockfd, buf, len, flags, dest_addr,
 			addrlen));
+}
+
+pid_t io_waitpid(pid_t pid, int *status, int options)
+{
+	return TEMP_FAILURE_RETRY(waitpid(pid, status, options));
 }
