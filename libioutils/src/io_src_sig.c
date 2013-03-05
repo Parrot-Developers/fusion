@@ -67,37 +67,64 @@ static void sig_clean(struct io_src *src)
 	memset(&(sig->si), 0, sizeof(sig->si));
 }
 
-int io_src_sig_init(struct io_src_sig *sig, io_sig_cb_t *cb, ...)
+/**
+ * Builds the signal mask, with a list of signal numbers
+ * @param m Signal set, initialized in output
+ * @param args List of signals, the first being already processed
+ * @param signo First signal of the list, already extracted from args
+ * @return Opposite of the first sigaddset errno on error, 0 otherwise
+ */
+static int build_sig_mask(sigset_t *m, va_list args, int signo)
 {
 	int ret;
-	int fd;
-	int signo;
-	va_list args;
-	sigset_t *m;
-
-	if (NULL == sig || NULL == cb)
-		return -EINVAL;
-	va_start(args, cb);
-	signo = va_arg(args, int);
-	if (0 == signo) {
-		return -EINVAL;
-		va_end(args);
-	}
-	m = &(sig->mask);
-
-	memset(sig, 0, sizeof(*sig));
 
 	/* add all the signals to the mask */
 	sigemptyset(m);
 	while (0 != signo) {
 		ret = sigaddset(m, signo);
-		if (-1 == ret) {
-			ret = -errno;
-			goto out;
-		}
+		if (-1 == ret)
+			return -errno;
 		signo = va_arg(args, int);
 	}
+
+	return 0;
+}
+
+/**
+ * Check if any of the arguments of io_src_sig_init si invalid
+ * @param sig Signal source
+ * @param cb Signal source callback
+ * @param signo First signal of the ellipsis
+ * @return non-zero if at least one argument is invalid, 0 otherwise
+ */
+static int sig_init_args_are_invalid(struct io_src_sig *sig, io_sig_cb_t *cb,
+		int signo)
+{
+	return NULL == sig || NULL == cb || 0 == signo;
+}
+
+int io_src_sig_init(struct io_src_sig *sig, io_sig_cb_t *cb, ...)
+{
+	int ret;
+	int fd;
+	va_list args;
+	sigset_t *m;
+	int signo;
+
+	/* firts signal MUST be retrieved before any modification of sig */
+	va_start(args, cb);
+	signo = va_arg(args, int);
+	if (sig_init_args_are_invalid(sig, cb, signo))
+		return -EINVAL;
+
+	/* here we can start to modify the context */
+	memset(sig, 0, sizeof(*sig));
+	m = &(sig->mask);
+
+	ret = build_sig_mask(m, args, signo);
 	va_end(args);
+	if (0 > ret)
+		return ret;
 
 	/*
 	 * block signals so that they aren't handled according to their default
