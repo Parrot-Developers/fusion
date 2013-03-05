@@ -27,6 +27,20 @@ ssize_t io_read(int fd, void *buf, size_t count)
 	return TEMP_FAILURE_RETRY(read(fd, buf, count));
 }
 
+ssize_t io_recvfrom(int sockfd, void *buf, size_t len, int flags,
+		struct sockaddr *src_addr, socklen_t *addrlen)
+{
+	return TEMP_FAILURE_RETRY(recvfrom(sockfd, buf, len, flags, src_addr,
+			addrlen));
+}
+
+ssize_t io_sendto(int sockfd, const void *buf, size_t len, int flags,
+		const struct sockaddr *dest_addr, socklen_t addrlen)
+{
+	return TEMP_FAILURE_RETRY(sendto(sockfd, buf, len, flags, dest_addr,
+			addrlen));
+}
+
 int set_non_blocking(int fd)
 {
 	int flags;

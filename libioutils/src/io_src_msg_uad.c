@@ -9,6 +9,8 @@
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif /* _GNU_SOURCE */
+#include <sys/socket.h>
+
 #include <unistd.h>
 
 #include <errno.h>
@@ -16,10 +18,9 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-#include <sys/socket.h>
-
 #include "io_mon.h"
 #include "io_src_msg_uad.h"
+#include "io_utils.h"
 
 /**
  * @def to_src_msg_uad
@@ -45,8 +46,8 @@ static int uad_cb(struct io_src_msg *src, enum io_src_event evt)
 		return -EINVAL;
 
 	if (IO_IN == evt) {
-		sret = TEMP_FAILURE_RETRY(recvfrom(src->src.fd, src->rcv_buf,
-				src->len, 0, NULL, NULL));
+		sret = io_recvfrom(src->src.fd, src->rcv_buf, src->len, 0, NULL,
+				NULL);
 		if (-1 == sret)
 			return -errno;
 	}
@@ -54,10 +55,9 @@ static int uad_cb(struct io_src_msg *src, enum io_src_event evt)
 	if (0 > ret)
 		return ret;
 	if (IO_OUT == evt) {
-		sret = TEMP_FAILURE_RETRY(sendto(src->src.fd, src->send_buf,
-				src->len, 0,
+		sret = io_sendto(src->src.fd, src->send_buf, src->len, 0,
 				(const struct sockaddr *)&(uad->addr),
-				sizeof(uad->addr)));
+				sizeof(uad->addr));
 		if (-1 == sret)
 			return -errno;
 	}
