@@ -352,6 +352,7 @@ static void testMON_PROCESS_EVENTS(void)
 	}
 	void clean_cb(struct io_src *src)
 	{
+		CU_ASSERT_FALSE((state & STATE_CLEANED));
 		reached_state(&state, STATE_CLEANED);
 	}
 
@@ -397,18 +398,19 @@ static void testMON_PROCESS_EVENTS(void)
 		if (0 != ret)
 			goto out;
 
-		loop = STATE_ALL_DONE != state;
+		loop = (STATE_ALL_DONE & ~STATE_CLEANED) != state;
 	}
 
 out:
+	/* cleanup */
+	io_mon_clean(&mon);
+
 	/* debriefing */
 	CU_ASSERT(state & STATE_MSG1_RECEIVED);
 	CU_ASSERT(state & STATE_MSG2_SENT);
 	CU_ASSERT(state & STATE_MSG2_RECEIVED);
 	CU_ASSERT(state & STATE_CLEANED);
 
-	/* cleanup */
-	io_mon_clean(&mon);
 }
 
 static void testMON_CLEAN(void)
