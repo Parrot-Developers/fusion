@@ -57,6 +57,8 @@ typedef int (io_src_sep_cb_t)(struct io_src_sep *sep, char *chunk,
  * @brief Separator source type
  */
 struct io_src_sep {
+	/** inner monitor source */
+	struct io_src src;
 	/** first separator byte */
 	char sep1;
 	/** second separator byte, INT_MAX for none */
@@ -65,8 +67,6 @@ struct io_src_sep {
 	int two_bytes;
 	/** user callback, notified when one of the registered signals occur */
 	io_src_sep_cb_t *cb;
-	/** inner monitor source */
-	struct io_src src;
 	/** buffer containing the bytes read from the source */
 	char buf[2 * IO_SRC_SEP_SIZE + 1];
 
