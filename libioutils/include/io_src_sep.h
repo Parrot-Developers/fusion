@@ -13,6 +13,8 @@
 #ifndef IO_SRC_SEP_H_
 #define IO_SRC_SEP_H_
 
+#include <limits.h>
+
 #include "io_src.h"
 
 /**
@@ -20,6 +22,8 @@
  * @brief Maximum size of a message that can be reads
  */
 #define IO_SRC_SEP_SIZE 1024
+
+#define IO_SRC_SEP_NO_SEP2 INT_MAX
 
 /**
  * @typedef io_src_sep
@@ -92,8 +96,8 @@ struct io_src_sep {
  * @param cb Callback called on each chunk of data, retrieved before a separator
  * @param clean Called to cleanup the source when removed. Can be NULL.
  * @param sep1 First separator between the chunks of data (only one byte)
- * @param sep2 second separator between the chunks of data, pass INT_MAX to use
- * only one separator (only one byte)
+ * @param sep2 second separator between the chunks of data, pass
+ * IO_SRC_SEP_NO_SEP2 to use only one separator (only one byte)
  * @return Negative errno compatible value on error, 0 otherwise
  */
 int io_src_sep_init(struct io_src_sep *sep_src, int fd, io_src_sep_cb_t *cb,

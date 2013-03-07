@@ -16,7 +16,6 @@
 #include <errno.h>
 #include <string.h>
 #include <stdio.h>
-#include <limits.h>
 
 #include "io_mon.h"
 #include "io_src_sep.h"
@@ -191,7 +190,7 @@ int io_src_sep_init(struct io_src_sep *sep_src, int fd, io_src_sep_cb_t *cb,
 	sep_src->cb = cb;
 	sep_src->sep1 = sep1;
 	sep_src->sep2 = sep2;
-	sep_src->two_bytes = INT_MAX != sep2;
+	sep_src->two_bytes = IO_SRC_SEP_NO_SEP2 != sep2;
 
 	/* can fail only on parameters */
 	return io_src_init(&(sep_src->src), fd, IO_IN, sep_cb, clean);
