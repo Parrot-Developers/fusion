@@ -179,21 +179,12 @@ static int process_event_sets(struct io_mon *mon, struct io_src *src)
 	if (0 != ret)
 		fprintf(stderr, "src->cb : %s\n", strerror(abs(ret)));
 
-	/*
-	 * a negative return from the callback says the source must be
-	 * removed. The removal is also forced when any I/O error occur
-	 */
-	if (0 > ret || (io_mon_has_error(src->events))) {
-		remove_source(mon, src);
-
+	if (0 > ret || (io_mon_has_error(src->events)))
 		/*
-		 * cleanup cb must be done AFTER unchaining so that the
-		 * client can do what he wants of it's context
+		 * TODO notify client that a removal has been performed, if not
+		 * initiated by him
 		 */
-		io_src_clean(src);
-
-		return ret;
-	}
+		remove_source(mon, src);
 
 	return 0;
 }
