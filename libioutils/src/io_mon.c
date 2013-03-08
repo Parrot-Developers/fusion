@@ -163,7 +163,7 @@ static int has_events_pending(struct io_src *src)
  * @return negative errno-compatible value on error from the client callback, 0
  * otherwise
  */
-static int process_events(struct io_mon *mon, struct io_src *src)
+static int process_event_sets(struct io_mon *mon, struct io_src *src)
 {
 	int ret;
 
@@ -218,7 +218,7 @@ static int do_process_events_sets(struct io_mon *mon, int n,
 		src = event->data.ptr;
 		src->events = event->events;
 
-		ret = process_events(mon, src);
+		ret = process_event_sets(mon, src);
 		if (0 > ret)
 			return ret;
 	}
