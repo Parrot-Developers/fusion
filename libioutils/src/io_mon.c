@@ -160,12 +160,10 @@ static int has_events_pending(struct io_src *src)
  * Notifies client of I/O events for a source and checks for errors.
  * @param mon Monitor
  * @param src Source
- * @param event Event to process
  * @return negative errno-compatible value on error from the client callback, 0
  * otherwise
  */
-static int process_events(struct io_mon *mon, struct io_src *src,
-		struct epoll_event *event)
+static int process_events(struct io_mon *mon, struct io_src *src)
 {
 	int ret;
 
@@ -184,7 +182,7 @@ static int process_events(struct io_mon *mon, struct io_src *src,
 	 * a negative return from the callback says the source must be
 	 * removed. The removal is also forced when any I/O error occur
 	 */
-	if (0 > ret || (io_mon_has_error(event->events))) {
+	if (0 > ret || (io_mon_has_error(src->events))) {
 		remove_source(mon, src);
 
 		/*
@@ -220,7 +218,7 @@ static int do_process_events_sets(struct io_mon *mon, int n,
 		src = event->data.ptr;
 		src->events = event->events;
 
-		ret = process_events(mon, src, event);
+		ret = process_events(mon, src);
 		if (0 > ret)
 			return ret;
 	}
