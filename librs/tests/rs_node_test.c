@@ -236,6 +236,35 @@ static void testRS_NODE_PREV(void)
 	/* error cases : none */
 }
 
+static void testRS_NODE_FIND(void)
+{
+	struct int_node int_node_a = {.val = 17,};
+	struct int_node int_node_b = {.val = 42,};
+	struct int_node int_node_c = {.val = 666,};
+	struct rs_node *haystack = NULL;
+	struct rs_node *needle = NULL;
+
+	rs_node_push(&haystack, &(int_node_a.node));
+	rs_node_push(&haystack, &(int_node_b.node));
+	rs_node_push(&haystack, &(int_node_c.node));
+
+	/* normal use cases */
+	needle = rs_node_find(NULL, &(int_node_a.node));
+	CU_ASSERT_PTR_NULL(needle);
+
+	needle = rs_node_find(haystack, &(int_node_a.node));
+	CU_ASSERT_EQUAL(needle, &(int_node_a.node));
+	needle = rs_node_find(haystack, &(int_node_b.node));
+	CU_ASSERT_EQUAL(needle, &(int_node_b.node));
+	needle = rs_node_find(haystack, &(int_node_c.node));
+	CU_ASSERT_EQUAL(needle, &(int_node_c.node));
+
+	needle = rs_node_find(haystack, NULL);
+	CU_ASSERT_PTR_NULL(needle);
+
+	/* error cases : none */
+}
+
 static void testRS_NODE_FIND_MATCH(void)
 {
 	struct int_node int_node_a = {.val = 17,};
@@ -408,6 +437,10 @@ static const test_t tests[] = {
 		{
 				.fn = testRS_NODE_PREV,
 				.name = "rs_node_prev"
+		},
+		{
+				.fn = testRS_NODE_FIND,
+				.name = "rs_node_find"
 		},
 		{
 				.fn = testRS_NODE_FIND_MATCH,

@@ -113,6 +113,15 @@ struct rs_node *rs_node_next(struct rs_node *node);
 struct rs_node *rs_node_prev(struct rs_node *node);
 
 /**
+ * Finds a node matching based on it's address
+ * @param needle One node of the list (not necessarily the first), the search
+ * is performed forward, starting from needle
+ * @param haystack Node to find, compared by address
+ * @return Node if found, NULL otherwise
+ */
+struct rs_node *rs_node_find(struct rs_node *needle, struct rs_node *haystack);
+
+/**
  * Finds a node matching a given criteria on a list of whom any node is known
  * @param node One node of the list (not necessarily the first), the search is
  * performed forward, starting from node
