@@ -8,11 +8,11 @@
  */
 #include <limits.h>
 #include <inttypes.h>
+#include <stddef.h>
 
 #include <CUnit/Basic.h>
 
 #include <rs_node.h>
-#include "../src/rs_utils.h"
 
 #include <fautes.h>
 #include <fautes_utils.h>
@@ -21,6 +21,13 @@ struct int_node {
 	int val;
 	struct rs_node node;
 };
+
+#ifndef container_of
+#define container_of(ptr, type, member) ({ \
+	const typeof(((type *)0)->member)*__mptr = (ptr); \
+	(type *)((char *)__mptr - offsetof(type, member)); \
+})
+#endif /* container_of */
 
 #define to_int_node(p) container_of(p, struct int_node, node)
 
