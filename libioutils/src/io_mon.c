@@ -12,6 +12,7 @@
 #include <unistd.h>
 
 #include <errno.h>
+#include <assert.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -216,6 +217,9 @@ static int do_process_events_sets(struct io_mon *mon, int n,
 	for (i = 0; i < n; i++) {
 		event = events + i;
 		src = event->data.ptr;
+		assert(src != NULL);
+		if (NULL == src)
+			return -EINVAL;
 		src->events = event->events;
 
 		ret = process_event_sets(mon, src);
