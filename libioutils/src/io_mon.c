@@ -166,8 +166,6 @@ static int has_events_pending(struct io_src *src)
  */
 static int process_event_sets(struct io_mon *mon, struct io_src *src)
 {
-	int ret;
-
 	/*
 	 * if during processing, sources are altered, some events may
 	 * have become irrelevant and must be filtered out
@@ -175,11 +173,9 @@ static int process_event_sets(struct io_mon *mon, struct io_src *src)
 	if (!has_events_pending(src))
 		return 0;
 
-	ret = src->cb(src);
-	if (0 != ret)
-		fprintf(stderr, "src->cb : %s\n", strerror(abs(ret)));
+	src->cb(src);
 
-	if (0 > ret || (io_mon_has_error(src->events)))
+	if (io_mon_has_error(src->events))
 		/*
 		 * TODO notify client that a removal has been performed, if not
 		 * initiated by him
@@ -200,7 +196,6 @@ static int process_event_sets(struct io_mon *mon, struct io_src *src)
 static int do_process_events_sets(struct io_mon *mon, int n,
 		struct epoll_event *events)
 {
-	int ret = 0;
 	int i = 0;
 	struct io_src *src = NULL;
 	struct epoll_event *event;
@@ -213,9 +208,7 @@ static int do_process_events_sets(struct io_mon *mon, int n,
 			return -EINVAL;
 		src->events = event->events;
 
-		ret = process_event_sets(mon, src);
-		if (0 > ret)
-			return ret;
+		process_event_sets(mon, src);
 	}
 
 	return 0;
