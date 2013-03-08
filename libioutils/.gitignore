@@ -1,4 +1,7 @@
 .cproject
+*.expand
+*.dot
+*.png
 .project
 *.o
 src/libioutils.so
