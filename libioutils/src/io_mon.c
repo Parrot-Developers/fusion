@@ -200,13 +200,14 @@ static int process_event(struct io_mon *mon, struct io_src *src,
 }
 
 /**
- * Notifies clients of an I/O events and checks for errors.
+ * Notifies client of I/O events sets pending for a source and checks for
+ * errors.
  * @param mon Monitor
- * @param n Number of events to process
- * @param events List of the events to process
+ * @param n Number of events sets to process
+ * @param events List of the events sets to process
  * @return First critical error from a client callback, 0 on success
  */
-static int do_process_events(struct io_mon *mon, int n,
+static int do_process_events_sets(struct io_mon *mon, int n,
 		struct epoll_event *events)
 {
 	int ret = 0;
@@ -336,7 +337,7 @@ int io_mon_process_events(struct io_mon *mon)
 	if (-1 == n)
 		return -errno;
 
-	return do_process_events(mon, n, events);
+	return do_process_events_sets(mon, n, events);
 }
 
 int io_mon_clean(struct io_mon *mon)
