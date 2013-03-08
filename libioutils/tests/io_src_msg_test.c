@@ -95,7 +95,7 @@ static void testSRC_MSG_SET_NEXT_MESSAGE(void)
  * message callback for the read tests, checks the messages received correspond
  * to what is expected ant sends the next one
  */
-static int msg_cb_read(struct io_src_msg *src, enum io_src_event evt)
+static void msg_cb_read(struct io_src_msg *src, enum io_src_event evt)
 {
 	int ret;
 	void *msg;
@@ -142,8 +142,6 @@ static int msg_cb_read(struct io_src_msg *src, enum io_src_event evt)
 				STATE_MSG3_RECEIVED);
 		reached_state(&state, STATE_MSG4_RECEIVED);
 	}
-
-	return 0;
 }
 
 /* sends ourselves messages manually and check we receive them */
@@ -247,22 +245,20 @@ out:
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 }
 
-static int msg_cb_write(struct io_src_msg *src, enum io_src_event evt)
+static void msg_cb_write(struct io_src_msg *src, enum io_src_event evt)
 {
 	CU_ASSERT_EQUAL(evt, IO_OUT);
 
 	if (0 == (state & STATE_MSG1_RECEIVED))
-		return io_src_msg_set_next_message(src, &MSG1);
-	if (0 == (state & STATE_MSG2_RECEIVED))
-		return io_src_msg_set_next_message(src, &MSG2);
-	if (0 == (state & STATE_MSG3_RECEIVED))
-		return io_src_msg_set_next_message(src, &MSG3);
-	if (0 == (state & STATE_MSG4_RECEIVED))
-		return io_src_msg_set_next_message(src, &MSG4);
-
-	CU_ASSERT(0);
-
-	return 0;
+		io_src_msg_set_next_message(src, &MSG1);
+	else if (0 == (state & STATE_MSG2_RECEIVED))
+		io_src_msg_set_next_message(src, &MSG2);
+	else if (0 == (state & STATE_MSG3_RECEIVED))
+		io_src_msg_set_next_message(src, &MSG3);
+	else if (0 == (state & STATE_MSG4_RECEIVED))
+		io_src_msg_set_next_message(src, &MSG4);
+	else
+		CU_ASSERT(0);
 }
 
 /* sends ourselves messages and check we receive them manually */
@@ -389,9 +385,9 @@ static void testSRC_MSG_GET_SOURCE(void)
 	struct io_src *src;
 	char buf[22];
 
-	int dummy_cb(struct io_src_msg *src, enum io_src_event evt)
+	void dummy_cb(struct io_src_msg *src, enum io_src_event evt)
 	{
-		return 0;
+
 	}
 
 	void dummy_clean(struct io_src_msg *msg)

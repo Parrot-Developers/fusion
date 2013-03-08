@@ -49,7 +49,7 @@ static void reached_state(int s)
 	state |= s;
 }
 
-int uad_cb(struct io_src_msg_uad *src, enum io_src_event evt)
+void uad_cb(struct io_src_msg_uad *src, enum io_src_event evt)
 {
 	struct my_uad_src *my_uad;
 	int ret;
@@ -92,8 +92,6 @@ int uad_cb(struct io_src_msg_uad *src, enum io_src_event evt)
 			CU_ASSERT(0);
 		}
 	}
-
-	return 0;
 }
 
 void uad_clean(struct io_src_msg_uad *src)
@@ -171,9 +169,9 @@ static void testSRC_MSG_UAD_GET_SOURCE(void)
 	struct io_src *src;
 	char buf[22];
 
-	int dummy_cb(struct io_src_msg_uad *src, enum io_src_event evt)
+	void dummy_cb(struct io_src_msg_uad *src, enum io_src_event evt)
 	{
-		return 0;
+
 	}
 
 	void dummy_clean(struct io_src_msg_uad *msg)

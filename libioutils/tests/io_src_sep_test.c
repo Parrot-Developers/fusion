@@ -80,7 +80,7 @@ static void testSRC_SEP(const int sep_pair[2], const char *big_msg, size_t sz)
 #define STATE_TIMER_EXPIRED 8
 #define STATE_ALL_DONE 15
 	int state = STATE_START;
-	int sep_cb(struct io_src_sep *sep, char *chunk, unsigned len)
+	void sep_cb(struct io_src_sep *sep, char *chunk, unsigned len)
 	{
 /*		printf("received %u byte(s) : \"%.*s\"\n", len, len, chunk); */
 
@@ -101,8 +101,6 @@ static void testSRC_SEP(const int sep_pair[2], const char *big_msg, size_t sz)
 					STATE_MSG2_RECEIVED);
 			reached_state(&state, STATE_MSG3_RECEIVED);
 		}
-
-		return 0;
 	}
 
 	ret = io_mon_init(&mon);
@@ -191,9 +189,9 @@ static void testSRC_SEP_GET_SOURCE(void)
 	struct io_src *src;
 	int pipefd[2] = {-1, -1};
 
-	int dummy_cb(struct io_src_sep *sep, char *chunk, unsigned len)
+	void dummy_cb(struct io_src_sep *sep, char *chunk, unsigned len)
 	{
-		return 0;
+
 	}
 
 	void dummy_clean(struct io_src *src)

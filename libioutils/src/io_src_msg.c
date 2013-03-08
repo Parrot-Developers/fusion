@@ -22,8 +22,7 @@
  * Receives a message and notifies it to the client
  * @param msg Message source
  * @param fd Source's file descriptor
- * @return Negative errno compatible value on error which implies source
- * removal, positive errno compatible value for a warning, 0 on success
+ * @return errno compatible value on error, 0 on success
  */
 static int in_msg(struct io_src_msg *msg, int fd)
 {
@@ -38,7 +37,9 @@ static int in_msg(struct io_src_msg *msg, int fd)
 			return -EIO;
 	} /* else, the source implementation performs input itself */
 
-	return msg->cb(msg, IO_IN);
+	msg->cb(msg, IO_IN);
+
+	return 0;
 }
 
 /**
@@ -46,18 +47,14 @@ static int in_msg(struct io_src_msg *msg, int fd)
  * the source's file descriptor.
  * @param msg Message source
  * @param fd Source's file descriptor
- * @return Negative errno compatible value on error which implies source
- * removal, positive errno compatible value for a warning, 0 on success
+ * @return errno compatible value on error, 0 on success
  */
 static int out_msg(struct io_src_msg *msg, int fd)
 {
-	int ret;
 	ssize_t sret;
 
 	/* the client callback prepares us something to send */
-	ret = msg->cb(msg, IO_OUT);
-	if (0 > ret)
-		return ret;
+	msg->cb(msg, IO_OUT);
 
 	if (msg->perform_io) {
 		/* msg->msg contains the message to send */
@@ -66,27 +63,28 @@ static int out_msg(struct io_src_msg *msg, int fd)
 			return -errno;
 	} /* else, the source implementation performs output itself */
 
-	return ret;
+	return 0;
 }
 
 /**
  * Source callback, either performs in or out operation, depending on the event
  * type
  * @param src Underlying monitor source of the message source
- * @return Negative errno compatible value on error which implies source
- * removal, positive errno compatible value for a warning, 0 on success
  */
-static int msg_cb(struct io_src *src)
+static void msg_cb(struct io_src *src)
 {
 	struct io_src_msg *msg = to_src_msg(src);
 
+	/* TODO treat I/O THEN errors */
 	if (io_mon_has_error(src->events))
-		return -EIO;
+		return;
 
-	if (src->events & IO_IN)
-		return in_msg(msg, src->fd);
+	if (src->events & IO_IN) {
+		in_msg(msg, src->fd);
+		return;
+	}
 
-	return out_msg(msg, src->fd);
+	out_msg(msg, src->fd);
 }
 
 /**

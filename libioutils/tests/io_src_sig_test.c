@@ -54,7 +54,7 @@ static void testSRC_SIG_INIT(void)
 #define STATE_SIGUSR2_RECEIVED 2
 #define STATE_ALL_DONE 3
 	int state = STATE_START;
-	int sig_cb(struct io_src_sig *sig)
+	void sig_cb(struct io_src_sig *sig)
 	{
 		if (SIGUSR1 == sig->si.ssi_signo) {
 			CU_ASSERT(!(STATE_SIGUSR2_RECEIVED & state));
@@ -67,8 +67,6 @@ static void testSRC_SIG_INIT(void)
 		} else {
 			CU_ASSERT(0);
 		}
-
-		return 0;
 	}
 
 	ret = io_mon_init(&mon);
@@ -143,9 +141,9 @@ static void testSRC_SIG_GET_SOURCE(void)
 	struct io_src_sig sig_src;
 	struct io_src *src;
 
-	int dummy_cb(struct io_src_sig *src)
+	void dummy_cb(struct io_src_sig *src)
 	{
-		return 0;
+
 	}
 
 	/* normal use cases */

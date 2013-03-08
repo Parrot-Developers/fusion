@@ -50,10 +50,8 @@ struct io_src_sep;
  * separator if present
  * @note it is guaranteed that chunk[len] can be written, for example to add a
  * null byte for terminating a string, even if len == IO_SRC_SEP_SIZE
- * @return errno compatible value, positive for only a warning, negative if the
- * source must be removed, 0 on success
  */
-typedef int (io_src_sep_cb_t)(struct io_src_sep *sep, char *chunk,
+typedef void (io_src_sep_cb_t)(struct io_src_sep *sep, char *chunk,
 		unsigned len);
 
 /**

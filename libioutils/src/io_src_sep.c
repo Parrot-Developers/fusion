@@ -52,14 +52,13 @@
  * reflect that we have consumed some bytes
  * @param sep
  * @param len
- * @return result of the user callback
+ * @return 0
  */
 static int notify_user(struct io_src_sep *sep, unsigned len)
 {
-	int ret;
 	char *chunk = buf_read_start(sep);
 
-	ret = sep->cb(sep, chunk, len);
+	sep->cb(sep, chunk, len);
 	sep->from += len;
 	if (sep->from >= IO_SRC_SEP_SIZE) {
 		memmove(sep->buf, buf_read_start(sep), to_read(sep));
@@ -67,7 +66,7 @@ static int notify_user(struct io_src_sep *sep, unsigned len)
 		sep->from = 0;
 	}
 
-	return ret;
+	return 0;
 }
 
 /**
@@ -158,25 +157,28 @@ static int consume(struct io_src_sep *sep)
  * Source callback, reads the signal and notifies the client
  * @param src Underlying monitor source of the signal source
  */
-static int sep_cb(struct io_src *src)
+static void sep_cb(struct io_src *src)
 {
 	ssize_t sret;
 	struct io_src_sep *sep = to_src_sep(src);
 
+	/* TODO treat I/O THEN errors */
 	if (io_mon_has_error(src->events))
-		return -EIO;
+		return;
 
 	/* get some data */
 	sret = io_read(src->fd, buf_write_start(sep), to_read(sep));
 	if (-1 == sret)
-		return -errno;
-	if (0 == sret)
-		return end_of_file(sep);
+		return;
+	if (0 == sret) {
+		end_of_file(sep);
+		return;
+	}
 
 	/* something has been read */
 	sep->up_to += sret;
 
-	return consume(sep);
+	consume(sep);
 }
 
 int io_src_sep_init(struct io_src_sep *sep_src, int fd, io_src_sep_cb_t *cb,

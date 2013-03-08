@@ -35,10 +35,8 @@ struct io_src_msg;
  * @param src Message source
  * @param evt Type of the event to process, either IO_IN or IO_OUT, not
  * IO_DUPLEX
- * @return errno compatible value, positive for only a warning, negative if the
- * source must be removed, 0 on success
  */
-typedef int (io_src_msg_cb_t)(struct io_src_msg *src, enum io_src_event evt);
+typedef void (io_src_msg_cb_t)(struct io_src_msg *src, enum io_src_event evt);
 
 /**
  * User callback for cleaning the io_src_msg. It's responsibility is to clean

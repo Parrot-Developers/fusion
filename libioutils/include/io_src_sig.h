@@ -24,10 +24,8 @@ struct io_src_sig;
  * @brief Called when one of the monitored signals happens, with the
  * signalfd_siginfo field properly filled for use by the client
  * @param sig Signal source
- * @return errno compatible value, positive for only a warning, negative if the
- * source must be removed, 0 on success
  */
-typedef int (io_sig_cb_t)(struct io_src_sig *sig);
+typedef void (io_sig_cb_t)(struct io_src_sig *sig);
 
 /**
  * @typedef io_src_sig

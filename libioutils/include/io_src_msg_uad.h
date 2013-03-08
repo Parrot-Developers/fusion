@@ -34,10 +34,8 @@ struct sockaddr_un sun_sizecheck;
  * in the rcv_buf specified at io_src_msg_uad_init().
  * @param src UAD source
  * @param evt Event type, either IO or OUT not both
- * @return errno compatible value, positive for only a warning, negative if the
- * source must be removed, 0 on success
  */
-typedef int (io_src_msg_uad_cb_t)(struct io_src_msg_uad *src,
+typedef void (io_src_msg_uad_cb_t)(struct io_src_msg_uad *src,
 		enum io_src_event evt);
 
 /**

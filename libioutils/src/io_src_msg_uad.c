@@ -31,8 +31,7 @@
 /**
  * Performs input
  * @param uad Source
- * @return errno compatible value, positive for only a warning, negative if the
- * source must be removed, 0 on success
+ * @return errno compatible value on error, 0 on success
  */
 static int process_in_event(struct io_src_msg_uad *uad)
 {
@@ -42,23 +41,23 @@ static int process_in_event(struct io_src_msg_uad *uad)
 			uad->src_msg.len, 0, NULL, NULL);
 	if (-1 == sret)
 		return -errno;
-	return uad->cb(uad, IO_IN);
+
+	uad->cb(uad, IO_IN);
+
+	return 0;
 }
 
 /**
  * Performs output
  * @param uad Source
- * @return errno compatible value, positive for only a warning, negative if the
- * source must be removed, 0 on success
+ * @return errno compatible value on error, 0 on success
  */
 static int process_out_event(struct io_src_msg_uad *uad)
 {
-	int ret;
 	ssize_t sret;
 
-	ret = uad->cb(uad, IO_OUT);
-	if (0 > ret)
-		return ret;
+	uad->cb(uad, IO_OUT);
+
 	sret = io_sendto(uad->src_msg.src.fd, uad->src_msg.send_buf,
 			uad->src_msg.len, 0,
 			(const struct sockaddr *)&(uad->addr),
@@ -73,8 +72,7 @@ static int process_out_event(struct io_src_msg_uad *uad)
  * Performs I/O, after arguments are already verified
  * @param uad Source
  * @param evt Either IO_IN or IO_OUT, not both
- * @return errno compatible value, positive for only a warning, negative if the
- * source must be removed, 0 on success
+ * @return errno compatible value on error, 0 on success
  */
 static int process_event(struct io_src_msg_uad *uad, enum io_src_event evt)
 {
@@ -87,17 +85,15 @@ static int process_event(struct io_src_msg_uad *uad, enum io_src_event evt)
  * recvfrom / sendto
  * @param src Source
  * @param evt Either IO_IN or IO_OUT, not both
- * @return errno compatible value, positive for only a warning, negative if the
- * source must be removed, 0 on success
  */
-static int uad_cb(struct io_src_msg *src, enum io_src_event evt)
+static void uad_cb(struct io_src_msg *src, enum io_src_event evt)
 {
 	struct io_src_msg_uad *uad = to_src_msg_uad(src);
 
 	if (IO_IN != evt && IO_OUT != evt)
-		return -EINVAL;
+		return;
 
-	return process_event(uad, evt);
+	process_event(uad, evt);
 }
 
 /**

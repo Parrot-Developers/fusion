@@ -62,9 +62,9 @@ static void testMON_GET_FD(void)
 	CU_ASSERT_EQUAL(ret, -EINVAL);
 }
 
-static int my_dummy_callback(__attribute__((unused)) struct io_src *src)
+static void my_dummy_callback(__attribute__((unused)) struct io_src *src)
 {
-	return 0;
+	/* do nothing */
 }
 
 static void my_dummy_clean(__attribute__((unused)) struct io_src *src)
@@ -308,7 +308,7 @@ static void testMON_PROCESS_EVENTS(void)
 #define STATE_CLEANED 8
 #define STATE_ALL_DONE 15
 	int state = STATE_START;
-	int in_cb(struct io_src *src)
+	void in_cb(struct io_src *src)
 	{
 		char buf[1024];
 		int r;
@@ -330,14 +330,15 @@ static void testMON_PROCESS_EVENTS(void)
 			close(pipefd[0]);
 		}
 
-		return 0;
+		return;
 	}
-	int out_cb(struct io_src *src)
+	void out_cb(struct io_src *src)
 	{
 		int r;
 
+		/* TODO treat I/O THEN errors */
 		if (io_mon_has_error(src->events))
-			return -EIO;
+			return;
 
 		r = write(src->fd, msg2, strlen(msg2) + 1);
 		CU_ASSERT_NOT_EQUAL_FATAL(r, -1);
@@ -347,8 +348,6 @@ static void testMON_PROCESS_EVENTS(void)
 		CU_ASSERT_NOT_EQUAL(r, -1);
 
 		reached_state(&state, STATE_MSG2_SENT);
-
-		return 0;
 	}
 	void clean_cb(struct io_src *src)
 	{

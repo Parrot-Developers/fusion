@@ -44,11 +44,8 @@ struct io_src;
  * Before the callback is called, the event fields is updated according to the
  * type of event which occurred, be it an I/O error or a normal event.
  * @param src source ready for I/O
- *
- * @return Negative errno compatible value on error which implies source
- * removal, positive errno compatible value for a warning, 0 on success
  */
-typedef int (io_src_cb_t)(struct io_src *src);
+typedef void (io_src_cb_t)(struct io_src *src);
 
 /**
  * @typedef io_src_clean_t

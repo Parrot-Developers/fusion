@@ -19,9 +19,9 @@
 #define O_CLOEXEC       02000000        /* set close_on_exec */
 #endif
 
-static int my_dummy_cb(__attribute__((unused)) struct io_src *source)
+static void my_dummy_cb(__attribute__((unused)) struct io_src *source)
 {
-	return 0;
+
 }
 
 static void clean_cb(__attribute__((unused)) struct io_src *src)
