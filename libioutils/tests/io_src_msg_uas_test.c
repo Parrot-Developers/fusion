@@ -94,11 +94,6 @@ void uad_cb(struct io_src_msg_uad *src, enum io_src_event evt)
 	}
 }
 
-void uad_clean(struct io_src_msg_uad *src)
-{
-	/* TODO stub */
-}
-
 static void testSRC_MSG_UAD_INIT(void)
 {
 	fd_set rfds;
@@ -107,13 +102,12 @@ static void testSRC_MSG_UAD_INIT(void)
 	bool loop = true;
 	struct timeval timeout;
 
-	ret = io_mon_init(&mon);
-	CU_ASSERT_EQUAL(ret, 0);
-
-	ret = io_src_msg_uad_init(&(src.uad_src), uad_cb, uad_clean, &(src.msg),
+	ret = io_src_msg_uad_init(&(src.uad_src), uad_cb, &(src.msg),
 			sizeof(src.msg), "my_cool_socket_name_%d", 42);
 	CU_ASSERT_EQUAL(ret, 0);
 
+	ret = io_mon_init(&mon);
+	CU_ASSERT_EQUAL(ret, 0);
 	ret = io_mon_add_source(&mon, &(src.uad_src.src_msg.src));
 	CU_ASSERT_EQUAL(ret, 0);
 
@@ -152,6 +146,7 @@ static void testSRC_MSG_UAD_INIT(void)
 out:
 	/* cleanup */
 	io_mon_clean(&mon);
+	io_src_msg_uad_clean(&(src.uad_src));
 
 	/* debriefeing */
 	CU_ASSERT(state & STATE_MSG1_SENT);
@@ -174,15 +169,9 @@ static void testSRC_MSG_UAD_GET_SOURCE(void)
 
 	}
 
-	void dummy_clean(struct io_src_msg_uad *msg)
-	{
-
-	}
-
 	/* normal use cases */
 	ret = io_src_msg_uad_init(&(uad_src),
 			dummy_cb,
-			dummy_clean,
 			buf,
 			22,
 			"my_socket_name");

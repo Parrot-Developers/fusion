@@ -92,14 +92,13 @@ struct io_src_sep {
  * @param sep_src Separator source to initialize
  * @param fd File descriptor
  * @param cb Callback called on each chunk of data, retrieved before a separator
- * @param clean Called to cleanup the source when removed. Can be NULL.
  * @param sep1 First separator between the chunks of data (only one byte)
  * @param sep2 second separator between the chunks of data, pass
  * IO_SRC_SEP_NO_SEP2 to use only one separator (only one byte)
  * @return Negative errno compatible value on error, 0 otherwise
  */
 int io_src_sep_init(struct io_src_sep *sep_src, int fd, io_src_sep_cb_t *cb,
-		io_src_clean_t *clean, int sep1, int sep2);
+		int sep1, int sep2);
 
 /**
  * Returns the underlying io_src of the separator source
@@ -110,5 +109,11 @@ static inline struct io_src *io_src_sep_get_source(struct io_src_sep *sep)
 {
 	return NULL == sep ? NULL : &(sep->src);
 }
+
+/**
+ * Cleans up a separator source
+ * @param sep Separator source
+ */
+void io_src_sep_clean(struct io_src_sep *sep);
 
 #endif /* IO_SRC_SEP_H_ */

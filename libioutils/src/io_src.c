@@ -31,7 +31,7 @@ static int init_args_are_invalid(struct io_src *src, int fd,
 }
 
 int io_src_init(struct io_src *src, int fd, enum io_src_event type,
-		io_src_cb_t *cb, io_src_clean_t *clean)
+		io_src_cb_t *cb)
 {
 	struct stat st;
 	int ret;
@@ -56,24 +56,18 @@ int io_src_init(struct io_src *src, int fd, enum io_src_event type,
 	src->fd = fd;
 	src->type = type;
 	src->cb = cb;
-	src->clean = clean;
 
 	return 0;
 }
 
 void io_src_clean(struct io_src *src)
 {
-	io_src_clean_t *clean;
-
 	if (NULL == src)
 		return;
 
 	if (-1 != src->fd)
 		close(src->fd);
-	clean = src->clean;
 	memset(src, 0, sizeof(*src));
 
 	src->fd = -1;
-	if (clean)
-		clean(src);
 }

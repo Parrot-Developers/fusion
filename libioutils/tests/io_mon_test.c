@@ -67,11 +67,6 @@ static void my_dummy_callback(__attribute__((unused)) struct io_src *src)
 	/* do nothing */
 }
 
-static void my_dummy_clean(__attribute__((unused)) struct io_src *src)
-{
-	/* do nothing */
-}
-
 static void testMON_ADD_SOURCE(void)
 {
 	int pipefd[2] = {-1, -1};
@@ -87,16 +82,13 @@ static void testMON_ADD_SOURCE(void)
 	CU_ASSERT_EQUAL(ret, 0);
 	ret = pipe(pipefd);
 	CU_ASSERT_NOT_EQUAL_FATAL(ret, -1);
-	ret = io_src_init(&src_in, pipefd[0], IO_IN, my_dummy_callback,
-			my_dummy_clean);
+	ret = io_src_init(&src_in, pipefd[0], IO_IN, my_dummy_callback);
 	CU_ASSERT_EQUAL(ret, 0);
-	ret = io_src_init(&src_out, pipefd[1], IO_OUT, my_dummy_callback,
-			my_dummy_clean);
+	ret = io_src_init(&src_out, pipefd[1], IO_OUT, my_dummy_callback);
 	CU_ASSERT_EQUAL(ret, 0);
 	fd = open("/dev/random", O_RDWR | O_CLOEXEC);
 	CU_ASSERT_NOT_EQUAL_FATAL(fd, -1);
-	ret = io_src_init(&src_duplex, fd, IO_DUPLEX, my_dummy_callback,
-			my_dummy_clean);
+	ret = io_src_init(&src_duplex, fd, IO_DUPLEX, my_dummy_callback);
 	CU_ASSERT_EQUAL(ret, 0);
 
 	/* normal use cases */
@@ -146,16 +138,13 @@ static void testMON_ADD_SOURCES(void)
 	CU_ASSERT_EQUAL(ret, 0);
 	ret = pipe(pipefd);
 	CU_ASSERT_NOT_EQUAL_FATAL(ret, -1);
-	ret = io_src_init(&src_in, pipefd[0], IO_IN, my_dummy_callback,
-			my_dummy_clean);
+	ret = io_src_init(&src_in, pipefd[0], IO_IN, my_dummy_callback);
 	CU_ASSERT_EQUAL(ret, 0);
-	ret = io_src_init(&src_out, pipefd[1], IO_OUT, my_dummy_callback,
-			my_dummy_clean);
+	ret = io_src_init(&src_out, pipefd[1], IO_OUT, my_dummy_callback);
 	CU_ASSERT_EQUAL(ret, 0);
 	fd = open("/dev/random", O_RDWR | O_CLOEXEC);
 	CU_ASSERT_NOT_EQUAL_FATAL(fd, -1);
-	ret = io_src_init(&src_duplex, fd, IO_DUPLEX, my_dummy_callback,
-			my_dummy_clean);
+	ret = io_src_init(&src_duplex, fd, IO_DUPLEX, my_dummy_callback);
 	CU_ASSERT_EQUAL(ret, 0);
 
 	/* normal use cases */
@@ -225,11 +214,9 @@ static void testMON_ACTIVATE_OUT_SOURCE(void)
 	CU_ASSERT_EQUAL(ret, 0);
 	ret = pipe(pipefd);
 	CU_ASSERT_NOT_EQUAL_FATAL(ret, -1);
-	ret = io_src_init(&src_in, pipefd[0], IO_IN, my_dummy_callback,
-			my_dummy_clean);
+	ret = io_src_init(&src_in, pipefd[0], IO_IN, my_dummy_callback);
 	CU_ASSERT_EQUAL(ret, 0);
-	ret = io_src_init(&src_out, pipefd[1], IO_OUT, my_dummy_callback,
-			my_dummy_clean);
+	ret = io_src_init(&src_out, pipefd[1], IO_OUT, my_dummy_callback);
 	CU_ASSERT_EQUAL(ret, 0);
 	ret = io_mon_add_source(&mon, &src_out);
 	CU_ASSERT_EQUAL(ret, 0);
@@ -250,8 +237,7 @@ static void testMON_ACTIVATE_OUT_SOURCE(void)
 	io_mon_clean(&mon);
 	ret = io_mon_init(&mon);
 	CU_ASSERT_EQUAL(ret, 0);
-	ret = io_src_init(&src_duplex, fd, IO_DUPLEX, my_dummy_callback,
-			my_dummy_clean);
+	ret = io_src_init(&src_duplex, fd, IO_DUPLEX, my_dummy_callback);
 	CU_ASSERT_EQUAL(ret, 0);
 	ret = io_mon_add_source(&mon, &src_duplex);
 	CU_ASSERT_EQUAL(ret, 0);
@@ -305,8 +291,7 @@ static void testMON_PROCESS_EVENTS(void)
 #define STATE_MSG1_RECEIVED 1
 #define STATE_MSG2_SENT 2
 #define STATE_MSG2_RECEIVED 4
-#define STATE_CLEANED 8
-#define STATE_ALL_DONE 15
+#define STATE_ALL_DONE 7
 	int state = STATE_START;
 	void in_cb(struct io_src *src)
 	{
@@ -349,21 +334,16 @@ static void testMON_PROCESS_EVENTS(void)
 
 		reached_state(&state, STATE_MSG2_SENT);
 	}
-	void clean_cb(struct io_src *src)
-	{
-		CU_ASSERT_FALSE((state & STATE_CLEANED));
-		reached_state(&state, STATE_CLEANED);
-	}
+
+	ret = pipe(pipefd);
+	CU_ASSERT_NOT_EQUAL_FATAL(ret, -1);
+	ret = io_src_init(&src_in, pipefd[0], IO_IN, in_cb);
+	CU_ASSERT_EQUAL(ret, 0);
+	ret = io_src_init(&src_out, pipefd[1], IO_OUT, out_cb);
+	CU_ASSERT_EQUAL(ret, 0);
 
 	ret = io_mon_init(&mon);
 	CU_ASSERT_EQUAL(ret, 0);
-	ret = pipe(pipefd);
-	CU_ASSERT_NOT_EQUAL_FATAL(ret, -1);
-	ret = io_src_init(&src_in, pipefd[0], IO_IN, in_cb, my_dummy_clean);
-	CU_ASSERT_EQUAL(ret, 0);
-	ret = io_src_init(&src_out, pipefd[1], IO_OUT, out_cb, clean_cb);
-	CU_ASSERT_EQUAL(ret, 0);
-
 	ret = io_mon_add_source(&mon, &src_out);
 	CU_ASSERT_EQUAL(ret, 0);
 	ret = io_mon_add_source(&mon, &src_in);
@@ -397,19 +377,19 @@ static void testMON_PROCESS_EVENTS(void)
 		if (0 != ret)
 			goto out;
 
-		loop = (STATE_ALL_DONE & ~STATE_CLEANED) != state;
+		loop = (STATE_ALL_DONE) != state;
 	}
 
 out:
 	/* cleanup */
 	io_mon_clean(&mon);
+	io_src_clean(&src_in);
+	io_src_clean(&src_out);
 
 	/* debriefing */
 	CU_ASSERT(state & STATE_MSG1_RECEIVED);
 	CU_ASSERT(state & STATE_MSG2_SENT);
 	CU_ASSERT(state & STATE_MSG2_RECEIVED);
-	CU_ASSERT(state & STATE_CLEANED);
-
 }
 
 static void testMON_CLEAN(void)

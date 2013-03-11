@@ -96,30 +96,6 @@ static void uad_cb(struct io_src_msg *src, enum io_src_event evt)
 	process_event(uad, evt);
 }
 
-/**
- * Clean callback, called on io_src_clean, automatically on source removal due
- * to error and monitor clean. Resets all the sources fields then calls user
- * io_src_msg_uad_clean_t callback
- * @param src Source to clean, previously cleaned by io_src_clean (i.e. with fd
- * already closed)
- */
-static void uad_clean(struct io_src_msg *src)
-{
-	struct io_src_msg_uad *uad = to_src_msg_uad(src);
-
-	uad->cb = NULL;
-	memset(&(uad->addr), 0, sizeof(uad->addr));
-
-	if (uad->clean)
-		uad->clean(uad);
-
-	uad->clean = NULL;
-	/*
-	 * TODO there is no way to properly shutdown() the socket before close
-	 * which is mandatory. A change in the API is needed there
-	 */
-}
-
 static int uad_init_args_are_invalid(struct io_src_msg_uad *uad,
 		io_src_msg_uad_cb_t *cb, void *rcv_buf, unsigned len,
 		const char *fmt)
@@ -146,8 +122,7 @@ int io_src_msg_uad_get_message(struct io_src_msg_uad *uad, void **msg)
 }
 
 int io_src_msg_uad_init(struct io_src_msg_uad *uad, io_src_msg_uad_cb_t *cb,
-		io_src_msg_uad_clean_t *clean, void *rcv_buf, unsigned len,
-		const char *fmt, ...)
+		void *rcv_buf, unsigned len, const char *fmt, ...)
 {
 	int sockfd;
 	va_list args;
@@ -175,14 +150,26 @@ int io_src_msg_uad_init(struct io_src_msg_uad *uad, io_src_msg_uad_cb_t *cb,
 	}
 
 	uad->cb = cb;
-	uad->clean = clean;
 
 	/* can fail only on parameters */
 	return io_src_msg_init(&(uad->src_msg), sockfd, IO_DUPLEX, uad_cb,
-			uad_clean, rcv_buf, len, 0);
+			rcv_buf, len, 0);
 
 out:
 	close(sockfd);
 
 	return ret;
 }
+
+void io_src_msg_uad_clean(struct io_src_msg_uad *uad)
+{
+	if (NULL == uad)
+		return;
+
+	uad->cb = NULL;
+	memset(&(uad->addr), 0, sizeof(uad->addr));
+	shutdown(uad->src_msg.src.fd, SHUT_RDWR);
+
+	io_src_msg_clean((&uad->src_msg));
+}
+

@@ -42,22 +42,20 @@ struct my_msg_src {
 
 #define to_src_my_msg_src(p) container_of(p, struct my_msg_src, msg_src)
 
-static void my_msg_src_clean(struct io_src_msg *msg)
+static void my_msg_src_clean(struct my_msg_src *my_src)
 {
-	struct my_msg_src *my_src;
-
-	my_src = to_src_my_msg_src(msg);
-
 	/*
-	 * don't close the source fd, it has been closed by the underlying
-	 * source's clean callback
+	 * don't close the source fd, it will be closed by the io_src_msg_clean
 	 */
-	if (!(msg->src.type & IO_IN))
+	/* TODO add macros IS_OUT IS_IN ? */
+	if (!(my_src->msg_src.src.type & IO_IN))
 		close(my_src->pipefds[0]);
-	if (!(msg->src.type & IO_OUT))
+	if (!(my_src->msg_src.src.type & IO_OUT))
 		close(my_src->pipefds[1]);
 
-	memset(&(my_src->msg), 0, sizeof(struct msg));
+	memset(&(my_src->msg), 0, sizeof(my_src->msg));
+
+	io_src_msg_clean(&(my_src->msg_src));
 	my_src->pipefds[0] = my_src->pipefds[1] = -1;
 }
 
@@ -156,20 +154,19 @@ static void testSRC_MSG_INIT_read(void)
 
 	state = STATE_START;
 
-	ret = io_mon_init(&mon);
-	CU_ASSERT_EQUAL(ret, 0);
 	ret = pipe(msg_src.pipefds);
 	CU_ASSERT_EQUAL(ret, 0);
 	ret = io_src_msg_init(&(msg_src.msg_src),
 			msg_src.pipefds[0],
 			IO_IN,
 			msg_cb_read,
-			my_msg_src_clean,
 			&(msg_src.msg),
 			sizeof(msg_src.msg),
 			1);
 	CU_ASSERT_EQUAL(ret, 0);
 
+	ret = io_mon_init(&mon);
+	CU_ASSERT_EQUAL(ret, 0);
 	ret = io_mon_add_source(&mon, &(msg_src.msg_src.src));
 	CU_ASSERT_EQUAL(ret, 0);
 
@@ -214,33 +211,34 @@ out:
 
 	/* cleanup */
 	io_mon_clean(&mon);
+	my_msg_src_clean(&(msg_src));
 
 	/* error cases */
 	ret = io_src_msg_init(NULL, msg_src.pipefds[0], IO_IN, msg_cb_read,
-			my_msg_src_clean, &(msg_src.msg), sizeof(struct msg),
+			&(msg_src.msg), sizeof(struct msg),
 			1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_src_msg_init(&(msg_src.msg_src), -1, IO_IN, msg_cb_read,
-			my_msg_src_clean, &(msg_src.msg), sizeof(struct msg),
+			&(msg_src.msg), sizeof(struct msg),
 			1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_src_msg_init(&(msg_src.msg_src), msg_src.pipefds[0], IO_IN,
-			msg_cb_read, my_msg_src_clean, NULL,
+			msg_cb_read, NULL,
 			sizeof(struct msg), 1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_src_msg_init(&(msg_src.msg_src), msg_src.pipefds[0], IO_IN,
-			msg_cb_read, my_msg_src_clean, &(msg_src.msg), 0, 1);
+			msg_cb_read, &(msg_src.msg), 0, 1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_src_msg_init(&(msg_src.msg_src), msg_src.pipefds[0], IO_IN,
-			NULL, my_msg_src_clean, &(msg_src.msg),
+			NULL, &(msg_src.msg),
 			sizeof(struct msg), 1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_src_msg_init(&(msg_src.msg_src), msg_src.pipefds[0], 666,
-			msg_cb_read, my_msg_src_clean, &(msg_src.msg),
+			msg_cb_read, &(msg_src.msg),
 			sizeof(struct msg), 1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_src_msg_init(&(msg_src.msg_src), msg_src.pipefds[0], 0,
-			msg_cb_read, my_msg_src_clean, &(msg_src.msg),
+			msg_cb_read, &(msg_src.msg),
 			sizeof(struct msg), 1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 }
@@ -265,6 +263,7 @@ static void msg_cb_write(struct io_src_msg *src, enum io_src_event evt)
 static void testSRC_MSG_INIT_write(void)
 {
 	fd_set rfds;
+	int maxfd;
 	int ret;
 	struct io_mon mon;
 	struct my_msg_src msg_src;
@@ -274,26 +273,26 @@ static void testSRC_MSG_INIT_write(void)
 
 	state = STATE_START;
 
-	ret = io_mon_init(&mon);
-	CU_ASSERT_EQUAL(ret, 0);
 	ret = pipe(msg_src.pipefds);
 	CU_ASSERT_EQUAL(ret, 0);
 	ret = io_src_msg_init(&(msg_src.msg_src),
 			msg_src.pipefds[1],
 			IO_OUT,
 			msg_cb_write,
-			my_msg_src_clean,
 			&(msg_src.msg),
 			sizeof(msg_src.msg),
 			1);
 	CU_ASSERT_EQUAL(ret, 0);
 
+	ret = io_mon_init(&mon);
+	CU_ASSERT_EQUAL(ret, 0);
 	ret = io_mon_add_source(&mon, &(msg_src.msg_src.src));
 	CU_ASSERT_EQUAL(ret, 0);
 
 	ret = io_mon_activate_out_source(&mon, &(msg_src.msg_src.src), 1);
 	CU_ASSERT_EQUAL(ret, 0);
 
+	maxfd = MAX(mon.epollfd, msg_src.pipefds[0]) + 1;
 	/* normal use case */
 	while (loop) {
 		/* restore the timer */
@@ -304,8 +303,7 @@ static void testSRC_MSG_INIT_write(void)
 		FD_ZERO(&rfds);
 		FD_SET(mon.epollfd, &rfds);
 		FD_SET(msg_src.pipefds[0], &rfds);
-		ret = select(msg_src.pipefds[0] + 1, &rfds, NULL, NULL,
-				&timeout);
+		ret = select(maxfd, &rfds, NULL, NULL, &timeout);
 
 		/* error, not normal */
 		CU_ASSERT_NOT_EQUAL(ret, -1);
@@ -347,6 +345,7 @@ static void testSRC_MSG_INIT_write(void)
 
 	/* cleanup */
 	io_mon_clean(&mon);
+	my_msg_src_clean(&(msg_src));
 
 out:
 	/* debriefing */
@@ -357,22 +356,22 @@ out:
 
 	/* error cases */
 	ret = io_src_msg_init(NULL, msg_src.pipefds[0], IO_OUT, msg_cb_read,
-			my_msg_src_clean, &(msg_src.msg), sizeof(struct msg),
+			&(msg_src.msg), sizeof(struct msg),
 			1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_src_msg_init(&(msg_src.msg_src), -1, IO_OUT, msg_cb_read,
-			my_msg_src_clean, &(msg_src.msg), sizeof(struct msg),
+			&(msg_src.msg), sizeof(struct msg),
 			1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_src_msg_init(&(msg_src.msg_src), msg_src.pipefds[0], IO_OUT,
-			msg_cb_read, my_msg_src_clean, NULL, sizeof(struct msg),
+			msg_cb_read, NULL, sizeof(struct msg),
 			1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_src_msg_init(&(msg_src.msg_src), msg_src.pipefds[0], IO_OUT,
-			msg_cb_read, my_msg_src_clean, &(msg_src.msg), 0, 1);
+			msg_cb_read, &(msg_src.msg), 0, 1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_src_msg_init(&(msg_src.msg_src), msg_src.pipefds[0], IO_OUT,
-			NULL, my_msg_src_clean, &(msg_src.msg),
+			NULL, &(msg_src.msg),
 			sizeof(struct msg), 1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 
@@ -390,17 +389,11 @@ static void testSRC_MSG_GET_SOURCE(void)
 
 	}
 
-	void dummy_clean(struct io_src_msg *msg)
-	{
-
-	}
-
 	/* normal use cases */
 	ret = io_src_msg_init(&(msg_src),
 			STDOUT_FILENO,
 			IO_OUT,
 			dummy_cb,
-			dummy_clean,
 			buf,
 			22,
 			1);

@@ -182,7 +182,7 @@ static void sep_cb(struct io_src *src)
 }
 
 int io_src_sep_init(struct io_src_sep *sep_src, int fd, io_src_sep_cb_t *cb,
-		io_src_clean_t *clean, int sep1, int sep2)
+		int sep1, int sep2)
 {
 	if (NULL == sep_src || NULL == cb || -1 == fd)
 		return -EINVAL;
@@ -195,5 +195,13 @@ int io_src_sep_init(struct io_src_sep *sep_src, int fd, io_src_sep_cb_t *cb,
 	sep_src->two_bytes = IO_SRC_SEP_NO_SEP2 != sep2;
 
 	/* can fail only on parameters */
-	return io_src_init(&(sep_src->src), fd, IO_IN, sep_cb, clean);
+	return io_src_init(&(sep_src->src), fd, IO_IN, sep_cb);
+}
+
+void io_src_sep_clean(struct io_src_sep *sep)
+{
+	if (NULL == sep)
+		return;
+
+	io_src_clean(&(sep->src));
 }

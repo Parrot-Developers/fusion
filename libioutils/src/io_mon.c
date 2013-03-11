@@ -336,7 +336,6 @@ int io_mon_clean(struct io_mon *mon)
 	while (mon->source) {
 		src = to_src(mon->source);
 		remove_source(mon, src);
-		io_src_clean(src);
 	}
 
 	if (-1 != mon->epollfd)

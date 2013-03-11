@@ -49,19 +49,15 @@ struct my_sep_src {
  * Callback called when the source is removed
  * @param src Underlying monitor source of the signal source
  */
-static void sep_clean(struct io_src *src)
+static void my_sep_clean(struct my_sep_src *my_sep)
 {
-	struct my_sep_src *my_sep;
-
-	if (NULL == src)
+	if (NULL == my_sep)
 		return;
-	my_sep = to_my_src_sep(to_src_sep(src));
 
 	close(my_sep->pipefds[0]);
 	close(my_sep->pipefds[1]);
 
-	memset(my_sep, 0, sizeof(*my_sep));
-	src->fd = -1;
+	io_src_sep_clean(&(my_sep->src_sep));
 }
 
 /* main and only test. sends ourselves messages and check we receive them */
@@ -103,14 +99,14 @@ static void testSRC_SEP(const int sep_pair[2], const char *big_msg, size_t sz)
 		}
 	}
 
-	ret = io_mon_init(&mon);
-	CU_ASSERT_EQUAL(ret, 0);
 	ret = pipe(src_sep.pipefds);
 	CU_ASSERT_EQUAL(ret, 0);
 	ret = io_src_sep_init(&(src_sep.src_sep), src_sep.pipefds[0], sep_cb,
-			sep_clean, sep_pair[0], sep_pair[1]);
+			sep_pair[0], sep_pair[1]);
 	CU_ASSERT_EQUAL(ret, 0);
 
+	ret = io_mon_init(&mon);
+	CU_ASSERT_EQUAL(ret, 0);
 	ret = io_mon_add_source(&mon, &(src_sep.src_sep.src));
 	CU_ASSERT_EQUAL(ret, 0);
 
@@ -155,18 +151,19 @@ out:
 	CU_ASSERT(state & STATE_TIMER_EXPIRED);
 
 	/* error cases */
-	ret = io_src_sep_init(NULL, src_sep.pipefds[0], sep_cb, sep_clean,
-			sep_pair[0], sep_pair[1]);
+	ret = io_src_sep_init(NULL, src_sep.pipefds[0], sep_cb, sep_pair[0],
+			sep_pair[1]);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_src_sep_init(&(src_sep.src_sep), -1, sep_cb, sep_clean,
-			sep_pair[0], sep_pair[1]);
+	ret = io_src_sep_init(&(src_sep.src_sep), -1, sep_cb, sep_pair[0],
+			sep_pair[1]);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_src_sep_init(&(src_sep.src_sep), src_sep.pipefds[0], NULL,
-			sep_clean, sep_pair[0], sep_pair[1]);
+			sep_pair[0], sep_pair[1]);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	/* cleanup */
 	io_mon_clean(&mon);
+	my_sep_clean(&(src_sep));
 }
 
 
@@ -194,11 +191,6 @@ static void testSRC_SEP_GET_SOURCE(void)
 
 	}
 
-	void dummy_clean(struct io_src *src)
-	{
-
-	}
-
 	ret = pipe(pipefd);
 	CU_ASSERT_NOT_EQUAL_FATAL(ret, -1);
 
@@ -206,7 +198,6 @@ static void testSRC_SEP_GET_SOURCE(void)
 	ret = io_src_sep_init(&(sep_src),
 			pipefd[0],
 			dummy_cb,
-			dummy_clean,
 			'x',
 			INT_MAX);
 	CU_ASSERT_EQUAL(ret, 0);

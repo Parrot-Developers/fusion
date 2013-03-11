@@ -48,13 +48,6 @@ struct io_src;
 typedef void (io_src_cb_t)(struct io_src *src);
 
 /**
- * @typedef io_src_clean_t
- * @brief Callback called after the source has been removed from the monitor
- * @param src Source to cleanup
- */
-typedef void (io_src_clean_t)(struct io_src *src);
-
-/**
  * @struct io_src
  * @brief Source to register in a monitor
  */
@@ -68,8 +61,6 @@ struct io_src {
 	enum io_src_event type;
 	/** callback responsible of this source */
 	io_src_cb_t *cb;
-	/** callback called to cleanup when the source is removed */
-	io_src_clean_t *clean;
 
 	/**
 	 * epoll events which occurred on this source, set before the callback
@@ -116,11 +107,10 @@ struct io_src {
  * @param fd File descriptor of the source
  * @param type Type, in, out or both
  * @param cb Callback notified when fd is ready for I/O
- * @param clean Called to cleanup the source when removed. Can be NULL.
  * @return Negative errno compatible value on error otherwise zero
  */
 int io_src_init(struct io_src *src, int fd, enum io_src_event type,
-		io_src_cb_t *cb, io_src_clean_t *clean);
+		io_src_cb_t *cb);
 
 /**
  * Returns the underlying file descriptor of a given source
@@ -133,8 +123,7 @@ static inline int io_src_get_fd(struct io_src *src)
 }
 
 /**
- * Reinitializes the source for further use, closing the file descriptor, then
- * calls the user clean callback
+ * Reinitializes the source for further use, closing the file descriptor.
  * @param src Source to initialize. Can't be NULL
  */
 void io_src_clean(struct io_src *src);

@@ -127,6 +127,7 @@ out:
 
 	/* cleanup */
 	io_mon_clean(&mon);
+	io_src_sig_clean(&src_sig);
 
 	/* check sigmask hasn't changed */
 	sigemptyset(&new_mask);

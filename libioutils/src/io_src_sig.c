@@ -48,27 +48,6 @@ static void sig_cb(struct io_src *src)
 }
 
 /**
- * Callback called when the source is removed
- * @param src Underlying monitor source of the signal source
- */
-static void sig_clean(struct io_src *src)
-{
-	struct io_src_sig *sig;
-
-	if (NULL == src)
-		return;
-	sig = to_src_sig(src);
-
-	/* restore gently the signal mask */
-	sigprocmask(SIG_SETMASK, &(sig->old_mask), NULL);
-	sigemptyset(&(sig->mask));
-	sigemptyset(&(sig->old_mask));
-	sig->cb = NULL;
-
-	memset(&(sig->si), 0, sizeof(sig->si));
-}
-
-/**
  * Builds the signal mask, with a list of signal numbers
  * @param m Signal set, initialized in output
  * @param args List of signals, the first being already processed
@@ -162,9 +141,25 @@ int io_src_sig_init(struct io_src_sig *sig, io_sig_cb_t *cb, ...)
 	sig->cb = cb;
 
 	/* can fail only on parameters */
-	return io_src_init(&(sig->src), fd, IO_IN, sig_cb, sig_clean);
+	return io_src_init(&(sig->src), fd, IO_IN, sig_cb);
 out:
-	sig_clean(&(sig->src));
+	io_src_sig_clean(sig);
 
 	return ret;
+}
+
+void io_src_sig_clean(struct io_src_sig *sig)
+{
+	if (NULL == sig)
+		return;
+
+	/* restore gently the signal mask */
+	sigprocmask(SIG_SETMASK, &(sig->old_mask), NULL);
+	sigemptyset(&(sig->mask));
+	sigemptyset(&(sig->old_mask));
+	sig->cb = NULL;
+
+	memset(&(sig->si), 0, sizeof(sig->si));
+
+	io_src_clean(&(sig->src));
 }

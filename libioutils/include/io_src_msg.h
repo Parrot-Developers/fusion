@@ -39,14 +39,6 @@ struct io_src_msg;
 typedef void (io_src_msg_cb_t)(struct io_src_msg *src, enum io_src_event evt);
 
 /**
- * User callback for cleaning the io_src_msg. It's responsibility is to clean
- * user defined fields. src_msg's fields cleanup is performed automatically,
- * including file descriptor closing.
- * @param src Message source to clean
- */
-typedef void (io_src_msg_clean_t)(struct io_src_msg *src);
-
-/**
  * @typedef io_src_msg
  * @brief Message source type
  */
@@ -55,11 +47,6 @@ struct io_src_msg {
 	struct io_src src;
 	/** user callback, notified when I/O is possible */
 	io_src_msg_cb_t *cb;
-	/**
-	 * user clean callback, called when io_mon_clean is called , after the
-	 * underlying source itself has been cleaned
-	 */
-	io_src_msg_clean_t *clean;
 	/** fixed-length of the messages to read/write */
 	unsigned len;
 	/**
@@ -101,8 +88,6 @@ int io_src_msg_get_message(struct io_src_msg *msg_src, void **msg);
  * @param fd File descriptor of the source
  * @param type Type, in, out or duplex
  * @param cb Callback called when a message has been received, stored in msg
- * @param clean Cleanup callback, called when the source is removed from the
- * monitor
  * @param rcv_buf Buffer of size len, filled at each cb call with the message
  * just read
  * @param len Size of rcv_buf
@@ -111,8 +96,8 @@ int io_src_msg_get_message(struct io_src_msg *msg_src, void **msg);
  * @return errno compatible negative value on error, 0 on success
  */
 int io_src_msg_init(struct io_src_msg *msg_src, int fd, enum io_src_event type,
-		io_src_msg_cb_t *cb, io_src_msg_clean_t *clean, void *rcv_buf,
-		unsigned len, unsigned perform_io);
+		io_src_msg_cb_t *cb, void *rcv_buf, unsigned len,
+		unsigned perform_io);
 
 /**
  * Returns the underlying io_src of the message source
@@ -123,5 +108,11 @@ static inline struct io_src *io_src_msg_get_source(struct io_src_msg *msg)
 {
 	return NULL == msg ? NULL : &(msg->src);
 }
+
+/**
+ * Cleans up a message source, by properly closing fd, zeroing fields etc...
+ * @param msg Message source to clean
+ */
+void io_src_msg_clean(struct io_src_msg *msg);
 
 #endif /* IO_SRC_MSG_H_ */

@@ -39,13 +39,6 @@ typedef void (io_src_msg_uad_cb_t)(struct io_src_msg_uad *src,
 		enum io_src_event evt);
 
 /**
- * Called when the source is removed from a monitor, on error or at cleanup.
- * Should perform client cleanup
- * @param src USD source
- */
-typedef void (io_src_msg_uad_clean_t)(struct io_src_msg_uad *src);
-
-/**
  * @struct io_src_msg_uad
  * @brief Message source type
  */
@@ -54,11 +47,6 @@ struct io_src_msg_uad {
 	struct io_src_msg src_msg;
 	/** user callback, notified when I/O is possible */
 	io_src_msg_uad_cb_t *cb;
-	/**
-	 * user clean callback, called when io_mon_clean is called , after the
-	 * underlying message source itself has been cleaned
-	 */
-	io_src_msg_uad_clean_t *clean;
 	/** path of the socket */
 	struct sockaddr_un addr;
 };
@@ -86,15 +74,14 @@ int io_src_msg_uad_get_message(struct io_src_msg_uad *uad, void **msg);
  * Initializes a bidirectional message source, from an UAD.
  * @param uad UAD source to initialize
  * @param cb Callback notified
- * @param clean Source cleanup callback
  * @param rcv_buf Buffer where received data are stored
  * @param len Size of rcv_buf
  * @param fmt A la printf format string for the construction of the path
  * @return errno compatible negative value
  */
 int io_src_msg_uad_init(struct io_src_msg_uad *uad, io_src_msg_uad_cb_t *cb,
-		io_src_msg_uad_clean_t *clean, void *rcv_buf, unsigned len,
-		const char *fmt, ...) __attribute__((format(printf, 6, 7)));
+		void *rcv_buf, unsigned len, const char *fmt, ...)
+__attribute__((format(printf, 5, 6)));
 
 /**
  * Returns the underlying io_src of the UAD source
@@ -106,5 +93,11 @@ static inline struct io_src *io_src_msg_uad_get_source(struct io_src_msg_uad
 {
 	return NULL == uad ? NULL : io_src_msg_get_source(&(uad->src_msg));
 }
+
+/**
+ * Re-initializes a uad source, releasing all it's resources.
+ * @param uad Source to clean
+ */
+void io_src_msg_uad_clean(struct io_src_msg_uad *uad);
 
 #endif /* IO_SRC_MSG_UAD_H_ */

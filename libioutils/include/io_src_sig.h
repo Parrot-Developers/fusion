@@ -68,4 +68,10 @@ static inline struct io_src *io_src_sig_get_source(struct io_src_sig *sig)
 	return NULL == sig ? NULL : &(sig->src);
 }
 
+/**
+ * Cleans up a signal source, by properly closing fd, zeroing fields etc...
+ * @param sig Signal source
+ */
+void io_src_sig_clean(struct io_src_sig *sig);
+
 #endif /* IO_SRC_SIG_H_ */
