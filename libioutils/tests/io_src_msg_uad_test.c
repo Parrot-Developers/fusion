@@ -1,5 +1,5 @@
 /**
- * @file io_src_msg_uad.c
+ * @file io_src_msg_uad_test.c
  * @date 14 feb. 2013
  * @author nicolas.carrier@parrot.com
  * @brief
