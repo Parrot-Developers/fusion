@@ -10,6 +10,7 @@
 int main(int argc, char *argv[])
 {
 	pid_t pid;
+	pid_t pid_ret;
 	int pidfd;
 	char *child_argv[] = {
 		"/bin/sleep",
@@ -21,6 +22,7 @@ int main(int argc, char *argv[])
 	};
 	int ret;
 	int status;
+	int count = 0;
 
 	pid = fork();
 	if (-1 == pid) {
@@ -39,19 +41,24 @@ int main(int argc, char *argv[])
 	}
 
 	/* in parent */
+	printf("pidwatch_create for pid %lld\n", (long long int)pid);
 	pidfd = pidwatch_create(pid, SOCK_CLOEXEC);
 	if (-1 == pidfd) {
 		perror("pidwatch");
 		return EXIT_FAILURE;
 	}
 
-	ret = pidwatch_wait(pidfd, &status);
-	if (-1 == ret) {
-		perror("pidwatch_wait");
-		return EXIT_FAILURE;
-	}
+	do {
+		pid_ret = pidwatch_wait(pidfd, &status);
+		if (-1 == ret) {
+			perror("pidwatch_wait");
+			return EXIT_FAILURE;
+		}
+		count++;
+	} while (0 == pid_ret || pid != pid_ret);
 
 	printf("Process of pid %lld terminated\n", (long long int)pid);
+	printf("%d message%s received\n", count, 1 < count ? "s" : "");
 
 	return EXIT_SUCCESS;
 }

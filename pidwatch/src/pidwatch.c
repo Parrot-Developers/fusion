@@ -7,11 +7,11 @@
 #include <linux/netlink.h>
 #include <linux/connector.h>
 #include <linux/cn_proc.h>
+#include <linux/filter.h>
 
 #include <unistd.h>
 
 #include <errno.h>
-#include <stdio.h> /* TODO remove */
 
 #include <pidwatch.h>
 
@@ -19,7 +19,7 @@ static int subscription_message(int pidfd)
 {
 	char nlmsghdrbuf[NLMSG_LENGTH(0)];
 	struct nlmsghdr *nlmsghdr = (struct nlmsghdr *)nlmsghdrbuf;
-	enum proc_cn_mcast_op op;
+	enum proc_cn_mcast_op op = PROC_CN_MCAST_LISTEN;
 	struct cn_msg cn_msg = {
 		.id = {
 			.idx = CN_IDX_PROC,
@@ -50,12 +50,29 @@ static int subscription_message(int pidfd)
 	nlmsghdr->nlmsg_seq = 0;
 	nlmsghdr->nlmsg_pid = 0;
 
-	op = PROC_CN_MCAST_LISTEN;
-
 	return TEMP_FAILURE_RETRY(writev(pidfd, iov, 3));
 }
 
-pid_t gpid;
+/**
+ * Installs a packet filter to the netlink socket, so that our client process is
+ * woken up only for messages it is interested on
+ * @param pidfd Netlink socket for parocess connector messages
+ * @return -1 on error with errno set suitably, 0 on success
+ */
+static int install_filter(int pidfd, pid_t pid)
+{
+	struct sock_filter filter[] = {
+		BPF_STMT(BPF_RET | BPF_K, 0xffffffff),
+	};
+
+	struct sock_fprog fprog = {
+		.filter = filter,
+		.len = sizeof(filter) / sizeof(*filter),
+	};
+
+	return setsockopt(pidfd, SOL_SOCKET, SO_ATTACH_FILTER, &fprog,
+			sizeof(fprog));
+}
 
 int pidwatch_create(pid_t pid, int flags)
 {
@@ -75,7 +92,6 @@ int pidwatch_create(pid_t pid, int flags)
 	};
 	int saved_errno;
 
-	printf("pidwatch_create for pid %lld\n", (long long int)pid);
 	if (((SOCK_NONBLOCK | SOCK_CLOEXEC) & flags) != flags) {
 		errno = EINVAL;
 		return -1;
@@ -88,18 +104,23 @@ int pidwatch_create(pid_t pid, int flags)
 	if (-1 == ret)
 		goto err;
 
+	/* must filter before subscription (start of message stream) */
+	ret = install_filter(pidfd, pid);
+	if (-1 == ret)
+		goto err;
+
 	ret = subscription_message(pidfd);
 	if (-1 == ret)
 		goto err;
 
-	gpid = pid;
-	/* 
-	 * once ready, verify with a kill(pid, 0) that the process is still
-	 * alive, in case it died between the fork and the pidwatch installation
-	 */
+	/* once subscribed, check the process still exists */
+	ret = kill(pid, 0);
+	if (-1 == ret)
+		goto err;
+
 	return pidfd;
 err:
-	/* is saving errno really needed ? does close modify errno ? */
+	/* is saving errno really needed ? i.e. does close modify errno ? */
 	saved_errno = errno;
 	close(pidfd);
 	errno = saved_errno;
@@ -109,69 +130,65 @@ err:
 
 int pidwatch_wait(int pidfd, int *status)
 {
-	printf("pidwatch_wait stub\n");
-
-	struct msghdr msghdr;
-	struct sockaddr_nl addr;
-	struct iovec iov[1];
 	char buf[PAGE_SIZE];
+	struct iovec iov[1] = {
+		[0] = {
+			.iov_base = buf,
+			.iov_len = sizeof(buf),
+		},
+	};
+	struct sockaddr_nl addr;
+	struct msghdr msghdr = {
+		.msg_name = &addr,
+		.msg_namelen = sizeof(addr),
+		.msg_iov = iov,
+		.msg_iovlen = 1,
+		.msg_control = NULL,
+		.msg_controllen = 0,
+		.msg_flags = 0,
+	};
 	ssize_t len;
-	struct nlmsghdr *nlmsghdr;
+	struct nlmsghdr *nlmsghdr = (struct nlmsghdr *)buf;
 	struct cn_msg *cn_msg;
 	struct proc_event *ev;
 
-	msghdr.msg_name = &addr;
-	msghdr.msg_namelen = sizeof addr;
-	msghdr.msg_iov = iov;
-	msghdr.msg_iovlen = 1;
-	msghdr.msg_control = NULL;
-	msghdr.msg_controllen = 0;
-	msghdr.msg_flags = 0;
+	len = recvmsg(pidfd, &msghdr, 0);
+	if (-1 == len)
+		/*
+		 * return -1 is valid : no pid can take this value and pid_t can
+		 * contain it otherwise, kill wouldn't work with negative pid
+		 * values. The same goes for 0
+		 */
+		return -1;
 
-	iov[0].iov_base = buf;
-	iov[0].iov_len = sizeof buf;
+	/* application can send message, filter them, they have no sense here */
+	/* TODO can't it be made by bpf ? */
+	if (addr.nl_pid != 0)
+		return 0;
 
-	do {
-		len = recvmsg(pidfd, &msghdr, 0);
-		if (-1 == len)
-			return -1;
-
-		if (addr.nl_pid != 0)
+	/* potentially more than on message in an answer */
+	for (; NLMSG_OK(nlmsghdr, len); nlmsghdr = NLMSG_NEXT(nlmsghdr, len)) {
+		if ((nlmsghdr->nlmsg_type == NLMSG_ERROR)
+				|| (nlmsghdr->nlmsg_type == NLMSG_NOOP))
 			continue;
 
-		for (nlmsghdr = (struct nlmsghdr *)buf;
-				NLMSG_OK(nlmsghdr, len);
-				nlmsghdr = NLMSG_NEXT(nlmsghdr, len)) {
-			if ((nlmsghdr->nlmsg_type == NLMSG_ERROR)
-					|| (nlmsghdr->nlmsg_type == NLMSG_NOOP))
-				continue;
+		cn_msg = NLMSG_DATA (nlmsghdr);
+		if ((cn_msg->id.idx != CN_IDX_PROC)
+				|| (cn_msg->id.val != CN_VAL_PROC))
+			continue;
+		ev = (struct proc_event *)cn_msg->data;
 
-			cn_msg = NLMSG_DATA (nlmsghdr);
-			if ((cn_msg->id.idx != CN_IDX_PROC)
-					|| (cn_msg->id.val != CN_VAL_PROC))
-				continue;
-			ev = (struct proc_event *)cn_msg->data;
+		/*
+		 * TODO check exit_code has the same semantic as status from
+		 * wait() : seems ok, but must ask a guru to be sure...
+		 */
+		if (PROC_EVENT_EXIT == ev->what) {
+			*status = ev->event_data.exit.exit_code;
 
-			switch (ev->what) {
-				case PROC_EVENT_EXIT:
-					printf ("EXIT %d/%d -> %d/%d\n",
-							ev->event_data.exit.process_pid,
-							ev->event_data.exit.process_tgid,
-							ev->event_data.exit.exit_code,
-							ev->event_data.exit.exit_signal);
-					if (ev->event_data.exit.process_pid == gpid) {
-						printf("FOUND ***\n");
-						*status = ev->event_data.exit.exit_code;
-						return 0;
-					}
-					break;
-				default:
-					printf("dropped packet, type %d\n",
-							ev->what);
-			}
+			return ev->event_data.exit.process_pid;
 		}
-	} while(1);
+	}
 
-	return -1;
+	return 0;
 }
 
