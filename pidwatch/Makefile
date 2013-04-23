@@ -1,0 +1,8 @@
+main:libpidwatch.so example/main.c include/pidwatch.h
+	gcc example/main.c -o main -L. -I include/ -lpidwatch
+
+libpidwatch.so:pidwatch.o
+	gcc -shared -Wl,-soname,libpidwatch.so -o libpidwatch.so  pidwatch.o
+	
+pidwatch.o:src/pidwatch.c include/pidwatch.h
+	gcc -Wall -c src/pidwatch.c -o pidwatch.o -fPIC -I include/ -Wall
