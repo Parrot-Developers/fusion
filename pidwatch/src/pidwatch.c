@@ -11,7 +11,10 @@
 
 #include <unistd.h>
 
+#include <arpa/inet.h>
+
 #include <errno.h>
+#include <stddef.h>
 
 #include <pidwatch.h>
 
@@ -53,6 +56,11 @@ static int subscription_message(int pidfd)
 	return TEMP_FAILURE_RETRY(writev(pidfd, iov, 3));
 }
 
+#include <stdio.h> /* TODO */
+struct __attribute__ ((__packed__)) cn_proc_msg {
+    struct cn_msg msg;
+    struct proc_event evt;
+};
 /**
  * Installs a packet filter to the netlink socket, so that our client process is
  * woken up only for messages it is interested on
@@ -62,7 +70,25 @@ static int subscription_message(int pidfd)
 static int install_filter(int pidfd, pid_t pid)
 {
 	struct sock_filter filter[] = {
-		BPF_STMT(BPF_RET | BPF_K, 0xffffffff),
+		/* check only one message is contained */ 
+		BPF_STMT(BPF_LD | BPF_H | BPF_ABS,
+				offsetof(struct nlmsghdr, nlmsg_type)),
+		BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, htons(NLMSG_DONE), 1, 0),
+		BPF_STMT(BPF_RET|BPF_K, 0x0),
+		/* check it's an exit event */
+		BPF_STMT(BPF_LD | BPF_W | BPF_ABS, NLMSG_LENGTH(0) +
+				offsetof(struct cn_proc_msg, evt.what)),
+		BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, htonl(PROC_EVENT_EXIT), 1,
+				0),
+		BPF_STMT(BPF_RET|BPF_K, 0x0),
+		/* check the pid matches */
+		BPF_STMT(BPF_LD | BPF_W | BPF_ABS,
+				NLMSG_LENGTH(0) +
+				offsetof(struct cn_proc_msg,
+					evt.event_data.exit.process_pid)),
+		BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, htonl(pid), 0, 1),
+		BPF_STMT(BPF_RET|BPF_K, 0xffffffff),
+		BPF_STMT(BPF_RET|BPF_K, 0x0),
 	};
 
 	struct sock_fprog fprog = {
@@ -106,8 +132,10 @@ int pidwatch_create(pid_t pid, int flags)
 
 	/* must filter before subscription (start of message stream) */
 	ret = install_filter(pidfd, pid);
-	if (-1 == ret)
+	if (-1 == ret) {
+		fprintf(stderr, "here\n");
 		goto err;
+	}
 
 	ret = subscription_message(pidfd);
 	if (-1 == ret)
