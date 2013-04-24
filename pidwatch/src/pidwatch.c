@@ -221,39 +221,18 @@ int pidwatch_wait(int pidfd, int *status)
 		/*
 		 * return -1 is valid : no pid can take this value and pid_t can
 		 * contain it, otherwise, kill() wouldn't work with negative pid
-		 * values. The same goes for 0
+		 * values.
 		 */
 		return -1;
 
-	/* application can send message, filter them, they have no sense here */
-	if (addr.nl_pid != 0)
-		return 0;
+	cn_msg = NLMSG_DATA (nlmsghdr);
+	ev = (struct proc_event *)cn_msg->data;
+	/*
+	 * TODO check exit_code has the same semantic as status from
+	 * wait() : seems ok, but must ask a guru to be sure...
+	 */
+	*status = ev->event_data.exit.exit_code;
 
-	/* potentially more than on message in an answer */
-	for (; /* (unsigned)len is ok, -1 is tested before */
-			NLMSG_OK(nlmsghdr, (unsigned)len);
-			nlmsghdr = NLMSG_NEXT(nlmsghdr, len)) {
-		if ((nlmsghdr->nlmsg_type == NLMSG_ERROR)
-				|| (nlmsghdr->nlmsg_type == NLMSG_NOOP))
-			continue;
-
-		cn_msg = NLMSG_DATA (nlmsghdr);
-		if ((cn_msg->id.idx != CN_IDX_PROC)
-				|| (cn_msg->id.val != CN_VAL_PROC))
-			continue;
-		ev = (struct proc_event *)cn_msg->data;
-
-		/*
-		 * TODO check exit_code has the same semantic as status from
-		 * wait() : seems ok, but must ask a guru to be sure...
-		 */
-		if (PROC_EVENT_EXIT == ev->what) {
-			*status = ev->event_data.exit.exit_code;
-
-			return ev->event_data.exit.process_pid;
-		}
-	}
-
-	return 0;
+	return ev->event_data.exit.process_pid;
 }
 
