@@ -74,21 +74,57 @@ static int install_filter(int pidfd, pid_t pid)
 		BPF_STMT(BPF_LD | BPF_H | BPF_ABS,
 				offsetof(struct nlmsghdr, nlmsg_type)),
 		BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, htons(NLMSG_DONE), 1, 0),
-		BPF_STMT(BPF_RET|BPF_K, 0x0),
-		/* check it's an exit event */
+		BPF_STMT(BPF_RET|BPF_K, 0x0), /* message is dropped */
+
+		/* check message isn't an error */
+		BPF_STMT(BPF_LD | BPF_H | BPF_ABS,
+				offsetof(struct nlmsghdr, nlmsg_type)),
+		BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, htons(NLMSG_ERROR), 0, 1),
+		BPF_STMT(BPF_RET|BPF_K, 0x0), /* message is dropped */
+
+		/* check message isn't an no-op */
+		BPF_STMT(BPF_LD | BPF_H | BPF_ABS,
+				offsetof(struct nlmsghdr, nlmsg_type)),
+		BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, htons(NLMSG_NOOP), 0, 1),
+		BPF_STMT(BPF_RET|BPF_K, 0x0), /* message is dropped */
+
+		/* check message comes from the kernel */
+		BPF_STMT(BPF_LD | BPF_W | BPF_ABS,
+				offsetof(struct nlmsghdr, nlmsg_pid)),
+		BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, 0, 1, 0),
+		BPF_STMT(BPF_RET|BPF_K, 0x0), /* message is dropped */
+
+		/* check it's a proc connector event part 1 */
+		BPF_STMT(BPF_LD | BPF_W | BPF_ABS, NLMSG_LENGTH(0) +
+				offsetof(struct cn_msg, id) +
+				offsetof(struct cb_id, idx)),
+		BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, htonl(CN_IDX_PROC), 1, 0),
+		BPF_STMT(BPF_RET|BPF_K, 0x0), /* message is dropped */
+
+		/* check it's a proc connector event part 2 */
+		BPF_STMT(BPF_LD | BPF_W | BPF_ABS, NLMSG_LENGTH(0) +
+				offsetof(struct cn_msg, id) +
+				offsetof(struct cb_id, val)),
+		BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, htonl(CN_VAL_PROC), 1, 0),
+		BPF_STMT(BPF_RET|BPF_K, 0x0), /* message is dropped */
+
+		/* check it's an exit message*/
 		BPF_STMT(BPF_LD | BPF_W | BPF_ABS, NLMSG_LENGTH(0) +
 				offsetof(struct cn_proc_msg, evt.what)),
 		BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, htonl(PROC_EVENT_EXIT), 1,
 				0),
-		BPF_STMT(BPF_RET|BPF_K, 0x0),
+		BPF_STMT(BPF_RET|BPF_K, 0x0), /* message is dropped */
+
 		/* check the pid matches */
-		BPF_STMT(BPF_LD | BPF_W | BPF_ABS,
-				NLMSG_LENGTH(0) +
+		BPF_STMT(BPF_LD | BPF_W | BPF_ABS, NLMSG_LENGTH(0) +
 				offsetof(struct cn_proc_msg,
 					evt.event_data.exit.process_pid)),
 		BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, htonl(pid), 0, 1),
+
+		/* message is sent to user space */
 		BPF_STMT(BPF_RET|BPF_K, 0xffffffff),
-		BPF_STMT(BPF_RET|BPF_K, 0x0),
+
+		BPF_STMT(BPF_RET|BPF_K, 0x0), /* message is dropped */
 	};
 
 	struct sock_fprog fprog = {
@@ -184,18 +220,19 @@ int pidwatch_wait(int pidfd, int *status)
 	if (-1 == len)
 		/*
 		 * return -1 is valid : no pid can take this value and pid_t can
-		 * contain it otherwise, kill wouldn't work with negative pid
+		 * contain it, otherwise, kill() wouldn't work with negative pid
 		 * values. The same goes for 0
 		 */
 		return -1;
 
 	/* application can send message, filter them, they have no sense here */
-	/* TODO can't it be made by bpf ? */
 	if (addr.nl_pid != 0)
 		return 0;
 
 	/* potentially more than on message in an answer */
-	for (; NLMSG_OK(nlmsghdr, len); nlmsghdr = NLMSG_NEXT(nlmsghdr, len)) {
+	for (; /* (unsigned)len is ok, -1 is tested before */
+			NLMSG_OK(nlmsghdr, (unsigned)len);
+			nlmsghdr = NLMSG_NEXT(nlmsghdr, len)) {
 		if ((nlmsghdr->nlmsg_type == NLMSG_ERROR)
 				|| (nlmsghdr->nlmsg_type == NLMSG_NOOP))
 			continue;
