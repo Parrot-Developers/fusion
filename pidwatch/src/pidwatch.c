@@ -1,3 +1,9 @@
+/**
+ * @file pidwatch.c
+ * @author carrier.nicolas0@gmail.com
+ * @brief Watch for the termination of a process via a file descriptor. Uses
+ * netlink connector internally, instead of SIGCHLD.
+ */
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
