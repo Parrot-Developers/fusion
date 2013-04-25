@@ -158,7 +158,7 @@ int pidwatch_create(pid_t pid, int flags)
 		errno = EINVAL;
 		return -1;
 	}
-	pidfd = socket (PF_NETLINK, SOCK_DGRAM | flags, NETLINK_CONNECTOR);
+	pidfd = socket(PF_NETLINK, SOCK_DGRAM | flags, NETLINK_CONNECTOR);
 	if (-1 == pidfd)
 		return -1;
 
