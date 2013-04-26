@@ -21,6 +21,7 @@
 
 #include <errno.h>
 #include <stddef.h>
+#include <stdio.h>
 
 #include <pidwatch.h>
 
@@ -62,7 +63,6 @@ static int subscription_message(int pidfd)
 	return TEMP_FAILURE_RETRY(writev(pidfd, iov, 3));
 }
 
-#include <stdio.h> /* TODO */
 struct __attribute__ ((__packed__)) cn_proc_msg {
     struct cn_msg msg;
     struct proc_event evt;
@@ -132,14 +132,44 @@ static int install_filter(int pidfd, pid_t pid)
 
 		BPF_STMT(BPF_RET|BPF_K, 0x0), /* message is dropped */
 	};
+	struct sock_fprog fprog = {0};
 
-	struct sock_fprog fprog = {
-		.filter = filter,
-		.len = sizeof(filter) / sizeof(*filter),
-	};
+	fprog.filter = filter;
+	fprog.len = sizeof(filter) / sizeof(*filter);
 
 	return setsockopt(pidfd, SOL_SOCKET, SO_ATTACH_FILTER, &fprog,
 			sizeof(fprog));
+}
+
+/* reads the state of a process, knowing it's pid */
+static int read_process_state(pid_t pid)
+{
+#define BUF_MAX 128
+	char status_path[BUF_MAX];
+	FILE *stat_file = NULL;
+	char state;
+	int ret;
+	/* both two following read values are dropped */
+	char read_comm[BUF_MAX];
+	int read_pid;
+
+	ret = snprintf(status_path, BUF_MAX, "/proc/%lld/stat", (long long)pid);
+	if (0 > ret || ret >= BUF_MAX)
+		return -1;
+
+	stat_file = fopen(status_path, "rb");
+	if (NULL == stat_file)
+		return -1;
+
+	ret = fscanf(stat_file, "%d %s %c", &read_pid, read_comm, &state);
+	if (EOF == ret) {
+		fclose(stat_file);
+		return -1;
+	}
+	fclose(stat_file);
+
+	return state;
+#undef BUF_MAX
 }
 
 int pidwatch_create(pid_t pid, int flags)
@@ -159,6 +189,7 @@ int pidwatch_create(pid_t pid, int flags)
 		.nl_groups = CN_IDX_PROC,
 	};
 	int saved_errno;
+	int state;
 
 	if (((SOCK_NONBLOCK | SOCK_CLOEXEC) & flags) != flags) {
 		errno = EINVAL;
@@ -184,9 +215,15 @@ int pidwatch_create(pid_t pid, int flags)
 		goto err;
 
 	/* once subscribed, check the process still exists */
-	ret = kill(pid, 0);
-	if (-1 == ret)
+	state = read_process_state(pid);
+	if (-1 == state || 'Z' == state) {
+		/*
+		 * on error, assume process disappeared, the same goes for
+		 * zombie process, which won't generate any EXIT event
+		 */
+		errno = ESRCH;
 		goto err;
+	}
 
 	return pidfd;
 err:
@@ -233,10 +270,8 @@ int pidwatch_wait(int pidfd, int *status)
 
 	cn_msg = NLMSG_DATA (nlmsghdr);
 	ev = (struct proc_event *)cn_msg->data;
-	/*
-	 * TODO check exit_code has the same semantic as status from
-	 * wait() : seems ok, but must ask a guru to be sure...
-	 */
+
+	/* exit_code has the same semantic as status from wait(2) */
 	*status = ev->event_data.exit.exit_code;
 
 	return ev->event_data.exit.process_pid;
