@@ -1,4 +1,6 @@
 *.so
 *.o
 *.swp
-main
+pidwatch_tests
+tags
+pidwait
