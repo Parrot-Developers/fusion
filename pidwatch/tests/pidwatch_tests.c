@@ -195,6 +195,7 @@ void testPIDWATCH_WAIT(void)
 int main(int argc, char *argv[])
 {
 	printf("*** Automated unit tests for pidwatch ***\n");
+	
 	testPIDWATCH_CREATE();
 	testPIDWATCH_WAIT();
 
