@@ -3,6 +3,7 @@
 #endif
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/capability.h>
 
 #include <unistd.h>
 
@@ -192,10 +193,61 @@ void testPIDWATCH_WAIT(void)
 	assert(pid_ret == -1);
 }
 
+void free_cap(cap_t *cap)
+{
+	if (cap)
+	{
+		printf("here\n");
+		cap_free(*cap);
+	}
+}
+
+/**
+ * Checks if a capability is effective for the current process. If not, allows
+ * to try activating it.
+ * @param value Capability to check
+ * @param try If non-zero and if the capability isn't set, try to raise it
+ * @return -1 on error, with errno set, 0 if the capability was already
+ * effective, 1 if not, but it was permetted, try was non-zero and it was raised
+ */
+int check_proc_cap(cap_value_t value, int try)
+{
+	int ret;
+	cap_t __attribute__((cleanup(free_cap))) caps;
+	cap_flag_value_t flag_value;
+
+	caps = cap_get_proc();
+	if (NULL == caps)
+		return -1;
+
+	ret = cap_get_flag(caps, value, CAP_EFFECTIVE, &flag_value);
+	if (-1 == ret)
+		return -1;
+	if (CAP_SET != value) {
+		ret = cap_set_flag(caps, CAP_EFFECTIVE, 1, &value, CAP_SET);
+		if (-1 == ret)
+			return -1;
+		ret = cap_set_proc(caps);
+		if (-1 == ret)
+			return -1;
+		return 1;
+	}
+
+	return 0;
+}
+
 int main(int argc, char *argv[])
 {
+	int ret;
+
 	printf("*** Automated unit tests for pidwatch ***\n");
 	
+	ret = check_proc_cap(CAP_NET_ADMIN, 1);
+	if (-1 == ret) {
+		fprintf(stderr, "CAP_NET_ADMIN is needed for pidwatch\n");
+		return EXIT_FAILURE;
+	}
+
 	testPIDWATCH_CREATE();
 	testPIDWATCH_WAIT();
 
