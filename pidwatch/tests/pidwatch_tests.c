@@ -154,6 +154,7 @@ void testPIDWATCH_WAIT(void)
 	pid_t pid_ret;
 	int pidfd;
 	int status;
+	int wstatus;
 	int ret;
 
 	/* normal cases */
@@ -165,9 +166,8 @@ void testPIDWATCH_WAIT(void)
 	pid_ret = E(pid_t, pidwatch_wait(pidfd, &status));
 	assert(pid_ret != -1);
 	/* cleanup */
-	waitpid(pid, &status, 0);
-	assert(WIFEXITED(status));
-	assert(0 == WEXITSTATUS(status));
+	waitpid(pid, &wstatus, 0);
+	assert(status == wstatus);
 	close(pidfd);
 
 	/* terminated by signal */
@@ -180,9 +180,8 @@ void testPIDWATCH_WAIT(void)
 	pid_ret = E(pid_t, pidwatch_wait(pidfd, &status));
 	assert(pid_ret != -1);
 	/* cleanup */
-	waitpid(pid, &status, 0);
-	assert(WIFSIGNALED(status));
-	assert(9 == WTERMSIG(status));
+	waitpid(pid, &wstatus, 0);
+	assert(status == wstatus);
 	close(pidfd);
 
 
