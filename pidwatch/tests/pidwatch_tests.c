@@ -108,7 +108,7 @@ pid_t __attribute__((sentinel)) launch(char *prog, ...)
 	_return;\
 })\
 
-void testPIDWATCH_CREATE(void)
+void test_pidwatch_create(void)
 {
 	pid_t pid;
 	int pidfd;
@@ -148,7 +148,7 @@ void testPIDWATCH_CREATE(void)
 	assert(pidfd == -1);
 }
 
-void testPIDWATCH_WAIT(void)
+void test_pidwatch_wait(void)
 {
 	pid_t pid;
 	pid_t pid_ret;
@@ -237,15 +237,15 @@ int main(int argc, char *argv[])
 	int ret;
 
 	printf("*** Automated unit tests for pidwatch ***\n");
-	
+
 	ret = check_proc_cap(CAP_NET_ADMIN, 1);
 	if (-1 == ret) {
 		fprintf(stderr, "CAP_NET_ADMIN is needed for pidwatch\n");
 		return EXIT_FAILURE;
 	}
 
-	testPIDWATCH_CREATE();
-	testPIDWATCH_WAIT();
+	test_pidwatch_create();
+	test_pidwatch_wait();
 
 	printf("*** No error found ***\n");
 

@@ -64,9 +64,10 @@ static int subscription_message(int pidfd)
 }
 
 struct __attribute__ ((__packed__)) cn_proc_msg {
-    struct cn_msg msg;
-    struct proc_event evt;
+	struct cn_msg msg;
+	struct proc_event evt;
 };
+
 /**
  * Installs a packet filter to the netlink socket, so that our client process is
  * woken up only for messages it is interested on
@@ -76,7 +77,7 @@ struct __attribute__ ((__packed__)) cn_proc_msg {
 static int install_filter(int pidfd, pid_t pid)
 {
 	struct sock_filter filter[] = {
-		/* check only one message is contained */ 
+		/* check only one message is contained */
 		BPF_STMT(BPF_LD | BPF_H | BPF_ABS,
 				offsetof(struct nlmsghdr, nlmsg_type)),
 		BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, htons(NLMSG_DONE), 1, 0),
@@ -268,7 +269,7 @@ int pidwatch_wait(int pidfd, int *status)
 		 */
 		return -1;
 
-	cn_msg = NLMSG_DATA (nlmsghdr);
+	cn_msg = NLMSG_DATA(nlmsghdr);
 	ev = (struct proc_event *)cn_msg->data;
 
 	/* exit_code has the same semantic as status from wait(2) */
