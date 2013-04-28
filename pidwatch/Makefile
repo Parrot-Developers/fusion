@@ -2,7 +2,7 @@ pidwatch_tests:libpidwatch.so tests/pidwatch_tests.c include/pidwatch.h
 	gcc tests/pidwatch_tests.c -g -O0 -lcap -o pidwatch_tests -L. -I include/ -lpidwatch -Wall -Wl,-rpath /home/nicolas/workspace/C/pidwatch
 
 pidwait:libpidwatch.so example/pidwait.c include/pidwatch.h
-	gcc example/pidwait.c -g -O0 -o pidwait -L. -I include/ -lpidwatch -Wall -Wl,-rpath /home/nicolas/workspace/C/pidwatch
+	gcc example/pidwait.c -g -O0 -o pidwait -L. -I include/ -lpidwatch  -lcap -Wall -Wl,-rpath /home/nicolas/workspace/C/pidwatch
 
 libpidwatch.so:pidwatch.o
 	gcc -shared -Wl,-soname,libpidwatch.so -o libpidwatch.so  pidwatch.o

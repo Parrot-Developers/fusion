@@ -2,48 +2,31 @@
 #define _GNU_SOURCE
 #endif
 #include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/capability.h>
 
 #include <unistd.h>
 
-#include <stdarg.h>
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <getopt.h>
+#include <string.h>
 #include <errno.h>
 
 #include <pidwatch.h>
 
-void dump_args(int argc, char *argv[])
+static void dump_args(int argc, char *argv[])
 {
 	do {
 		printf("%s ", *argv);
 	} while (*(++argv));
 }
 
-pid_t __attribute__((sentinel)) launch(char *prog, ...)
+static pid_t launch(int argc, char *argv[])
 {
 	int ret;
-	int child_argc = 0;
-	char *child_argv[10] = {NULL};
 	char *child_envp[] = {NULL};
-	char *arg = (char *)-1;
-	va_list args;
 	pid_t pid;
-
-	child_argv[child_argc++] = prog;
-
-	va_start(args, prog);
-	for (; child_argc < 10 && NULL != arg; child_argc++) {
-		arg = va_arg(args, char *);
-		child_argv[child_argc] = arg;
-	}
-	va_end(args);
-
-	if (NULL != arg) {
-		errno = ERANGE;
-		return -1;
-	}
-	child_argv[child_argc] = NULL; /* not necessary but clearer */
 
 	pid = fork();
 	if (-1 == pid)
@@ -51,10 +34,7 @@ pid_t __attribute__((sentinel)) launch(char *prog, ...)
 
 	if (0 == pid) {
 		/* in child */
-		printf("Executing ");
-		dump_args(child_argc, child_argv);
-		printf("\n");
-		ret = execvpe(child_argv[0], child_argv, child_envp);
+		ret = execvpe(argv[0], argv, child_envp);
 		if (-1 == ret) {
 			perror("execve");
 			exit(1);
@@ -65,54 +45,10 @@ pid_t __attribute__((sentinel)) launch(char *prog, ...)
 	return pid;
 }
 
-//void testPIDWATCH_WAIT(void)
-//{
-//	pid_t pid;
-//	pid_t pid_ret;
-//	int pidfd;
-//	int status;
-//	int ret;
-//
-//	/* normal cases */
-//	/* normal termination */
-//	pid = E(pid_t, launch("sleep", "0.5", NULL));
-//	assert(pid != -1);
-//	pidfd = E(int, pidwatch_create(pid, SOCK_CLOEXEC));
-//	assert(pidfd != -1);
-//	pid_ret = E(pid_t, pidwatch_wait(pidfd, &status));
-//	assert(pid_ret != -1);
-//	/* cleanup */
-//	waitpid(pid, &status, 0);
-//	assert(WIFEXITED(status));
-//	assert(0 == WEXITSTATUS(status));
-//	close(pidfd);
-//
-//	/* terminated by signal */
-//	pid = E(pid_t, launch("sleep", "1", NULL));
-//	assert(pid != -1);
-//	pidfd = E(int, pidwatch_create(pid, SOCK_CLOEXEC));
-//	assert(pidfd != -1);
-//	ret = E(int, kill(pid, 9));
-//	assert(-1 != ret);
-//	pid_ret = E(pid_t, pidwatch_wait(pidfd, &status));
-//	assert(pid_ret != -1);
-//	/* cleanup */
-//	waitpid(pid, &status, 0);
-//	assert(WIFSIGNALED(status));
-//	assert(9 == WTERMSIG(status));
-//	close(pidfd);
-//
-//
-//	/* error cases */
-//	pid_ret = pidwatch_wait(-1, &status);
-//	assert(pid_ret == -1);
-//	pid_ret = pidwatch_wait(1, NULL);
-//	assert(pid_ret == -1);
-//}
-
-void usage(int exit_code)
+static void usage(int exit_code)
 {
-	printf("usage : pidwait -p|--pid PID\n"
+	FILE *out = exit_code ? stderr : stdout;
+	fprintf(out, "usage : pidwait -p|--pid PID\n"
 	       "        pidwait COMMAND_LINE\n"
 	       "\tThe first form waits for the termination a process of a given"
 	       "pid.\n"
@@ -123,10 +59,142 @@ void usage(int exit_code)
 	exit(exit_code);
 }
 
+static void close_p(int *fd)
+{
+	if (fd)
+		if (-1 != *fd) {
+			close(*fd);
+			*fd = -1;
+		}
+}
+
+static void process_args(int argc, char *argv[], int *child, pid_t *pid)
+{
+	if (NULL == child || NULL == pid)
+		fprintf(stderr, "Coding error : NULL argument\n");
+
+	if (argc < 2)
+		usage(EXIT_FAILURE);
+
+	if ('-' == argv[1][0]) {
+		if (0 == strcmp("-h", argv[1]))
+			usage(EXIT_SUCCESS);
+		if (0 == strcmp("-p", argv[1]) ||
+				0 == strcmp("--pid", argv[1])) {
+			if (3 != argc) {
+				usage(EXIT_FAILURE);
+			} else {
+				*child = 0;
+				*pid = atoi(argv[2]);
+				printf("Attach to process %d\n", *pid);
+			}
+		} else {
+			fprintf(stderr, "Unsupported option \"%s\"\n", argv[1]);
+			usage(EXIT_FAILURE);
+		}
+	} else {
+		*child = 1;
+		*pid = launch(argc - 1, argv + 1);
+		printf("Watch \"");
+		dump_args(argc - 1, argv + 1);
+		printf("\"with pid %d\n", *pid);
+	}
+}
+
+static void debriefing(pid_t pid, int status)
+{
+	printf("Process of pid %d ", pid);
+	if (WIFEXITED(status)) {
+		printf("exited with return code %d\n", WEXITSTATUS(status));
+	} else if (WIFSIGNALED(status)) {
+		printf("was killed by signal %d", WTERMSIG(status));
+#ifdef WCOREDUMP
+		if (WCOREDUMP(status))
+			printf(" and produced a coredump");
+#endif
+		printf("\n");
+	} else {
+		/* normally, can't be reached */
+		fprintf(stderr, "Unhandheld exit status case\n");
+	}
+}
+
+void free_cap(cap_t *cap)
+{
+	if (cap)
+		cap_free(*cap);
+}
+
+/**
+ * Checks if a capability is effective for the current process. If not, allows
+ * to try activating it.
+ * @param value Capability to check
+ * @param try If non-zero and if the capability isn't set, try to raise it
+ * @return -1 on error, with errno set, 0 if the capability was already
+ * effective, 1 if not, but it was permetted, try was non-zero and it was raised
+ */
+int check_proc_cap(cap_value_t value, int try)
+{
+	int ret;
+	cap_t __attribute__((cleanup(free_cap))) caps;
+	cap_flag_value_t flag_value;
+
+	caps = cap_get_proc();
+	if (NULL == caps)
+		return -1;
+
+	ret = cap_get_flag(caps, value, CAP_EFFECTIVE, &flag_value);
+	if (-1 == ret)
+		return -1;
+	if (CAP_SET != value) {
+		ret = cap_set_flag(caps, CAP_EFFECTIVE, 1, &value, CAP_SET);
+		if (-1 == ret)
+			return -1;
+		ret = cap_set_proc(caps);
+		if (-1 == ret)
+			return -1;
+		return 1;
+	}
+
+	return 0;
+}
+
 int main(int argc, char *argv[])
 {
+	int __attribute__((cleanup(close_p))) pidfd;
+	int status;
+	int child;
+	int ret;
+	pid_t pid_ret;
+	pid_t pid;
 
+	process_args(argc, argv, &child, &pid);
 
+	ret = check_proc_cap(CAP_NET_ADMIN, 1);
+	if (-1 == ret) {
+		fprintf(stderr, "CAP_NET_ADMIN is needed for pidwatch\n");
+		fprintf(stderr, "try \"setcap cap_net_admin=+p pidwait\"\n");
+		return EXIT_FAILURE;
+	}
+
+	pidfd = pidwatch_create(pid, SOCK_CLOEXEC);
+	if (-1 == pidfd) {
+		perror("pidwatch_create");
+		return EXIT_FAILURE;
+	}
+	/* here, block directly. One can rather use a select-like event loop */
+	pid_ret = pidwatch_wait(pidfd, &status);
+	assert(pid == pid_ret);
+	if (-1 == pid_ret) {
+		perror("pidwatch_wait");
+		return EXIT_FAILURE;
+	}
+
+	debriefing(pid, status);
+
+	/* if we are the parent of the child, we should reap it */
+	if (child)
+		waitpid(pid, &status, WNOHANG);
 
 	return EXIT_SUCCESS;
 }
