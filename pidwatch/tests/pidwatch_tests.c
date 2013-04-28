@@ -69,7 +69,7 @@ pid_t __attribute__((sentinel)) launch(char *prog, ...)
 	va_end(args);
 
 	if (NULL != arg) {
-		errno = ERANGE;
+		errno = E2BIG;
 		return -1;
 	}
 	child_argv[child_argc] = NULL; /* not necessary but clearer */
