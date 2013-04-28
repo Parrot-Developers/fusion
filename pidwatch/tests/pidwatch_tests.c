@@ -195,10 +195,7 @@ void testPIDWATCH_WAIT(void)
 void free_cap(cap_t *cap)
 {
 	if (cap)
-	{
-		printf("here\n");
 		cap_free(*cap);
-	}
 }
 
 /**
