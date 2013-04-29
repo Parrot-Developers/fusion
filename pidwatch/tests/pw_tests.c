@@ -50,7 +50,7 @@ void read_pid_max(void)
 void dump_args(int argc, char *argv[])
 {
 	do {
-		printf("%s ", *argv);
+		fprintf(stderr, "%s ", *argv);
 	} while (*(++argv));
 }
 
@@ -85,9 +85,9 @@ pid_t __attribute__((sentinel)) launch(char *prog, ...)
 
 	if (0 == pid) {
 		/* in child */
-		printf("Executing ");
+		fprintf(stderr, "Executing ");
 		dump_args(child_argc, child_argv);
-		printf("\n");
+		fprintf(stderr, "\n");
 		ret = execvpe(child_argv[0], child_argv, child_envp);
 		if (-1 == ret) {
 			perror("execve");
@@ -130,7 +130,7 @@ void testPIDWATCH_CREATE(void)
 	close(pidfd);
 
 	/* error cases */
-	pid = E(pid_t, launch("echo", "titi tata tutu", NULL));
+	pid = E(pid_t, launch("ls", "supercalifragilistic", NULL));
 	CU_ASSERT_NOT_EQUAL(pid, -1);
 	sleep(1);
 	/*
