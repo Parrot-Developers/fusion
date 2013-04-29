@@ -7,6 +7,7 @@
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
+#include <sys/socket.h>
 /* is it ok to include this ? */
 #include <sys/user.h>
 
