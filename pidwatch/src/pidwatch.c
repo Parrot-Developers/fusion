@@ -8,8 +8,6 @@
 #define _GNU_SOURCE
 #endif
 #include <sys/socket.h>
-/* is it ok to include this ? */
-#include <sys/user.h>
 
 #include <linux/netlink.h>
 #include <linux/connector.h>
@@ -26,6 +24,8 @@
 #include <string.h>
 
 #include <pidwatch.h>
+
+#define MSG_BUF_SIZE 4096
 
 static int subscription_message(int pidfd)
 {
@@ -241,7 +241,7 @@ err:
 
 int pidwatch_wait(int pidfd, int *status)
 {
-	char buf[PAGE_SIZE];
+	char buf[MSG_BUF_SIZE];
 	struct iovec iov[1] = {
 		[0] = {
 			.iov_base = buf,
