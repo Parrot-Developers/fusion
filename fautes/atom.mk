@@ -15,7 +15,7 @@ LOCAL_EXPORT_C_INCLUDES  := $(LOCAL_PATH)/include
 LOCAL_EXPORT_LDLIBS := -lcunit
 
 LOCAL_SRC_FILES := \
-	$(call all-c-files-under,lib,.c) \
+	$(call all-c-files-under,lib) \
 
 LOCAL_LIBRARIES := libcunit
 
@@ -32,7 +32,7 @@ LOCAL_DESCRIPTION := Utility to run embedded unit tests using libfautes / cunit
 LOCAL_CATEGORY_PATH := devel/unit_tests
 
 LOCAL_SRC_FILES := \
-	$(call all-c-files-under,src,.c) \
+	$(call all-c-files-under,src) \
 
 LOCAL_LDLIBS := -ldl
 

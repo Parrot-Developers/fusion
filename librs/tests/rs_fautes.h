@@ -1,5 +1,5 @@
 /**
- * @file io_fautes.h
+ * @file rs_fautes.h
  * @date 24 oct. 2012
  * @author nicolas.carrier@parrot.com
  * @brief
