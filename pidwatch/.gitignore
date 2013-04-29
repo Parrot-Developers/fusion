@@ -4,3 +4,5 @@
 pidwatch_tests
 tags
 pidwait
+.cproject
+.project
