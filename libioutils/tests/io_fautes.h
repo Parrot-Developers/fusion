@@ -13,6 +13,7 @@
 extern suite_t mon_suite;
 extern suite_t src_msg_suite;
 extern suite_t src_msg_uad_suite;
+extern suite_t src_pid_suite;
 extern suite_t src_sep_suite;
 extern suite_t src_sig_suite;
 extern suite_t src_suite;
