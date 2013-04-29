@@ -22,6 +22,7 @@
 #include <errno.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <pidwatch.h>
 
@@ -133,8 +134,9 @@ static int install_filter(int pidfd, pid_t pid)
 
 		BPF_STMT(BPF_RET|BPF_K, 0x0), /* message is dropped */
 	};
-	struct sock_fprog fprog = {0};
+	struct sock_fprog fprog;
 
+	memset(&fprog, 0, sizeof(fprog));
 	fprog.filter = filter;
 	fprog.len = sizeof(filter) / sizeof(*filter);
 
