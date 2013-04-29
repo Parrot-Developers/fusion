@@ -12,10 +12,10 @@ LOCAL_CATEGORY_PATH := libs
 
 LOCAL_EXPORT_C_INCLUDES  := $(LOCAL_PATH)/include
 
-LOCAL_SRC_FILES := $(call all-c-files-under,src,.c)
+LOCAL_SRC_FILES := $(call all-c-files-under,src)
 
 ifdef LIBRS_FAUTES_SUPPORT
-LOCAL_SRC_FILES += $(call all-c-files-under,tests,.c)
+LOCAL_SRC_FILES += $(call all-c-files-under,tests)
 
 LOCAL_LIBRARIES := libfautes
 endif
