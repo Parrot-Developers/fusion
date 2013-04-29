@@ -167,12 +167,12 @@ int main(int argc, char *argv[])
 {
 	int __attribute__((cleanup(close_p))) pidfd;
 	int status;
-	int child;
+	int child = 0;
 #ifdef PIDWATCH_HAS_CAPABILITY_SUPPORT
 	int ret;
 #endif /* PIDWATCH_HAS_CAPABILITY_SUPPORT */
 	pid_t pid_ret;
-	pid_t pid;
+	pid_t pid = 0;
 
 	process_args(argc, argv, &child, &pid);
 
