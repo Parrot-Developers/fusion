@@ -3,7 +3,9 @@
 #endif
 #include <sys/types.h>
 #include <sys/wait.h>
+#ifdef PIDWATCH_HAS_CAPABILITY_SUPPORT
 #include <sys/capability.h>
+#endif /* PIDWATCH_HAS_CAPABILITY_SUPPORT */
 
 #include <unistd.h>
 
@@ -119,6 +121,7 @@ static void debriefing(pid_t pid, int status)
 	}
 }
 
+#ifdef PIDWATCH_HAS_CAPABILITY_SUPPORT
 void free_cap(cap_t *cap)
 {
 	if (cap)
@@ -158,24 +161,29 @@ int check_proc_cap(cap_value_t value, int try)
 
 	return 0;
 }
+#endif /* PIDWATCH_HAS_CAPABILITY_SUPPORT */
 
 int main(int argc, char *argv[])
 {
 	int __attribute__((cleanup(close_p))) pidfd;
 	int status;
 	int child;
+#ifdef PIDWATCH_HAS_CAPABILITY_SUPPORT
 	int ret;
+#endif /* PIDWATCH_HAS_CAPABILITY_SUPPORT */
 	pid_t pid_ret;
 	pid_t pid;
 
 	process_args(argc, argv, &child, &pid);
 
+#ifdef PIDWATCH_HAS_CAPABILITY_SUPPORT
 	ret = check_proc_cap(CAP_NET_ADMIN, 1);
 	if (-1 == ret) {
 		fprintf(stderr, "CAP_NET_ADMIN is needed for pidwatch\n");
 		fprintf(stderr, "try \"setcap cap_net_admin=+p pidwait\"\n");
 		return EXIT_FAILURE;
 	}
+#endif /* PIDWATCH_HAS_CAPABILITY_SUPPORT */
 
 	pidfd = pidwatch_create(pid, SOCK_CLOEXEC);
 	if (-1 == pidfd) {
