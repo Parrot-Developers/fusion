@@ -3,18 +3,23 @@
 #endif
 #include <sys/types.h>
 #include <sys/wait.h>
+#ifdef PIDWATCH_HAS_CAPABILITY_SUPPORT
 #include <sys/capability.h>
+#endif /* PIDWATCH_HAS_CAPABILITY_SUPPORT */
 
 #include <unistd.h>
 
-#include <assert.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
 
+#include <CUnit/Basic.h>
+
 #include <pidwatch.h>
+
+#include <fautes.h>
 
 pid_t g_pid_max;
 
@@ -108,7 +113,7 @@ pid_t __attribute__((sentinel)) launch(char *prog, ...)
 	_return;\
 })\
 
-void test_pidwatch_create(void)
+void testPIDWATCH_CREATE(void)
 {
 	pid_t pid;
 	int pidfd;
@@ -116,39 +121,39 @@ void test_pidwatch_create(void)
 	int invalid_flag;
 
 	/* normal cases */
-	pid = E(pid_t, launch("sleep", "0.5", NULL));
-	assert(pid != -1);
+	pid = E(pid_t, launch("sleep", "1", NULL));
+	CU_ASSERT_NOT_EQUAL(pid, -1);
 	pidfd = E(int, pidwatch_create(pid, SOCK_CLOEXEC));
-	assert(pidfd != -1);
+	CU_ASSERT_NOT_EQUAL(pidfd, -1);
 	/* cleanup */
 	waitpid(pid, &status, 0);
 	close(pidfd);
 
 	/* error cases */
 	pid = E(pid_t, launch("echo", "titi tata tutu", NULL));
-	assert(pid != -1);
+	CU_ASSERT_NOT_EQUAL(pid, -1);
 	sleep(1);
 	/*
 	 * if the child dies before we set up the watch, it is a zombie, thus
 	 * considered dead, ESRCH is raised
 	 */
 	pidfd = pidwatch_create(pid, SOCK_CLOEXEC);
-	assert(ESRCH == errno);
-	assert(pidfd == -1);
+	CU_ASSERT(ESRCH == errno);
+	CU_ASSERT_EQUAL(pidfd, -1);
 	/* cleanup */
 	waitpid(pid, &status, 0);
 
 	/* invalid arguments */
 	pidfd = pidwatch_create(-63, SOCK_CLOEXEC);
-	assert(pidfd == -1);
+	CU_ASSERT_EQUAL(pidfd, -1);
 	invalid_flag = ~(SOCK_CLOEXEC | SOCK_NONBLOCK);
 	pidfd = pidwatch_create(g_pid_max, SOCK_CLOEXEC);
-	assert(pidfd == -1);
+	CU_ASSERT_EQUAL(pidfd, -1);
 	pidfd = pidwatch_create(1, invalid_flag); /* pid 1 is always valid */
-	assert(pidfd == -1);
+	CU_ASSERT_EQUAL(pidfd, -1);
 }
 
-void test_pidwatch_wait(void)
+void testPIDWATCH_WAIT(void)
 {
 	pid_t pid;
 	pid_t pid_ret;
@@ -159,39 +164,40 @@ void test_pidwatch_wait(void)
 
 	/* normal cases */
 	/* normal termination */
-	pid = E(pid_t, launch("sleep", "0.5", NULL));
-	assert(pid != -1);
+	pid = E(pid_t, launch("sleep", "1", NULL));
+	CU_ASSERT_NOT_EQUAL(pid, -1);
 	pidfd = E(int, pidwatch_create(pid, SOCK_CLOEXEC));
-	assert(pidfd != -1);
+	CU_ASSERT_NOT_EQUAL(pidfd, -1);
 	pid_ret = E(pid_t, pidwatch_wait(pidfd, &status));
-	assert(pid_ret != -1);
+	CU_ASSERT_NOT_EQUAL(pid_ret, -1);
 	/* cleanup */
 	waitpid(pid, &wstatus, 0);
-	assert(status == wstatus);
+	CU_ASSERT_EQUAL(status, wstatus);
 	close(pidfd);
 
 	/* terminated by signal */
 	pid = E(pid_t, launch("sleep", "1", NULL));
-	assert(pid != -1);
+	CU_ASSERT_NOT_EQUAL(pid, -1);
 	pidfd = E(int, pidwatch_create(pid, SOCK_CLOEXEC));
-	assert(pidfd != -1);
+	CU_ASSERT_NOT_EQUAL(pidfd, -1);
 	ret = E(int, kill(pid, 9));
-	assert(-1 != ret);
+	CU_ASSERT_NOT_EQUAL(ret, -1);
 	pid_ret = E(pid_t, pidwatch_wait(pidfd, &status));
-	assert(pid_ret != -1);
+	CU_ASSERT_NOT_EQUAL(pid_ret, -1);
 	/* cleanup */
 	waitpid(pid, &wstatus, 0);
-	assert(status == wstatus);
+	CU_ASSERT_EQUAL(status, wstatus);
 	close(pidfd);
 
 
 	/* error cases */
 	pid_ret = pidwatch_wait(-1, &status);
-	assert(pid_ret == -1);
+	CU_ASSERT_EQUAL(pid_ret, -1);
 	pid_ret = pidwatch_wait(1, NULL);
-	assert(pid_ret == -1);
+	CU_ASSERT_EQUAL(pid_ret, -1);
 }
 
+#ifdef PIDWATCH_HAS_CAPABILITY_SUPPORT
 void free_cap(cap_t *cap)
 {
 	if (cap)
@@ -231,23 +237,45 @@ int check_proc_cap(cap_value_t value, int try)
 
 	return 0;
 }
+#endif /* PIDWATCH_HAS_CAPABILITY_SUPPORT */
 
-int main(int argc, char *argv[])
+static const test_t tests[] = {
+		{
+				.fn = testPIDWATCH_CREATE,
+				.name = "pidwatch_create"
+		},
+		{
+				.fn = testPIDWATCH_WAIT,
+				.name = "pidwatch_wait"
+		},
+
+		/* NULL guard */
+		{.fn = NULL, .name = NULL},
+};
+
+static int init_pw_suite(void)
 {
+#ifdef PIDWATCH_HAS_CAPABILITY_SUPPORT
 	int ret;
-
-	printf("*** Automated unit tests for pidwatch ***\n");
 
 	ret = check_proc_cap(CAP_NET_ADMIN, 1);
 	if (-1 == ret) {
 		fprintf(stderr, "CAP_NET_ADMIN is needed for pidwatch\n");
-		return EXIT_FAILURE;
+		return 1;
 	}
+#endif /* PIDWATCH_HAS_CAPABILITY_SUPPORT */
 
-	test_pidwatch_create();
-	test_pidwatch_wait();
-
-	printf("*** No error found ***\n");
-
-	return EXIT_SUCCESS;
+	return 0;
 }
+
+static int clean_pw_suite(void)
+{
+	return 0;
+}
+
+suite_t pidwatch_suite = {
+		.name = "pidwatch",
+		.init = init_pw_suite,
+		.clean = clean_pw_suite,
+		.tests = tests,
+};
