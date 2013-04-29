@@ -22,3 +22,20 @@ LOCAL_LIBRARIES += libfautes
 endif
 
 include $(BUILD_SHARED_LIBRARY)
+
+###############################################################################
+# pidwait
+###############################################################################
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := pidwait
+LOCAL_DESCRIPTION := Example libpidwatch client for monitoring processes death
+LOCAL_CATEGORY_PATH := devel
+
+LOCAL_SRC_FILES := \
+	$(call all-c-files-under,example) \
+
+LOCAL_LIBRARIES := libpidwatch
+
+include $(BUILD_EXECUTABLE)
