@@ -14,7 +14,7 @@ LOCAL_EXPORT_C_INCLUDES  := $(LOCAL_PATH)/include
 
 LOCAL_SRC_FILES := $(call all-c-files-under,src)
 
-LOCAL_LIBRARIES := librs
+LOCAL_LIBRARIES := librs libpidwatch
 
 ifdef LIBIOUTILS_FAUTES_SUPPORT
 LOCAL_SRC_FILES += $(call all-c-files-under,tests)
