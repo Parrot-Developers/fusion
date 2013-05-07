@@ -67,6 +67,9 @@ static int add_source(struct io_mon *mon, struct io_src *src)
 	if (0 != ret)
 		return ret;
 
+	/* sources can't be present twice */
+	if (rs_node_find(&(src->node), mon->source))
+		return -EEXIST;
 	rs_node_push(&(mon->source), &(src->node));
 	mon->nb_sources++;
 

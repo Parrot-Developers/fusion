@@ -111,6 +111,9 @@ static void testMON_ADD_SOURCE(void)
 	CU_ASSERT_EQUAL(!!(flags & O_NONBLOCK), 1);
 
 	/* error use cases */
+	/* adding a source twice, is forbidden */
+	ret = io_mon_add_source(&mon, &src_duplex);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_mon_add_source(NULL, &src_out);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_mon_add_source(&mon, NULL);
