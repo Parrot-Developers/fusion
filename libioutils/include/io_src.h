@@ -52,6 +52,16 @@ typedef void (io_src_cb_t)(struct io_src *src);
  * @brief Source to register in a monitor
  */
 struct io_src {
+	/* fields used internally by a monitor */
+	/** node for linking */
+	struct rs_node node;
+	/**
+	 * epoll events activated on this source, altered by io_mon_add_source
+	 * and io_mon_activate_out_source
+	 * @see man epoll_ctl
+	 */
+	enum io_src_event active;
+
 	/** file descriptor of the source */
 	int fd;
 	/**
@@ -68,16 +78,6 @@ struct io_src {
 	 * @see man epoll_ctl
 	 */
 	uint32_t events;
-
-	/* fields used by a monitor */
-	/**
-	 * epoll events activated on this source, altered by io_mon_add_source
-	 * and io_mon_activate_out_source
-	 * @see man epoll_ctl
-	 */
-	enum io_src_event active;
-	/** node for linking */
-	struct rs_node node;
 };
 
 /**

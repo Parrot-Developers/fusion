@@ -40,7 +40,6 @@ struct io_src_sig {
 	sigset_t old_mask;
 	/** user callback, notified when one of the registered signals occur */
 	io_sig_cb_t *cb;
-	/* TODO add a cleanup user callback ? */
 	/** signal info structure, filled in before calling back the client */
 	struct signalfd_siginfo si;
 };
