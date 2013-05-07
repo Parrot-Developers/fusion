@@ -114,6 +114,32 @@ static void testTO_SRC(void)
 	CU_ASSERT_EQUAL(to_src(&(src.node)), &src);
 }
 
+static void testSRC_IS_ACTIVE(void)
+{
+	int ret;
+	struct io_src src;
+	int pipefd[2] = {-1, -1};
+
+	ret = pipe(pipefd);
+	CU_ASSERT_NOT_EQUAL_FATAL(ret, -1);
+
+	ret = io_src_init(&src, pipefd[0], IO_IN, my_dummy_cb);
+	CU_ASSERT_EQUAL(ret, 0);
+	src.active = IO_IN;
+	/* normal use case */
+
+	CU_ASSERT(io_src_is_active(&src, IO_IN));
+
+	/* error use case */
+	CU_ASSERT(!io_src_is_active(&src, IO_OUT));
+	/* all flags must be in the same state */
+	CU_ASSERT(!io_src_is_active(&src, IO_DUPLEX));
+	CU_ASSERT(!io_src_is_active(NULL, IO_IN));
+
+	io_src_clean(&src);
+	close(pipefd[1]);
+}
+
 void testSRC_GET_FD(void)
 {
 	int ret;
@@ -146,6 +172,10 @@ static const test_t tests[] = {
 		{
 				.fn = testTO_SRC,
 				.name = "to_src"
+		},
+		{
+				.fn = testSRC_IS_ACTIVE,
+				.name = "io_src_is_active"
 		},
 		{
 				.fn = testSRC_GET_FD,

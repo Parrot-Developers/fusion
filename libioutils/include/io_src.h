@@ -113,6 +113,15 @@ int io_src_init(struct io_src *src, int fd, enum io_src_event type,
 		io_src_cb_t *cb);
 
 /**
+ * Says whether a source is active for a given set of events
+ * @param src Source to test
+ * @param event_set Event set to test
+ * @return non-zero if the source is active for all the events present on
+ * event_set, 0 otherwise or on error
+ */
+int io_src_is_active(struct io_src *src, enum io_src_event event_set);
+
+/**
  * Returns the underlying file descriptor of a given source
  * @param src Source to retrieve the file descriptor of
  * @return -1 in case of error, otherwise, file descriptor of the source

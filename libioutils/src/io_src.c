@@ -60,6 +60,14 @@ int io_src_init(struct io_src *src, int fd, enum io_src_event type,
 	return 0;
 }
 
+int io_src_is_active(struct io_src *src, enum io_src_event event_set)
+{
+	if (NULL == src)
+		return 0;
+
+	return (event_set & src->active) == event_set;
+}
+
 void io_src_clean(struct io_src *src)
 {
 	if (NULL == src)
