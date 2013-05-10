@@ -268,6 +268,69 @@ static void testMON_ACTIVATE_OUT_SOURCE(void)
 	close(fd);
 }
 
+static void testMON_ACTIVATE_IN_SOURCE(void)
+{
+	int pipefd[2] = {-1, -1};
+	int fd;
+	struct io_mon mon;
+	struct io_src src_out;
+	struct io_src src_in;
+	struct io_src src_duplex;
+	int ret;
+
+	ret = io_mon_init(&mon);
+	CU_ASSERT_EQUAL(ret, 0);
+	ret = pipe(pipefd);
+	CU_ASSERT_NOT_EQUAL_FATAL(ret, -1);
+	fd = open("/dev/random", O_RDWR | O_CLOEXEC);
+	CU_ASSERT_NOT_EQUAL_FATAL(fd, -1);
+	ret = io_src_init(&src_in, pipefd[0], IO_IN, my_dummy_callback);
+	CU_ASSERT_EQUAL(ret, 0);
+	ret = io_src_init(&src_out, pipefd[1], IO_OUT, my_dummy_callback);
+	CU_ASSERT_EQUAL(ret, 0);
+	ret = io_src_init(&src_duplex, fd, IO_DUPLEX, my_dummy_callback);
+	CU_ASSERT_EQUAL(ret, 0);
+	ret = io_mon_add_source(&mon, &src_in);
+	CU_ASSERT_EQUAL(ret, 0);
+	ret = io_mon_add_source(&mon, &src_out);
+	CU_ASSERT_EQUAL(ret, 0);
+	ret = io_mon_add_source(&mon, &src_duplex);
+	CU_ASSERT_EQUAL(ret, 0);
+
+	/* normal use cases */
+	/* output source */
+	CU_ASSERT_EQUAL(src_in.active, IO_IN);
+	ret = io_mon_activate_in_source(&mon, &src_in, 0);
+	CU_ASSERT_EQUAL(ret, 0);
+	CU_ASSERT_EQUAL(src_in.active, 0);
+	ret = io_mon_activate_in_source(&mon, &src_in, 1);
+	CU_ASSERT_EQUAL(ret, 0);
+	CU_ASSERT_EQUAL(src_in.active, IO_IN);
+
+	/* duplex source */
+	CU_ASSERT_EQUAL(src_duplex.active, IO_IN);
+	ret = io_mon_activate_in_source(&mon, &src_duplex, 0);
+	CU_ASSERT_EQUAL(ret, 0);
+	CU_ASSERT_EQUAL(src_duplex.active, 0);
+	ret = io_mon_activate_in_source(&mon, &src_duplex, 1);
+	CU_ASSERT_EQUAL(ret, 0);
+	CU_ASSERT_EQUAL(src_duplex.active, IO_IN);
+
+	/* error use cases */
+	ret = io_mon_activate_in_source(NULL, &src_duplex, 1);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+	ret = io_mon_activate_in_source(&mon, NULL, 1);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+	ret = io_mon_activate_in_source(&mon, &src_out, 1);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+
+	/* cleanup */
+	io_mon_clean(&mon);
+	close(pipefd[0]);
+	close(pipefd[1]);
+	close(fd);
+}
+
 static void reached_state(int *glob_state, int state)
 {
 	*glob_state |= state;
@@ -442,6 +505,10 @@ static const test_t tests[] = {
 		{
 				.fn = testMON_ACTIVATE_OUT_SOURCE,
 				.name = "io_mon_activate_out_source"
+		},
+		{
+				.fn = testMON_ACTIVATE_IN_SOURCE,
+				.name = "io_mon_activate_in_source"
 		},
 		{
 				.fn = testMON_PROCESS_EVENTS,

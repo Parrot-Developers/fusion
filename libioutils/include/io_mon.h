@@ -94,6 +94,17 @@ int io_mon_activate_out_source(struct io_mon *mon, struct io_src *src,
 		int active);
 
 /**
+ * (De-)Activates the monitoring of a particular input source
+ * @param mon Monitor
+ * @param src Source to (de-)activate
+ * @param active non-zero if the source must be monitored, 0 otherwise
+ *
+ * @return negative errno value on error, 0 otherwise
+ */
+int io_mon_activate_in_source(struct io_mon *mon, struct io_src *src,
+		int active);
+
+/**
  * When monitor's fd is ready for reading operation, a call to
  * io_mon_process_events will dispatch each event to the relevant
  * callback.<br />

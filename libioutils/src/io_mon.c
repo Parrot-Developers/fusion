@@ -217,6 +217,33 @@ static int do_process_events_sets(struct io_mon *mon, int n,
 	return 0;
 }
 
+/**
+ * Helper for io_mon_activate_out_source and io_mon_activate_in_source
+ * implementation
+ * @param mon Monitor
+ * @param src Source to (de-)activate
+ * @param active non-zero if the source must be monitored, 0 otherwise
+ * @param direction Direction to alter the monitoring of, either IO_IN or
+ * IO_OUT, not both
+ *
+ * @return negative errno value on error, 0 otherwise
+ */
+static int activate_source(struct io_mon *mon, struct io_src *src,
+		int active, enum io_src_event direction)
+{
+	if (NULL == mon || NULL == src || !(direction & src->type))
+		return -EINVAL;
+
+	if (active)
+		src->active |= direction;
+	else
+		src->active &= ~direction;
+
+	/* TODO do nothing if the source is already active */
+
+	return alter_source(mon->epollfd, src, EPOLL_CTL_MOD);
+}
+
 int io_mon_init(struct io_mon *mon)
 {
 	if (NULL == mon)
@@ -300,20 +327,18 @@ void io_mon_dump_epoll_event(uint32_t events)
 int io_mon_activate_out_source(struct io_mon *mon, struct io_src *src,
 		int active)
 {
-	if (NULL == mon || NULL == src || !(IO_OUT & src->type))
-		return -EINVAL;
+	return activate_source(mon, src, active, IO_OUT);
+}
 
-	if (active)
-		src->active |= IO_OUT;
-	else
-		src->active &= ~IO_OUT;
-
-	return alter_source(mon->epollfd, src, EPOLL_CTL_MOD);
+int io_mon_activate_in_source(struct io_mon *mon, struct io_src *src,
+		int active)
+{
+	return activate_source(mon, src, active, IO_IN);
 }
 
 int io_mon_process_events(struct io_mon *mon)
 {
-	int n = 0;
+	int n = 0; /* TODO should be a ssize_t hu ? */
 	struct epoll_event events[MONITOR_MAX_SOURCES];
 
 	if (NULL == mon)
