@@ -49,7 +49,7 @@ static void reached_state(int s)
 	state |= s;
 }
 
-void uad_cb(struct io_src_msg_uad *src, enum io_src_event evt)
+static void uad_cb(struct io_src_msg_uad *src, enum io_src_event evt)
 {
 	struct my_uad_src *my_uad;
 	int ret;
@@ -92,6 +92,43 @@ void uad_cb(struct io_src_msg_uad *src, enum io_src_event evt)
 			CU_ASSERT(0);
 		}
 	}
+}
+
+static void testSRC_MSG_UAD_SET_NEXT_MESSAGE(void)
+{
+	int ret;
+	char msg[1024] = {0};
+	char *pmsg = NULL;
+	struct io_src_msg_uad src;
+
+	ret = io_src_msg_uad_set_next_message(&src, msg);
+	CU_ASSERT_NOT_EQUAL(ret, -1);
+	CU_ASSERT_PTR_EQUAL(src.src_msg.send_buf, msg);
+
+	/* error use cases */
+	ret = io_src_msg_uad_set_next_message(NULL, &msg);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+	ret = io_src_msg_uad_set_next_message(&src, NULL);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+}
+
+static void testSRC_MSG_UAD_GET_MESSAGE(void)
+{
+	int ret;
+	void *msg;
+	struct io_src_msg_uad src;
+
+	src.src_msg.rcv_buf = (void *)0xDEADBEEF;
+
+	ret = io_src_msg_uad_get_message(&src, &msg);
+	CU_ASSERT_NOT_EQUAL(ret, -1);
+	CU_ASSERT_PTR_EQUAL(msg, src.src_msg.rcv_buf);
+
+	/* error use cases */
+	ret = io_src_msg_uad_get_message(NULL, &msg);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+	ret = io_src_msg_uad_get_message(&src, NULL);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
 }
 
 static void testSRC_MSG_UAD_INIT(void)
@@ -187,27 +224,15 @@ static void testSRC_MSG_UAD_GET_SOURCE(void)
 	CU_ASSERT_EQUAL(src, NULL);
 }
 
-static void testSRC_MSG_UAD_GET_MESSAGE(void)
-{
-	int ret;
-	void *msg;
-	struct io_src_msg_uad src;
-
-	src.src_msg.rcv_buf = (void *)0xDEADBEEF;
-
-	ret = io_src_msg_uad_get_message(&src, &msg);
-	CU_ASSERT_NOT_EQUAL(ret, -1);
-	CU_ASSERT_PTR_EQUAL(msg, src.src_msg.rcv_buf);
-
-	/* error use cases */
-	ret = io_src_msg_uad_get_message(NULL, &msg);
-	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_src_msg_uad_get_message(&src, NULL);
-	CU_ASSERT_NOT_EQUAL(ret, 0);
-}
-
 static const test_t tests[] = {
-		/* TODO add set next message test */
+		{
+				.fn = testSRC_MSG_UAD_SET_NEXT_MESSAGE,
+				.name = "io_src_msg_uad_set_next_message"
+		},
+		{
+				.fn = testSRC_MSG_UAD_GET_MESSAGE,
+				.name = "io_src_msg_uad_get_message"
+		},
 		{
 				.fn = testSRC_MSG_UAD_INIT,
 				.name = "io_src_msg_uad_init"
@@ -215,10 +240,6 @@ static const test_t tests[] = {
 		{
 				.fn = testSRC_MSG_UAD_GET_SOURCE,
 				.name = "io_src_msg_uad_get_source"
-		},
-		{
-				.fn = testSRC_MSG_UAD_GET_MESSAGE,
-				.name = "io_src_msg_uad_get_message"
 		},
 
 		/* NULL guard */
