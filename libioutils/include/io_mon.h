@@ -65,6 +65,15 @@ int io_mon_add_sources(struct io_mon *mon, ...)
 	__attribute__ ((sentinel(0)));
 
 /**
+ * Removes a source from the monitoring pool and stop monitoring the
+ * corresponding fd
+ * @param mon Monitor
+ * @param src Source to remove
+ * @return negative errno compatible value on error, 0 otherwise
+ */
+int io_mon_remove_source(struct io_mon *mon, struct io_src *src);
+
+/**
  * Dumps the events in an epoll event flag set
  * @param events Epoll events set
  */

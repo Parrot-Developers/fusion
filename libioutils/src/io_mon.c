@@ -101,39 +101,6 @@ static int alter_source(int epfd, struct io_src *src, int op)
 }
 
 /**
- * Removes a source from the monitoring pool and stop monitoring the
- * corresponding fd
- * @param mon Monitor
- * @param src Source to remove
- * @return negative errno compatible value on error, 0 otherwise
- */
-static int remove_source(struct io_mon *mon, struct io_src *src)
-{
-	int ret;
-	struct rs_node *node;
-	struct io_src *old_src;
-
-	if (&(src->node) == mon->source)
-		mon->source = rs_node_next(mon->source);
-
-	node = rs_node_remove(&(src->node), &(src->node));
-	if (NULL == node)
-		return -EINVAL;
-	mon->nb_sources--;
-
-	old_src = to_src(node);
-	if (IO_NONE != old_src->active) {
-		old_src->active = IO_NONE;
-		ret = alter_source(mon->epollfd, old_src, EPOLL_CTL_DEL);
-		if (-1 == ret)
-			return -errno;
-	}
-
-
-	return 0;
-}
-
-/**
  * Registers a source to epoll subsystem. In sources are monitored, out ones
  * aren't, duplex ones are monitored only for in events. All types are forced to
  * monitor errors
@@ -183,7 +150,7 @@ static int process_event_sets(struct io_mon *mon, struct io_src *src)
 		 * TODO notify client that a removal has been performed, if not
 		 * initiated by him
 		 */
-		remove_source(mon, src);
+		io_mon_remove_source(mon, src);
 
 	return 0;
 }
@@ -309,6 +276,37 @@ int io_mon_add_sources(struct io_mon *mon, ...)
 	return 0;
 }
 
+int io_mon_remove_source(struct io_mon *mon, struct io_src *src)
+{
+	int ret;
+	struct rs_node *node;
+	struct rs_node *old_mon_src;
+	struct io_src *old_src;
+
+	if (NULL == mon || NULL == src)
+		return -EINVAL;
+
+	old_mon_src = mon->source;
+	if (&(src->node) == mon->source)
+		mon->source = rs_node_next(mon->source);
+
+	node = rs_node_remove(old_mon_src, &(src->node));
+	if (NULL == node)
+		return -EINVAL;
+	mon->nb_sources--;
+
+	old_src = to_src(node);
+	if (IO_NONE != old_src->active) {
+		old_src->active = IO_NONE;
+		ret = alter_source(mon->epollfd, old_src, EPOLL_CTL_DEL);
+		if (-1 == ret)
+			return -errno;
+	}
+
+
+	return 0;
+}
+
 void io_mon_dump_epoll_event(uint32_t events)
 {
 	fprintf(stderr, "epoll events :\n");
@@ -366,7 +364,7 @@ int io_mon_clean(struct io_mon *mon)
 
 	while (mon->source) {
 		src = to_src(mon->source);
-		remove_source(mon, src);
+		io_mon_remove_source(mon, src);
 	}
 
 	if (-1 != mon->epollfd)
