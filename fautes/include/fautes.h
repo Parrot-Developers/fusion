@@ -16,22 +16,22 @@
  * @typedef test_t
  * @brief Unit test
  */
-typedef struct {
+struct test_t {
 	CU_TestFunc fn;
 	const char *name;
-} test_t;
+};
 
 /**
  * @typedef suite_t
  * @brief Unit tests suite, one must define a structure of this type prior to
  * a suite_register() call
  */
-typedef struct {
+struct suite_t {
 	const char *name;	/**< test suite's name */
 	CU_InitializeFunc init;
 	CU_CleanupFunc clean;
-	const test_t *tests;
+	const struct test_t *tests;
 	int active;
-} suite_t;
+};
 
 #endif /* FAUTES_H_ */

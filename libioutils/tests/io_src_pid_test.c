@@ -165,7 +165,7 @@ static void testSRC_PID_GET_SOURCE(void)
 	CU_ASSERT_EQUAL(src, NULL);
 }
 
-static const test_t tests[] = {
+static const struct test_t tests[] = {
 		{
 				.fn = testSRC_PID_INIT,
 				.name = "io_src_pid_init"
@@ -179,7 +179,7 @@ static const test_t tests[] = {
 		{.fn = NULL, .name = NULL},
 };
 
-suite_t src_pid_suite = {
+struct suite_t src_pid_suite = {
 		 /* name of the module, corresponds to the functions prefix */
 		.name = "io_src_pid",
 		.init = NULL,

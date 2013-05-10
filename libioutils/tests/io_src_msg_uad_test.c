@@ -223,7 +223,7 @@ static void testSRC_MSG_UAD_GET_SOURCE(void)
 	CU_ASSERT_EQUAL(src, NULL);
 }
 
-static const test_t tests[] = {
+static const struct test_t tests[] = {
 		{
 				.fn = testSRC_MSG_UAD_SET_NEXT_MESSAGE,
 				.name = "io_src_msg_uad_set_next_message"
@@ -257,7 +257,7 @@ static int clean_src_msg_uad_suite(void)
 	return 0; /* return non-zero on error */
 }
 
-suite_t src_msg_uad_suite = {
+struct suite_t src_msg_uad_suite = {
 		.name = "io_src_msg_uad",
 		.init = init_src_msg_uad_suite,
 		.clean = clean_src_msg_uad_suite,

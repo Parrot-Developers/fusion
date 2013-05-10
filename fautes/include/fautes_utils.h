@@ -111,8 +111,8 @@ int compare_string_to_file(char *path, char *buf, size_t size);
 	int __old_out_fd = -1; \
 	int __pipe[2] = {-1, -1}; \
 	int __ret; \
- \
- __old_out_fd = dup(filedes); \
+\
+__old_out_fd = dup(filedes); \
 	if (-1 == __old_out_fd) { \
 		__ret = -errno; \
 		perror("dup"); \
@@ -133,7 +133,8 @@ int compare_string_to_file(char *path, char *buf, size_t size);
 					__ret = -errno; \
 					perror("read"); \
 				} else { \
-					(string)[MIN(__ret, (int)(len) - 1)] = '\0';\
+					(string)[MIN(__ret, (int)(len) - 1)] =\
+					'\0';\
 					__ret = 0; \
 				} \
 			} \
@@ -146,7 +147,7 @@ int compare_string_to_file(char *path, char *buf, size_t size);
 		close(__pipe[1]); \
 	if (-1 != __old_out_fd) \
 		close(__old_out_fd); \
- \
+\
 	/* "return" value */ \
 	__ret; \
 })

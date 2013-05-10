@@ -419,7 +419,7 @@ static void testRS_DLL_FOREACH(void)
 	CU_ASSERT_NOT_EQUAL(f_ret, 0);
 }
 
-static const test_t tests[] = {
+static const struct test_t tests[] = {
 		{
 				.fn = testRS_DLL_INIT,
 				.name = "rs_dll_init"
@@ -476,7 +476,7 @@ static int clean_dll_suite(void)
 	return 0;
 }
 
-suite_t dll_suite = {
+struct suite_t dll_suite = {
 		.name = "rs_dll",
 		.init = init_dll_suite,
 		.clean = clean_dll_suite,

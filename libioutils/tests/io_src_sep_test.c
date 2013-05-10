@@ -213,7 +213,7 @@ static void testSRC_SEP_GET_SOURCE(void)
 	CU_ASSERT_EQUAL(src, NULL);
 }
 
-static const test_t tests[] = {
+static const struct test_t tests[] = {
 		{
 				.fn = testSRC_SEP_INIT,
 				.name = "io_src_sep_init"
@@ -227,7 +227,7 @@ static const test_t tests[] = {
 		{.fn = NULL, .name = NULL},
 };
 
-suite_t src_sep_suite = {
+struct suite_t src_sep_suite = {
 		.name = "io_src_sep",
 		.init = NULL,
 		.clean = NULL,

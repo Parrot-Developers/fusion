@@ -12,7 +12,7 @@
 
 const char const *fautes_lib_name = "libpidwatch";
 
-suite_t *libpidwatch_test_suites[] = {
+struct suite_t *libpidwatch_test_suites[] = {
 		&pidwatch_suite,
 
 		NULL, /* NULL guard */

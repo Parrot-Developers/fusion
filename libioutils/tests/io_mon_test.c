@@ -517,7 +517,7 @@ static void testMON_CLEAN(void)
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 }
 
-static const test_t tests[] = {
+static const struct test_t tests[] = {
 		{
 				.fn = testMON_INIT,
 				.name = "io_mon_init"
@@ -573,7 +573,7 @@ static int clean_mon_suite(void)
 	return 0;
 }
 
-suite_t mon_suite = {
+struct suite_t mon_suite = {
 		.name = "io_mon",
 		.init = init_mon_suite,
 		.clean = clean_mon_suite,

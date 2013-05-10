@@ -164,7 +164,7 @@ void testSRC_GET_FD(void)
 	close(pipefd[1]);
 }
 
-static const test_t tests[] = {
+static const struct test_t tests[] = {
 		{
 				.fn = testSRC_INIT,
 				.name = "io_src_init"
@@ -196,7 +196,7 @@ static int clean_src_suite(void)
 	return 0;
 }
 
-suite_t src_suite = {
+struct suite_t src_suite = {
 		.name = "io_src",
 		.init = init_src_suite,
 		.clean = clean_src_suite,

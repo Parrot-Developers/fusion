@@ -12,7 +12,7 @@
 
 const char const *fautes_lib_name = "librs";
 
-suite_t *librs_test_suites[] = {
+struct suite_t *librs_test_suites[] = {
 		&dll_suite,
 		&node_suite,
 		NULL, /* NULL guard */

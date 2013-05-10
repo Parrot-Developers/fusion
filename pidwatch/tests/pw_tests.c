@@ -239,7 +239,7 @@ int check_proc_cap(cap_value_t value, int try)
 }
 #endif /* PIDWATCH_HAS_CAPABILITY_SUPPORT */
 
-static const test_t tests[] = {
+static const struct test_t tests[] = {
 		{
 				.fn = testPIDWATCH_CREATE,
 				.name = "pidwatch_create"
@@ -273,7 +273,7 @@ static int clean_pw_suite(void)
 	return 0;
 }
 
-suite_t pidwatch_suite = {
+struct suite_t pidwatch_suite = {
 		.name = "pidwatch",
 		.init = init_pw_suite,
 		.clean = clean_pw_suite,

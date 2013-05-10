@@ -10,8 +10,8 @@
 #ifndef RS_FAUTES_H_
 #define RS_FAUTES_H_
 
-extern suite_t dll_suite;
-extern suite_t node_suite;
+extern struct suite_t dll_suite;
+extern struct suite_t node_suite;
 
 void librs_init_test_suites(void);
 

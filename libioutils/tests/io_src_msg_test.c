@@ -424,7 +424,7 @@ static void testSRC_MSG_GET_MESSAGE(void)
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 }
 
-static const test_t tests[] = {
+static const struct test_t tests[] = {
 		{
 				.fn = testSRC_MSG_SET_NEXT_MESSAGE,
 				.name = "io_src_msg_set_next_message"
@@ -450,7 +450,7 @@ static const test_t tests[] = {
 		{.fn = NULL, .name = NULL},
 };
 
-suite_t src_msg_suite = {
+struct suite_t src_msg_suite = {
 		.name = "io_src_msg",
 		.init = NULL,
 		.clean = NULL,

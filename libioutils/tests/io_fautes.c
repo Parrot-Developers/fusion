@@ -12,7 +12,7 @@
 
 const char const *fautes_lib_name = "libioutils";
 
-suite_t *libioutils_test_suites[] = {
+struct suite_t *libioutils_test_suites[] = {
 		&mon_suite,
 		&src_msg_suite,
 		&src_msg_uad_suite,

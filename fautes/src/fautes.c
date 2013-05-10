@@ -26,11 +26,11 @@
  * @return Error code of the first error to happen in either CU_add_suite
  * or CU_add_test
  */
-CU_ErrorCode suite_register(suite_t *suite)
+CU_ErrorCode suite_register(struct suite_t *suite)
 {
 	CU_pSuite pSuite = NULL;
 	CU_pTest pTest = NULL;
-	const test_t *test = &(suite->tests[0]);
+	const struct test_t *test = &(suite->tests[0]);
 
 	pSuite = CU_add_suite(suite->name, suite->init, suite->clean);
 	if (NULL == pSuite) {
@@ -54,7 +54,7 @@ CU_ErrorCode suite_register(suite_t *suite)
 
 static void usage(char *progname)
 {
-	printf("usage %s [xml] lib1.so [lib2.so...] \n"
+	printf("usage %s [xml] lib1.so [lib2.so...]\n"
 			"\tRuns the Fautes tests suites embedded in each "
 			"library passed as final arguments\n"
 			"\tIf xml is passed, result of the tests will be"
@@ -81,11 +81,11 @@ static int get_sym(void *lib_handle, const char *name, void **output)
 
 typedef void (*init_fun_t)(void);
 
-static suite_t **get_test_suite(const char *so_lib, void **lib_handle,
+static struct suite_t **get_test_suite(const char *so_lib, void **lib_handle,
 		char **libname)
 {
 	void *sym;
-	suite_t **res = NULL;
+	struct suite_t **res = NULL;
 	int ret;
 	char names_buf[512];
 	init_fun_t init_fun;
@@ -108,7 +108,7 @@ static suite_t **get_test_suite(const char *so_lib, void **lib_handle,
 	ret = get_sym(*lib_handle, names_buf, &sym);
 	if (-1 == ret)
 		goto out;
-	res = (suite_t **)sym;
+	res = (struct suite_t **)sym;
 
 	/* if there is a suites initialization function, call it */
 	snprintf(names_buf, 512, "%s_init_test_suites", *libname);
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
 {
 	int xml = 0;
 	CU_ErrorCode cu_err = CUE_SUCCESS;
-	suite_t **suite;
+	struct suite_t **suite;
 	char **so_lib;
 	void *lib_handle;
 	char *libname;
@@ -174,13 +174,15 @@ int main(int argc, char *argv[])
 			if ((*suite)->active) {
 				cu_err = suite_register(*suite);
 				if (CUE_SUCCESS != cu_err) {
-					fprintf(stderr, "CU_initialize_registry %s\n",
-							CU_get_error_msg());
+					fprintf(stderr,
+						"CU_initialize_registry %s\n",
+						CU_get_error_msg());
 					dlclose(lib_handle);
 					return CU_get_error();
 				}
 			} else {
-				printf("WARNING suite %s inactive\n", (*suite)->name);
+				printf("WARNING suite %s inactive\n",
+						(*suite)->name);
 			}
 		} while (*(++suite));
 

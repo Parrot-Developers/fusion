@@ -416,7 +416,7 @@ static void testRS_NODE_FOREACH(void)
 	/* error use cases */
 }
 
-static const test_t tests[] = {
+static const struct test_t tests[] = {
 		{
 				.fn = testRS_NODE_HEAD,
 				.name = "rs_node_head"
@@ -481,7 +481,7 @@ static int clean_node_suite(void)
 	return 0;
 }
 
-suite_t node_suite = {
+struct suite_t node_suite = {
 		.name = "rs_node",
 		.init = init_node_suite,
 		.clean = clean_node_suite,
