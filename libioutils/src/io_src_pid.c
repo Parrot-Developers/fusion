@@ -31,7 +31,7 @@ static void pid_cb(struct io_src *src)
 	struct io_src_pid *pid = to_src_pid(src);
 
 	/* TODO treat I/O THEN errors */
-	if (io_mon_has_error(src->events))
+	if (io_src_has_error(src->events))
 		return;
 
 	pid_ret = pidwatch_wait(src->fd, &status);

@@ -388,7 +388,7 @@ static void testMON_PROCESS_EVENTS(void)
 		int r;
 
 		/* TODO treat I/O THEN errors */
-		if (io_mon_has_error(src->events))
+		if (io_src_has_error(src->events))
 			return;
 
 		r = write(src->fd, msg2, strlen(msg2) + 1);

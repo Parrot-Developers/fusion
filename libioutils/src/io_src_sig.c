@@ -37,7 +37,7 @@ static void sig_cb(struct io_src *src)
 	struct io_src_sig *sig = to_src_sig(src);
 
 	/* TODO treat I/O THEN errors */
-	if (io_mon_has_error(src->events))
+	if (io_src_has_error(src->events))
 		return;
 
 	ret = io_read(src->fd, &(sig->si), sizeof(sig->si));

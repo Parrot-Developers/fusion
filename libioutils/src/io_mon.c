@@ -178,7 +178,7 @@ static int process_event_sets(struct io_mon *mon, struct io_src *src)
 
 	src->cb(src);
 
-	if (io_mon_has_error(src->events))
+	if (io_src_has_error(src->events))
 		/*
 		 * TODO notify client that a removal has been performed, if not
 		 * initiated by him

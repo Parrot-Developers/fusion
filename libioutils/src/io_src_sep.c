@@ -163,7 +163,7 @@ static void sep_cb(struct io_src *src)
 	struct io_src_sep *sep = to_src_sep(src);
 
 	/* TODO treat I/O THEN errors */
-	if (io_mon_has_error(src->events))
+	if (io_src_has_error(src->events))
 		return;
 
 	/* get some data */

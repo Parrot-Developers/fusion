@@ -31,6 +31,18 @@ enum io_src_event {
 };
 
 /**
+ * @def IO_EPOLL_ERROR_EVENTS
+ * @brief Epoll events considered as an error when occurring on a source
+ */
+#define IO_EPOLL_ERROR_EVENTS (EPOLLERR | EPOLLHUP | EPOLLRDHUP)
+
+/**
+ * @def io_src_has_error
+ * @brief Returns 1 if the epoll event set contains at least one error event
+ */
+#define io_src_has_error(events) (IO_EPOLL_ERROR_EVENTS & (events))
+
+/**
  * @def io_src_has_in
  * @brief Returns 1 if the epoll event set contains the IN event flag
  */

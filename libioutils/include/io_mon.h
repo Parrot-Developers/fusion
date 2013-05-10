@@ -28,18 +28,6 @@ struct io_mon {
 };
 
 /**
- * @def IO_EPOLL_ERROR_EVENTS
- * @brief Epoll events considered as an error when occurring on a source
- */
-#define IO_EPOLL_ERROR_EVENTS (EPOLLERR | EPOLLHUP | EPOLLRDHUP)
-
-/**
- * @def io_mon_has_error
- * @brief Returns 1 if the epoll event set contains at least one error event
- */
-#define io_mon_has_error(events) (IO_EPOLL_ERROR_EVENTS & (events))
-
-/**
  * Initializes a monitor context
  * @param mon Monitor context to initialize
  * @return negative errno value on error, 0 otherwise
