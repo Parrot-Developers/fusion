@@ -1,7 +1,7 @@
 /******************************************************************************
 * @file rs_rb.h
 *
-* @brief mambo ring buffer
+* @brief ring buffer implementation, imported from mambo
 *
 * Copyright (C) 2011 Parrot S.A.
 *
@@ -9,13 +9,12 @@
 * @date July 2011
 ******************************************************************************/
 
-#ifndef RS_RB_H_
-#define RS_RB_H_
+#ifndef _MB_RB_H_
+#define _MB_RB_H_
 #include <stdint.h>
-#include "mb_log.h"
 
 /* ring buffer */
-struct mb_rb {
+struct rs_rb {
 	void *base;		/* base address of memory buffer */
 	size_t size;		/* size of memory buffer */
 	size_t size_mask;	/* size mask of memory buffer */
@@ -25,7 +24,7 @@ struct mb_rb {
 };
 
 /* create ring buffer */
-static inline int mb_rb_create(struct mb_rb *rb, size_t size)
+static inline int rs_rb_create(struct rs_rb *rb, size_t size)
 {
 	size_t real_size;
 
@@ -49,22 +48,22 @@ static inline int mb_rb_create(struct mb_rb *rb, size_t size)
 }
 
 /* get ring buffer size */
-static inline size_t mb_rb_size(struct mb_rb *rb)
+static inline size_t rs_rb_size(struct rs_rb *rb)
 {
 	return rb->size;
 }
 
 /* empty ring buffer */
-static inline void mb_rb_empty(struct mb_rb *rb)
+static inline void rs_rb_empty(struct rs_rb *rb)
 {
 	rb->read = 0;
 	rb->write = 0;
 	rb->len = 0;
 }
 /* destroy ring buffer */
-static inline int mb_rb_destroy(struct mb_rb *rb)
+static inline int rs_rb_destroy(struct rs_rb *rb)
 {
-	mb_rb_empty(rb);
+	rs_rb_empty(rb);
 	rb->size = 0;
 	rb->size_mask = 0;
 	free(rb->base);
@@ -76,37 +75,37 @@ static inline int mb_rb_destroy(struct mb_rb *rb)
  **/
 
 /* get ring buffer read ptr */
-static inline void *mb_rb_read_ptr(struct mb_rb *rb)
+static inline void *rs_rb_read_ptr(struct rs_rb *rb)
 {
 	return (uint8_t *)rb->base + rb->read;
 }
 
 /* get ring buffer read length (number of bytes that can be read) */
-static inline size_t mb_rb_read_length(struct mb_rb *rb)
+static inline size_t rs_rb_read_length(struct rs_rb *rb)
 {
 	return rb->len;
 }
 
 /* get ring buffer read length with out wrapping
  * (number of bytes that can be read from read ptr without wrapping) */
-static inline size_t mb_rb_read_length_no_wrap(struct mb_rb *rb)
+static inline size_t rs_rb_read_length_no_wrap(struct rs_rb *rb)
 {
 	return (rb->write >= rb->read) ? rb->len : rb->len - rb->write;
 }
 
 /* increment read pointer, freeing up ring buffer space */
-static inline void mb_rb_read_incr(struct mb_rb *rb, size_t length)
+static inline void rs_rb_read_incr(struct rs_rb *rb, size_t length)
 {
-	mb_assert(length <= rb->len);
+	assert(length <= rb->len);
 	rb->len -= length;
 	rb->read += length;
 	rb->read &= rb->size_mask;
 }
 
 /* read byte at offset  */
-static inline uint8_t mb_rb_read_offset(struct mb_rb *rb, size_t offset)
+static inline uint8_t rs_rb_read_offset(struct rs_rb *rb, size_t offset)
 {
-	mb_assert(offset < rb->len);
+	assert(offset < rb->len);
 	return ((uint8_t *)rb->base)[(rb->read + offset) & rb->size_mask];
 }
 /**
@@ -114,20 +113,20 @@ static inline uint8_t mb_rb_read_offset(struct mb_rb *rb, size_t offset)
  **/
 
 /* get ring buffer write ptr */
-static inline void *mb_rb_write_ptr(struct mb_rb *rb)
+static inline void *rs_rb_write_ptr(struct rs_rb *rb)
 {
 	return (uint8_t *)rb->base + rb->write;
 }
 
 /* get ring buffer write length (number of bytes that can be written) */
-static inline size_t mb_rb_write_length(struct mb_rb *rb)
+static inline size_t rs_rb_write_length(struct rs_rb *rb)
 {
 	return rb->size - rb->len;
 }
 
 /* get ring buffer write length with out wrapping
  * (number of bytes that can be written from write ptr without wrapping) */
-static inline size_t mb_rb_write_length_no_wrap(struct mb_rb *rb)
+static inline size_t rs_rb_write_length_no_wrap(struct rs_rb *rb)
 {
 	if (rb->write >= rb->read)
 		return rb->size - rb->write;
@@ -136,12 +135,12 @@ static inline size_t mb_rb_write_length_no_wrap(struct mb_rb *rb)
 }
 
 /* increment write pointer */
-static inline void mb_rb_write_incr(struct mb_rb *rb, size_t length)
+static inline void rs_rb_write_incr(struct rs_rb *rb, size_t length)
 {
-	mb_assert(rb->len + length <= rb->size);
+	assert(rb->len + length <= rb->size);
 	rb->len += length;
 	rb->write += length;
 	rb->write &= rb->size_mask;
 }
 
-#endif /* RS_RB_H_ */
+#endif /* _MB_RBUFFER_H_ */
