@@ -231,15 +231,18 @@ static int do_process_events_sets(struct io_mon *mon, int n,
 static int activate_source(struct io_mon *mon, struct io_src *src,
 		int active, enum io_src_event direction)
 {
+	enum io_src_event old_active;
 	if (NULL == mon || NULL == src || !(direction & src->type))
 		return -EINVAL;
 
+	old_active = src->active;
 	if (active)
 		src->active |= direction;
 	else
 		src->active &= ~direction;
 
-	/* TODO do nothing if the source is already active */
+	if (old_active == src->active)
+		return 0;
 
 	return alter_source(mon->epollfd, src, EPOLL_CTL_MOD);
 }
