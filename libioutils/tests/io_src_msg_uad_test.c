@@ -98,7 +98,6 @@ static void testSRC_MSG_UAD_SET_NEXT_MESSAGE(void)
 {
 	int ret;
 	char msg[1024] = {0};
-	char *pmsg = NULL;
 	struct io_src_msg_uad src;
 
 	ret = io_src_msg_uad_set_next_message(&src, msg);

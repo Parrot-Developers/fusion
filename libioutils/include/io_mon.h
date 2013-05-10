@@ -35,7 +35,7 @@ struct io_mon {
 
 /**
  * @def io_mon_has_error
- * @brief Returns 1 if the epoll event set contains at least an error event
+ * @brief Returns 1 if the epoll event set contains at least one error event
  */
 #define io_mon_has_error(events) (IO_EPOLL_ERROR_EVENTS & (events))
 
@@ -123,13 +123,5 @@ int io_mon_process_events(struct io_mon *mon);
  * @return negative errno value on error, 0 otherwise
  */
 int io_mon_clean(struct io_mon *mon);
-
-/*
- * TODO
- * candidates for implementation :
- *    io_mon_update_source
- *    io_mon_remove_source (which call clean ?)
- *    plus maybe tests like IS_READ, IS_WRITE IS_ERROR ...
- */
 
 #endif /* IO_MONITOR_H_ */

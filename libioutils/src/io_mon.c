@@ -341,7 +341,7 @@ int io_mon_activate_in_source(struct io_mon *mon, struct io_src *src,
 
 int io_mon_process_events(struct io_mon *mon)
 {
-	int n = 0; /* TODO should be a ssize_t hu ? */
+	ssize_t n = 0;
 	struct epoll_event events[MONITOR_MAX_SOURCES];
 
 	if (NULL == mon)

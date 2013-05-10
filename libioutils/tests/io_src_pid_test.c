@@ -126,7 +126,7 @@ static void testSRC_PID_INIT(void)
 
 	CU_ASSERT(process_dead)
 
-out:
+out :
 	/* cleanup */
 	io_mon_clean(&mon);
 	io_src_pid_clean(&pid_src);
