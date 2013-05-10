@@ -60,7 +60,7 @@ static void uad_cb(struct io_src_msg_uad *src, enum io_src_event evt)
 
 	CU_ASSERT(IO_IN == evt || IO_OUT == evt);
 
-	if (evt & IO_OUT) {
+	if (io_src_has_out(evt)) {
 		/* this occurs before write */
 		if (STATE_START == state) {
 			ret = io_src_msg_uad_set_next_message(src, &MSG1);
@@ -77,7 +77,7 @@ static void uad_cb(struct io_src_msg_uad *src, enum io_src_event evt)
 			CU_ASSERT(0);
 		}
 	}
-	if (evt & IO_IN) {
+	if (io_src_has_in(evt)) {
 		if (STATE_MSG1_SENT == state) {
 			if (0 == memcmp(&(my_uad->msg), &MSG1, sizeof(MSG1)))
 				reached_state(STATE_MSG1_RECEIVED);

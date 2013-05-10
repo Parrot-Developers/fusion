@@ -31,6 +31,18 @@ enum io_src_event {
 };
 
 /**
+ * @def io_src_has_in
+ * @brief Returns 1 if the epoll event set contains the IN event flag
+ */
+#define io_src_has_in(events) (!!((events) & IO_IN))
+
+/**
+ * @def io_src_has_out
+ * @brief Returns 1 if the epoll event set contains the OUT event flag
+ */
+#define io_src_has_out(events) (!!((events) & IO_OUT))
+
+/**
  * @struct io_src
  * @brief Source to register in a monitor
  */

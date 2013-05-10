@@ -79,7 +79,7 @@ static void msg_cb(struct io_src *src)
 	if (io_mon_has_error(src->events))
 		return;
 
-	if (src->events & IO_IN) {
+	if (io_src_has_in(src->events)) {
 		in_msg(msg, src->fd);
 		return;
 	}

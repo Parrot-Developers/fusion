@@ -47,10 +47,9 @@ static void my_msg_src_clean(struct my_msg_src *my_src)
 	/*
 	 * don't close the source fd, it will be closed by the io_src_msg_clean
 	 */
-	/* TODO add macros IS_OUT IS_IN ? */
-	if (!(my_src->msg_src.src.type & IO_IN))
+	if (!io_src_has_in(my_src->msg_src.src.type))
 		close(my_src->pipefds[0]);
-	if (!(my_src->msg_src.src.type & IO_OUT))
+	if (!io_src_has_out(my_src->msg_src.src.type))
 		close(my_src->pipefds[1]);
 
 	memset(&(my_src->msg), 0, sizeof(my_src->msg));
