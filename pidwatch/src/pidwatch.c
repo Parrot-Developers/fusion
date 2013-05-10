@@ -209,10 +209,8 @@ int pidwatch_create(pid_t pid, int flags)
 
 	/* must filter before subscription (start of message stream) */
 	ret = install_filter(pidfd, pid);
-	if (-1 == ret) {
-		fprintf(stderr, "here\n");
+	if (-1 == ret)
 		goto err;
-	}
 
 	ret = subscription_message(pidfd);
 	if (-1 == ret)
