@@ -1,5 +1,5 @@
 /******************************************************************************
-* @file mb_rb.h
+* @file rs_rb.h
 *
 * @brief mambo ring buffer
 *
@@ -9,8 +9,8 @@
 * @date July 2011
 ******************************************************************************/
 
-#ifndef _MB_RB_H_
-#define _MB_RB_H_
+#ifndef RS_RB_H_
+#define RS_RB_H_
 #include <stdint.h>
 #include "mb_log.h"
 
@@ -144,4 +144,4 @@ static inline void mb_rb_write_incr(struct mb_rb *rb, size_t length)
 	rb->write &= rb->size_mask;
 }
 
-#endif /* _MB_RBUFFER_H_ */
+#endif /* RS_RB_H_ */
