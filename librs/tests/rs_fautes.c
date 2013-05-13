@@ -15,6 +15,7 @@ const char const *fautes_lib_name = "librs";
 struct suite_t *librs_test_suites[] = {
 		&dll_suite,
 		&node_suite,
+		&rb_suite,
 		NULL, /* NULL guard */
 };
 
@@ -24,4 +25,5 @@ void librs_init_test_suites(void)
 
 	dll_suite.active = default_active_state;
 	node_suite.active = default_active_state;
+	rb_suite.active = default_active_state;
 }
