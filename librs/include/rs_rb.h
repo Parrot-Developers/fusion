@@ -1,16 +1,16 @@
-/******************************************************************************
-* @file rs_rb.h
-*
-* @brief ring buffer implementation, imported from mambo
-*
-* Copyright (C) 2011 Parrot S.A.
-*
-* @author Jean-Baptiste Dubois
-* @date July 2011
-******************************************************************************/
+/**
+ * @file rs_rb.h
+ *
+ * @brief ring buffer implementation, imported from mambo
+ *
+ * Copyright (C) 2011 Parrot S.A.
+ *
+ * @author Jean-Baptiste Dubois
+ * @date July 2011
+ */
 
-#ifndef _MB_RB_H_
-#define _MB_RB_H_
+#ifndef RS_RB_H_
+#define RS_RB_H_
 #include <stdint.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -77,6 +77,8 @@ static inline int rs_rb_destroy(struct rs_rb *rb)
 	rb->size = 0;
 	rb->size_mask = 0;
 	free(rb->base);
+
+
 	return 0;
 }
 
@@ -87,7 +89,7 @@ static inline int rs_rb_destroy(struct rs_rb *rb)
 /* get ring buffer read ptr */
 static inline void *rs_rb_read_ptr(struct rs_rb *rb)
 {
-	return (uint8_t *)rb->base + rb->read;
+	return (uint8_t *) rb->base + rb->read;
 }
 
 /* get ring buffer read length (number of bytes that can be read) */
@@ -116,7 +118,7 @@ static inline void rs_rb_read_incr(struct rs_rb *rb, size_t length)
 static inline uint8_t rs_rb_read_offset(struct rs_rb *rb, size_t offset)
 {
 	assert(offset < rb->len);
-	return ((uint8_t *)rb->base)[(rb->read + offset) & rb->size_mask];
+	return ((uint8_t *) rb->base)[(rb->read + offset) & rb->size_mask];
 }
 /**
  *  ring buffer write functions
@@ -125,7 +127,7 @@ static inline uint8_t rs_rb_read_offset(struct rs_rb *rb, size_t offset)
 /* get ring buffer write ptr */
 static inline void *rs_rb_write_ptr(struct rs_rb *rb)
 {
-	return (uint8_t *)rb->base + rb->write;
+	return (uint8_t *) rb->base + rb->write;
 }
 
 /* get ring buffer write length (number of bytes that can be written) */
@@ -153,4 +155,4 @@ static inline void rs_rb_write_incr(struct rs_rb *rb, size_t length)
 	rb->write &= rb->size_mask;
 }
 
-#endif /* _MB_RBUFFER_H_ */
+#endif /* RS_RB_H_ */
