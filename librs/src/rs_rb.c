@@ -5,6 +5,9 @@
  * @author nicolas.carrier@parrot.com
  * @brief ring buffer implementation, imported from mambo
  *
+ * data stored into the ring buffer span from rb->read included to rb->write
+ * excluded
+ *
  * Copyright (C) 2013 Parrot S.A.
  */
 #include <assert.h>
@@ -68,25 +71,31 @@ int rs_rb_clean(struct rs_rb *rb)
 
 void *rs_rb_get_read_ptr(struct rs_rb *rb)
 {
-	return (uint8_t *) rb->base + rb->read;
+	if (NULL == rb)
+		return NULL;
+
+	return (uint8_t *)(rb->base) + rb->read;
 }
 
 size_t rs_rb_get_read_length(struct rs_rb *rb)
 {
-	return rb->len;
+	return NULL == rb ? 0 : rb->len;
 }
 
 size_t rs_rb_get_read_length_no_wrap(struct rs_rb *rb)
 {
-	return (rb->write >= rb->read) ? rb->len : rb->len - rb->write;
+	if (NULL == rb)
+		return 0;
+
+	return rb->len + rb->read <= rb->size ? rb->len : rb->len - rb->write;
 }
 
 int rs_rb_read_incr(struct rs_rb *rb, size_t length)
 {
 	if (NULL == rb)
 		return -EINVAL;
-	if (length <= rb->len)
-		return -ENOBUFS;
+	if (length > rb->len)
+		return -ENOSR;
 
 	rb->len -= length;
 	rb->read += length;
@@ -107,28 +116,32 @@ int rs_rb_read_at(struct rs_rb *rb, size_t offset, uint8_t *value)
 
 void *rs_rb_get_write_ptr(struct rs_rb *rb)
 {
+	if (NULL == rb)
+		return NULL;
+
 	return (uint8_t *) rb->base + rb->write;
 }
 
 size_t rs_rb_get_write_length(struct rs_rb *rb)
 {
-	return rb->size - rb->len;
+	return NULL == rb ? 0 : rb->size - rb->len;
 }
 
 size_t rs_rb_get_write_length_no_wrap(struct rs_rb *rb)
 {
-	if (rb->write >= rb->read)
-		return rb->size - rb->write;
-	else
-		return rb->read - rb->write;
+	if (NULL == rb)
+		return 0;
+
+	return (rb->write >= rb->read ? rb->size : rb->read) - rb->write;
 }
 
 int rs_rb_write_incr(struct rs_rb *rb, size_t length)
 {
 	if (NULL == rb)
 		return -EINVAL;
+	if (rb->len + length > rb->size)
+		return -ENOBUFS;
 
-	assert(rb->len + length <= rb->size);
 	rb->len += length;
 	rb->write += length;
 	rb->write &= rb->size_mask;
