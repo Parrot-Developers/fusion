@@ -12,6 +12,8 @@
 #ifndef _MB_RB_H_
 #define _MB_RB_H_
 #include <stdint.h>
+#include <assert.h>
+#include <stdlib.h>
 
 /* ring buffer */
 struct rs_rb {
@@ -23,28 +25,36 @@ struct rs_rb {
 	size_t write;		/* write offset */
 };
 
-/* create ring buffer */
-static inline int rs_rb_create(struct rs_rb *rb, size_t size)
+static int isPowerOfTwo(unsigned int x)
 {
-	size_t real_size;
+	return ((x != 0) && ((x & (~x + 1)) == x));
+}
 
+static inline int rs_rb_init(struct rs_rb *rb, void *buffer, size_t size)
+{
 	/* size must be power of two */
-	real_size = 1;
-	while (real_size < size)
-		real_size = real_size << 1;
+	if (!isPowerOfTwo(size) || NULL == rb || NULL == buffer)
+		return -EINVAL;
 
-	/* TODO : align buffer on system page boundary */
-	rb->base = malloc(real_size);
-	if (!rb->base)
-		return -ENOMEM;
-
-	rb->size = real_size;
-	rb->size_mask = real_size;
-	rb->size_mask -= 1;
+	rb->base = buffer;
+	rb->size = size;
+	rb->size_mask = size - 1;
 	rb->read = 0;
 	rb->write = 0;
 	rb->len = 0;
+
 	return 0;
+}
+
+/* create ring buffer */
+static inline int rs_rb_create(struct rs_rb *rb, size_t size)
+{
+	/* TODO : align buffer on system page boundary */
+	void *buffer = malloc(size);
+	if (!rb->base)
+		return -ENOMEM;
+
+	return rs_rb_init(rb, buffer, size);
 }
 
 /* get ring buffer size */
