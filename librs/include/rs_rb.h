@@ -3,6 +3,10 @@
  *
  * @brief ring buffer implementation, imported from mambo
  *
+ * read means data read, written to the ring buffer
+ *
+ * write means data which can be read from the ring buffer, written to an output
+ *
  * Copyright (C) 2011 Parrot S.A.
  *
  * @author Jean-Baptiste Dubois
@@ -27,7 +31,7 @@ struct rs_rb {
 int rs_rb_init(struct rs_rb *rb, void *buffer, size_t size);
 
 /* get ring buffer size */
-size_t rs_rb_size(struct rs_rb *rb);
+size_t rs_rb_get_size(struct rs_rb *rb);
 
 /* empty ring buffer */
 void rs_rb_empty(struct rs_rb *rb);
@@ -38,32 +42,32 @@ void rs_rb_clean(struct rs_rb *rb);
 /* *  ring buffer read functions * */
 
 /* get ring buffer read ptr */
-void *rs_rb_read_ptr(struct rs_rb *rb);
+void *rs_rb_get_read_ptr(struct rs_rb *rb);
 
-/* get ring buffer read length (number of bytes that can be read) */
-size_t rs_rb_read_length(struct rs_rb *rb);
+/* get ring buffer read length, i.e. free space left in the ring buffer */
+size_t rs_rb_get_read_length(struct rs_rb *rb);
 
 /* get ring buffer read length with out wrapping
  * (number of bytes that can be read from read ptr without wrapping) */
-size_t rs_rb_read_length_no_wrap(struct rs_rb *rb);
+size_t rs_rb_get_read_length_no_wrap(struct rs_rb *rb);
 
 /* increment read pointer, freeing up ring buffer space */
 void rs_rb_read_incr(struct rs_rb *rb, size_t length);
 
 /* read byte at offset  */
-uint8_t rs_rb_read_offset(struct rs_rb *rb, size_t offset);
+uint8_t rs_rb_read_at(struct rs_rb *rb, size_t offset);
 
 /* * ring buffer write functions * */
 
 /* get ring buffer write ptr */
-void *rs_rb_write_ptr(struct rs_rb *rb);
+void *rs_rb_get_write_ptr(struct rs_rb *rb);
 
 /* get ring buffer write length (number of bytes that can be written) */
-size_t rs_rb_write_length(struct rs_rb *rb);
+size_t rs_rb_get_write_length(struct rs_rb *rb);
 
 /* get ring buffer write length with out wrapping
  * (number of bytes that can be written from write ptr without wrapping) */
-size_t rs_rb_write_length_no_wrap(struct rs_rb *rb);
+size_t rs_rb_get_write_length_no_wrap(struct rs_rb *rb);
 
 /* increment write pointer */
 void rs_rb_write_incr(struct rs_rb *rb, size_t length);
