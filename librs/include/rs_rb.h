@@ -46,17 +46,6 @@ static inline int rs_rb_init(struct rs_rb *rb, void *buffer, size_t size)
 	return 0;
 }
 
-/* create ring buffer */
-static inline int rs_rb_create(struct rs_rb *rb, size_t size)
-{
-	/* TODO : align buffer on system page boundary */
-	void *buffer = malloc(size);
-	if (!rb->base)
-		return -ENOMEM;
-
-	return rs_rb_init(rb, buffer, size);
-}
-
 /* get ring buffer size */
 static inline size_t rs_rb_size(struct rs_rb *rb)
 {
@@ -70,16 +59,11 @@ static inline void rs_rb_empty(struct rs_rb *rb)
 	rb->write = 0;
 	rb->len = 0;
 }
-/* destroy ring buffer */
-static inline int rs_rb_destroy(struct rs_rb *rb)
+
+/* resets a ring buffer */
+static inline void rs_rb_clean(struct rs_rb *rb)
 {
-	rs_rb_empty(rb);
-	rb->size = 0;
-	rb->size_mask = 0;
-	free(rb->base);
-
-
-	return 0;
+	memset(rb, 0, sizeof(*rb));
 }
 
 /**
