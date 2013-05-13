@@ -55,7 +55,7 @@ size_t rs_rb_get_read_length_no_wrap(struct rs_rb *rb);
 int rs_rb_read_incr(struct rs_rb *rb, size_t length);
 
 /* read byte at offset  */
-uint8_t rs_rb_read_at(struct rs_rb *rb, size_t offset);
+int rs_rb_read_at(struct rs_rb *rb, size_t offset, uint8_t *value);
 
 /* * ring buffer write functions * */
 

@@ -95,10 +95,14 @@ int rs_rb_read_incr(struct rs_rb *rb, size_t length)
 	return 0;
 }
 
-uint8_t rs_rb_read_at(struct rs_rb *rb, size_t offset)
+int rs_rb_read_at(struct rs_rb *rb, size_t offset, uint8_t *value)
 {
-	assert(offset < rb->len);
-	return ((uint8_t *) rb->base)[(rb->read + offset) & rb->size_mask];
+	if (NULL == rb || offset >= rb->len || NULL == value)
+		return -EINVAL;
+
+	*value = ((uint8_t *) rb->base)[(rb->read + offset) & rb->size_mask];
+
+	return 0;
 }
 
 void *rs_rb_get_write_ptr(struct rs_rb *rb)
