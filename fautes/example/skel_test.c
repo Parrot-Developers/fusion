@@ -12,11 +12,12 @@
  */
 #include <CUnit/Basic.h>
 
+#include <fautes.h>
 /*
  * optional, only needed if the testing facilities provided by Fautes are
  * needed
  */
-#include <fautes.h>
+#include <fautes_utils.h>
 
 /* one example testing function */
 static void testSKEL_A_FUNCTION(void)
@@ -42,7 +43,7 @@ static void testSKEL_A_FUNCTION(void)
  * set of test which compose the test suite, executed in order, until the NULL
  * guard
  */
-static const test_t tests[] = {
+static const struct test_t tests[] = {
 		/*
 		 * to add another test, simply add a {.fn = FN, .name = NAME}
 		 * element before the NULL guard
@@ -70,7 +71,7 @@ static int clean_skel_suite(void)
 	return 0; /* return non-zero on error */
 }
 
-suite_t skel_suite = {
+struct suite_t skel_suite = {
 		 /* name of the module, corresponds to the functions prefix */
 		.name = "mylib_skel",
 		.init = init_skel_suite,
