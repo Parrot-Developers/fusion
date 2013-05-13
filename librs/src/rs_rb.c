@@ -41,19 +41,29 @@ int rs_rb_init(struct rs_rb *rb, void *buffer, size_t size)
 
 size_t rs_rb_get_size(struct rs_rb *rb)
 {
-	return rb->size;
+	return NULL == rb ? 0 : rb->size;
 }
 
-void rs_rb_empty(struct rs_rb *rb)
+int rs_rb_empty(struct rs_rb *rb)
 {
+	if (NULL == rb)
+		return -EINVAL;
+
 	rb->read = 0;
 	rb->write = 0;
 	rb->len = 0;
+
+	return 0;
 }
 
-void rs_rb_clean(struct rs_rb *rb)
+int rs_rb_clean(struct rs_rb *rb)
 {
+	if (NULL == rb)
+		return -EINVAL;
+
 	memset(rb, 0, sizeof(*rb));
+
+	return 0;
 }
 
 void *rs_rb_get_read_ptr(struct rs_rb *rb)
@@ -71,12 +81,18 @@ size_t rs_rb_get_read_length_no_wrap(struct rs_rb *rb)
 	return (rb->write >= rb->read) ? rb->len : rb->len - rb->write;
 }
 
-void rs_rb_read_incr(struct rs_rb *rb, size_t length)
+int rs_rb_read_incr(struct rs_rb *rb, size_t length)
 {
-	assert(length <= rb->len);
+	if (NULL == rb)
+		return -EINVAL;
+	if (length <= rb->len)
+		return -ENOBUFS;
+
 	rb->len -= length;
 	rb->read += length;
 	rb->read &= rb->size_mask;
+
+	return 0;
 }
 
 uint8_t rs_rb_read_at(struct rs_rb *rb, size_t offset)
@@ -103,10 +119,15 @@ size_t rs_rb_get_write_length_no_wrap(struct rs_rb *rb)
 		return rb->read - rb->write;
 }
 
-void rs_rb_write_incr(struct rs_rb *rb, size_t length)
+int rs_rb_write_incr(struct rs_rb *rb, size_t length)
 {
+	if (NULL == rb)
+		return -EINVAL;
+
 	assert(rb->len + length <= rb->size);
 	rb->len += length;
 	rb->write += length;
 	rb->write &= rb->size_mask;
+
+	return 0;
 }

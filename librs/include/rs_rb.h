@@ -34,10 +34,10 @@ int rs_rb_init(struct rs_rb *rb, void *buffer, size_t size);
 size_t rs_rb_get_size(struct rs_rb *rb);
 
 /* empty ring buffer */
-void rs_rb_empty(struct rs_rb *rb);
+int rs_rb_empty(struct rs_rb *rb);
 
 /* resets a ring buffer */
-void rs_rb_clean(struct rs_rb *rb);
+int rs_rb_clean(struct rs_rb *rb);
 
 /* *  ring buffer read functions * */
 
@@ -52,7 +52,7 @@ size_t rs_rb_get_read_length(struct rs_rb *rb);
 size_t rs_rb_get_read_length_no_wrap(struct rs_rb *rb);
 
 /* increment read pointer, freeing up ring buffer space */
-void rs_rb_read_incr(struct rs_rb *rb, size_t length);
+int rs_rb_read_incr(struct rs_rb *rb, size_t length);
 
 /* read byte at offset  */
 uint8_t rs_rb_read_at(struct rs_rb *rb, size_t offset);
@@ -70,6 +70,6 @@ size_t rs_rb_get_write_length(struct rs_rb *rb);
 size_t rs_rb_get_write_length_no_wrap(struct rs_rb *rb);
 
 /* increment write pointer */
-void rs_rb_write_incr(struct rs_rb *rb, size_t length);
+int rs_rb_write_incr(struct rs_rb *rb, size_t length);
 
 #endif /* RS_RB_H_ */
