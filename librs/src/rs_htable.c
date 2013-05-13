@@ -1,13 +1,13 @@
-/******************************************************************************
-* @file mb_hash.c
-*
-* @brief mambo hash table
-*
-* Copyright (C) 2011 Parrot S.A.
-*
-* @author Jean-Baptiste Dubois
-* @date May 2011
-******************************************************************************/
+/**
+ * @file rs_htable.c
+ *
+ * @brief hash table implementation, extracted from mambo
+ *
+ * Copyright (C) 2011 Parrot S.A.
+ *
+ * @author Jean-Baptiste Dubois
+ * @date May 2011
+ */
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include <errno.h>
 
-#include "mb_hash.h"
+#include "rs_htable.h"
 
 
 /* In the course of designing a good hashing configuration,
@@ -36,7 +36,7 @@ static const uint32_t hash_prime[] = {
 /*
  * create a hash table
  */
-int mb_hash_table_create(struct mb_hash_table *tab, size_t size)
+int rs_htable_create(struct rs_htable *tab, size_t size)
 {
 	size_t i = 0;
 	/* get upper prime number */
@@ -44,7 +44,7 @@ int mb_hash_table_create(struct mb_hash_table *tab, size_t size)
 		i++;
 
 	tab->size = hash_prime[i];
-	tab->buckets = calloc(tab->size, sizeof(struct mb_hash_item *));
+	tab->buckets = calloc(tab->size, sizeof(*tab->buckets));
 	tab->nbentries = 0;
 	return 0;
 }
@@ -52,10 +52,10 @@ int mb_hash_table_create(struct mb_hash_table *tab, size_t size)
 /*
  * destroy a hash table
  */
-int mb_hash_table_destroy(struct mb_hash_table *tab)
+int rs_htable_destroy(struct rs_htable *tab)
 {
 	size_t i;
-	struct mb_hash_entry *entry, *next;
+	struct rs_htable_entry *entry, *next;
 	for (i = 0; i < tab->size; i++) {
 		entry = tab->buckets[i];
 		while (entry) {
@@ -74,7 +74,7 @@ int mb_hash_table_destroy(struct mb_hash_table *tab)
  * by Daniel Bernstein djb2 string hash function
  * http://www.cse.yorku.ca/~oz/hash.html
  **/
-static uint32_t mb_hash_string(const char *key)
+static uint32_t hash_string(const char *key)
 {
 	const unsigned char *str = (const unsigned char *)key;
 	uint32_t hash = 5381;
@@ -91,13 +91,13 @@ static uint32_t mb_hash_string(const char *key)
  * @param key string key
  * @return A  pointer to a matching data, or NULL if no entry was found
  */
-int mb_hash_table_lookup(struct mb_hash_table *tab, const char *key,
+int rs_htable_lookup(struct rs_htable *tab, const char *key,
 		void **data)
 {
-	struct mb_hash_entry *entry;
+	struct rs_htable_entry *entry;
 	uint32_t hash;
 
-	hash = mb_hash_string(key);
+	hash = hash_string(key);
 	hash = hash % tab->size;
 	entry = tab->buckets[hash];
 
@@ -124,19 +124,19 @@ int mb_hash_table_lookup(struct mb_hash_table *tab, const char *key,
  * @param key string key
  * @return     0 upon success, or -1 upon failure
  */
-int mb_hash_table_insert(struct mb_hash_table *tab, const char *key, void *data)
+int rs_htable_insert(struct rs_htable *tab, const char *key, void *data)
 {
 	uint32_t hash;
-	struct mb_hash_entry *entry;
+	struct rs_htable_entry *entry;
 
 	assert(tab && key && data);
-	entry = (struct mb_hash_entry *)malloc(sizeof(struct mb_hash_entry));
+	entry = (struct rs_htable_entry *)malloc(sizeof(struct rs_htable_entry));
 	if (!entry)
 		return -ENOMEM;
 
 	entry->data = data;
 	entry->key = strdup(key);
-	hash = mb_hash_string(key);
+	hash = hash_string(key);
 	hash = hash % tab->size;
 
 	/* insert at list head */
@@ -154,13 +154,13 @@ int mb_hash_table_insert(struct mb_hash_table *tab, const char *key, void *data)
  * @param free 1 to free key
  * @return     0 upon success, or -1 upon failure
  */
-int mb_hash_table_remove(struct mb_hash_table *tab, const char *key,
+int rs_htable_remove(struct rs_htable *tab, const char *key,
 			 void **data)
 {
-	struct mb_hash_entry *entry, *prev = NULL;
+	struct rs_htable_entry *entry, *prev = NULL;
 	uint32_t hash;
 
-	hash = mb_hash_string(key);
+	hash = hash_string(key);
 	hash = hash % tab->size;
 	entry = tab->buckets[hash];
 
