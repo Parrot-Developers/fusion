@@ -56,11 +56,11 @@ static uint32_t hash_string(const char *key)
 	return hash;
 }
 
-int rs_hmap_init(struct rs_hmap *tab, size_t size)
+int rs_hmap_init(struct rs_hmap *map, size_t size)
 {
 	size_t i = 0;
 
-	if (NULL == tab)
+	if (NULL == map)
 		return -EINVAL;
 	if (PRIME_MAX < size)
 		return -E2BIG;
@@ -69,24 +69,24 @@ int rs_hmap_init(struct rs_hmap *tab, size_t size)
 	while (hash_prime[i] <= size)
 		i++;
 
-	tab->size = hash_prime[i];
-	tab->buckets = calloc(tab->size, sizeof(*tab->buckets));
-	if (NULL == tab->buckets)
+	map->size = hash_prime[i];
+	map->buckets = calloc(map->size, sizeof(*map->buckets));
+	if (NULL == map->buckets)
 		return -errno;
 
 	return 0;
 }
 
-int rs_hmap_clean(struct rs_hmap *tab)
+int rs_hmap_clean(struct rs_hmap *map)
 {
 	size_t i;
 	struct rs_hmap_entry *entry, *next;
 
-	if (NULL == tab)
+	if (NULL == map)
 		return -EINVAL;
 
-	for (i = 0; i < tab->size; i++) {
-		entry = tab->buckets[i];
+	for (i = 0; i < map->size; i++) {
+		entry = map->buckets[i];
 		while (entry) {
 			next = entry->next;
 			free(entry->key);
@@ -94,21 +94,21 @@ int rs_hmap_clean(struct rs_hmap *tab)
 			entry = next;
 		}
 	}
-	free(tab->buckets);
-	memset(tab, 0, sizeof(*tab));
+	free(map->buckets);
+	memset(map, 0, sizeof(*map));
 
 	return 0;
 }
 
-int rs_hmap_lookup(struct rs_hmap *tab, const char *key,
+int rs_hmap_lookup(struct rs_hmap *map, const char *key,
 		void **data)
 {
 	struct rs_hmap_entry *entry;
 	uint32_t hash;
 
 	hash = hash_string(key);
-	hash = hash % tab->size;
-	entry = tab->buckets[hash];
+	hash = hash % map->size;
+	entry = map->buckets[hash];
 
 	if (!entry)
 		return -ENOENT;
@@ -127,13 +127,13 @@ int rs_hmap_lookup(struct rs_hmap *tab, const char *key,
 	return 0;
 }
 
-int rs_hmap_insert(struct rs_hmap *tab, const char *key, void *data)
+int rs_hmap_insert(struct rs_hmap *map, const char *key, void *data)
 {
 	int ret;
 	uint32_t hash;
 	struct rs_hmap_entry *entry;
 
-	if (NULL == tab || str_is_invalid(key))
+	if (NULL == map || str_is_invalid(key))
 		return -EINVAL;
 
 	entry = calloc(1, sizeof(*entry));
@@ -149,11 +149,11 @@ int rs_hmap_insert(struct rs_hmap *tab, const char *key, void *data)
 		goto out;
 	}
 	hash = hash_string(key);
-	hash = hash % tab->size;
+	hash = hash % map->size;
 
 	/* insert at list head */
-	entry->next = tab->buckets[hash];
-	tab->buckets[hash] = entry;
+	entry->next = map->buckets[hash];
+	map->buckets[hash] = entry;
 
 	return 0;
 out:
@@ -165,18 +165,18 @@ out:
 	return ret;
 }
 
-int rs_hmap_remove(struct rs_hmap *tab, const char *key,
+int rs_hmap_remove(struct rs_hmap *map, const char *key,
 			 void **data)
 {
 	struct rs_hmap_entry *entry, *prev = NULL;
 	uint32_t hash;
 
-	if (NULL == tab || str_is_invalid(key) || NULL == data)
+	if (NULL == map || str_is_invalid(key) || NULL == data)
 		return -EINVAL;
 
 	hash = hash_string(key);
-	hash = hash % tab->size;
-	entry = tab->buckets[hash];
+	hash = hash % map->size;
+	entry = map->buckets[hash];
 
 	/* compare keys only on collision */
 	if (NULL != entry->next) {
@@ -195,7 +195,7 @@ int rs_hmap_remove(struct rs_hmap *tab, const char *key,
 
 	/* remove entry */
 	if (NULL == prev)
-		tab->buckets[hash] = entry->next;
+		map->buckets[hash] = entry->next;
 	else
 		prev->next = entry->next;
 
