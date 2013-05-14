@@ -1,7 +1,7 @@
 /**
- * @file rs_htable.c
+ * @file rs_hmap.c
  *
- * @brief hash table implementation, extracted from mambo
+ * @brief hash map implementation, extracted from mambo
  *
  * Copyright (C) 2011 Parrot S.A.
  *
@@ -18,11 +18,11 @@
 #include <stdlib.h>
 #include <errno.h>
 
-#include "rs_htable.h"
+#include "rs_hmap.h"
 
 
 /* In the course of designing a good hashing configuration,
- * it is helpful to have a list of prime numbers for the hash table size.
+ * it is helpful to have a list of prime numbers for the hash map size.
  * it minimizes clustering in the hashed table
  * */
 static const uint32_t hash_prime[] = {
@@ -34,12 +34,13 @@ static const uint32_t hash_prime[] = {
 };
 
 /*
- * create a hash table
+ * create a hash map
  */
-int rs_htable_create(struct rs_htable *tab, size_t size)
+int rs_hmap_create(struct rs_hmap *tab, size_t size)
 {
 	size_t i = 0;
 	/* get upper prime number */
+	/* TODO manage size too big */
 	while (hash_prime[i] <= size)
 		i++;
 
@@ -50,12 +51,12 @@ int rs_htable_create(struct rs_htable *tab, size_t size)
 }
 
 /*
- * destroy a hash table
+ * destroy a hash map
  */
-int rs_htable_destroy(struct rs_htable *tab)
+int rs_hmap_destroy(struct rs_hmap *tab)
 {
 	size_t i;
-	struct rs_htable_entry *entry, *next;
+	struct rs_hmap_entry *entry, *next;
 	for (i = 0; i < tab->size; i++) {
 		entry = tab->buckets[i];
 		while (entry) {
@@ -85,16 +86,16 @@ static uint32_t hash_string(const char *key)
 	return hash;
 }
 /**
- * Lookup an entry in hash table.
+ * Lookup an entry in hash map.
  *
- * @param tab hash table
+ * @param tab hash map
  * @param key string key
  * @return A  pointer to a matching data, or NULL if no entry was found
  */
-int rs_htable_lookup(struct rs_htable *tab, const char *key,
+int rs_hmap_lookup(struct rs_hmap *tab, const char *key,
 		void **data)
 {
-	struct rs_htable_entry *entry;
+	struct rs_hmap_entry *entry;
 	uint32_t hash;
 
 	hash = hash_string(key);
@@ -118,19 +119,19 @@ int rs_htable_lookup(struct rs_htable *tab, const char *key,
 }
 
 /**
- * Insert an entry in hash table.
+ * Insert an entry in hash map.
  *
- * @param tab hash table
+ * @param tab hash map
  * @param key string key
  * @return     0 upon success, or -1 upon failure
  */
-int rs_htable_insert(struct rs_htable *tab, const char *key, void *data)
+int rs_hmap_insert(struct rs_hmap *tab, const char *key, void *data)
 {
 	uint32_t hash;
-	struct rs_htable_entry *entry;
+	struct rs_hmap_entry *entry;
 
 	assert(tab && key && data);
-	entry = (struct rs_htable_entry *)malloc(sizeof(struct rs_htable_entry));
+	entry = (struct rs_hmap_entry *)malloc(sizeof(struct rs_hmap_entry));
 	if (!entry)
 		return -ENOMEM;
 
@@ -147,17 +148,17 @@ int rs_htable_insert(struct rs_htable *tab, const char *key, void *data)
 }
 
 /**
- * Remove an entry from hash table and retrieve associated data .
+ * Remove an entry from hash map and retrieve associated data .
  *
- * @param tab hash table
+ * @param tab hash map
  * @param key string key
  * @param free 1 to free key
  * @return     0 upon success, or -1 upon failure
  */
-int rs_htable_remove(struct rs_htable *tab, const char *key,
+int rs_hmap_remove(struct rs_hmap *tab, const char *key,
 			 void **data)
 {
-	struct rs_htable_entry *entry, *prev = NULL;
+	struct rs_hmap_entry *entry, *prev = NULL;
 	uint32_t hash;
 
 	hash = hash_string(key);
