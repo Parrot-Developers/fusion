@@ -104,6 +104,10 @@ int rs_hmap_lookup(struct rs_hmap *map, const char *key,
 	struct rs_hmap_entry *entry;
 	uint32_t hash;
 
+	if (NULL == map || str_is_invalid(key) || NULL == data)
+		return -EINVAL;
+
+	*data = NULL;
 	hash = hash_string(key);
 	hash = hash % map->size;
 	entry = map->buckets[hash];

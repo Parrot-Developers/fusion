@@ -62,9 +62,10 @@ int rs_hmap_clean(struct rs_hmap *map);
  *
  * @param map Hash map
  * @param key String key
- * @param data In output, a pointer to a matching data, or NULL if no entry was
- * found. can't be NULL
- * @return Negative errno-compatible value on error, 0 on success
+ * @param data In output, a pointer to a matching data, or to NULL if no entry
+ * was found. can't be NULL
+ * @return Negative errno-compatible value on error, 0 on success. -ENOENT if
+ * the entry wasn't found
  */
 int rs_hmap_lookup(struct rs_hmap *map, const char *key, void **data);
 
