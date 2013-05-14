@@ -14,6 +14,13 @@
 #define RS_HMAP_H_
 
 /**
+ * @def RS_HMAP_PRIME_MAX
+ * @brief Maximum size of a has map's bucket, which is a big prime number,
+ * fitting into an uint32_t
+ */
+#define RS_HMAP_PRIME_MAX 2147483647U
+
+/**
  * @struct rs_hmap_entry
  * @brief Hash map entry structure
  */

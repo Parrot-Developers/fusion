@@ -21,8 +21,6 @@
 #include "rs_hmap.h"
 #include "rs_utils.h"
 
-#define PRIME_MAX 2147483647
-
 /**
  * @var hash_prime
  * @brief In the course of designing a good hashing configuration, it is helpful
@@ -35,7 +33,7 @@ static const uint32_t hash_prime[] = {
 	262139, 524287, 1048573, 2097143, 4194301, 8388593,
 	16777213, 33554393, 67108859, 134217689, 268435399,
 	536870909, 1073741789,
-	PRIME_MAX
+	RS_HMAP_PRIME_MAX
 };
 
 /**
@@ -62,7 +60,7 @@ int rs_hmap_init(struct rs_hmap *map, size_t size)
 
 	if (NULL == map)
 		return -EINVAL;
-	if (PRIME_MAX < size)
+	if (RS_HMAP_PRIME_MAX < size)
 		return -E2BIG;
 
 	/* get upper prime number */
