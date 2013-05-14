@@ -54,6 +54,16 @@ static uint32_t hash_string(const char *key)
 	return hash;
 }
 
+/**
+ * Says whether or not a hash map is valid
+ * @param map Hash map to test
+ * @return non-zero if the hash map is invalid, 0 otherwise
+ */
+static int map_is_invalid(struct rs_hmap *map)
+{
+	return NULL == map || NULL == map->buckets;
+}
+
 int rs_hmap_init(struct rs_hmap *map, size_t size)
 {
 	size_t i = 0;
@@ -104,7 +114,7 @@ int rs_hmap_lookup(struct rs_hmap *map, const char *key,
 	struct rs_hmap_entry *entry;
 	uint32_t hash;
 
-	if (NULL == map || str_is_invalid(key) || NULL == data)
+	if (map_is_invalid(map) || str_is_invalid(key) || NULL == data)
 		return -EINVAL;
 
 	*data = NULL;
@@ -135,7 +145,7 @@ int rs_hmap_insert(struct rs_hmap *map, const char *key, void *data)
 	uint32_t hash;
 	struct rs_hmap_entry *entry;
 
-	if (NULL == map || str_is_invalid(key))
+	if (map_is_invalid(map) || str_is_invalid(key))
 		return -EINVAL;
 
 	entry = calloc(1, sizeof(*entry));
@@ -173,7 +183,7 @@ int rs_hmap_remove(struct rs_hmap *map, const char *key,
 	struct rs_hmap_entry *entry, *prev = NULL;
 	uint32_t hash;
 
-	if (NULL == map || str_is_invalid(key) || NULL == data)
+	if (map_is_invalid(map)  || str_is_invalid(key))
 		return -EINVAL;
 	if (NULL != data)
 		*data = NULL;
@@ -181,6 +191,8 @@ int rs_hmap_remove(struct rs_hmap *map, const char *key,
 	hash = hash_string(key);
 	hash = hash % map->size;
 	entry = map->buckets[hash];
+	if (NULL == entry)
+		return -ENOENT;
 
 	/* compare keys only on collision */
 	if (NULL != entry->next) {
