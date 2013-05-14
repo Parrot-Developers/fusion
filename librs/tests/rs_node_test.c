@@ -309,6 +309,15 @@ static void testRS_NODE_FIND_MATCH(void)
 	needle = rs_node_find_match(haystack, match_val, NULL);
 	CU_ASSERT_PTR_NULL(needle);
 
+	/* NULL data is possible, useful for nested matching functions */
+	int match(struct rs_node *node, const void *data)
+	{
+		struct int_node *int_node = to_int_node(node);
+		return int_node->val == 666;
+	}
+	needle = rs_node_find_match(haystack, match, NULL);
+	CU_ASSERT(int_node_test_equals(needle, &int_node_c));
+
 	/* error cases : none */
 }
 

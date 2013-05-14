@@ -112,7 +112,7 @@ struct rs_node *rs_node_find(struct rs_node *needle, struct rs_node *haystack)
 struct rs_node *rs_node_find_match(struct rs_node *node,
 		rs_node_match_cb_t match, const void *data)
 {
-	if (NULL == node || NULL == match || NULL == data)
+	if (NULL == node || NULL == match)
 		return NULL;
 
 	/* match */

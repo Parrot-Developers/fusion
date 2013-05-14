@@ -46,7 +46,8 @@ typedef int (*rs_node_cb_t)(struct rs_node *node, void *data);
  * @brief Convenience macro which declares a matching function on a given member
  * of a struct, enclosing a dll node. Matching is performed with the equal
  * operator, applied to the member and the value pointed at by the user data
- * argument, casted to the same type as the member
+ * argument, casted to the same type as the member. If data is NULL, the
+ * matching function returns 0;
  * @param type Base struct type
  * @param member Member on which the matching will be performed
  * @param node_member Name of the member containing the node
@@ -55,6 +56,8 @@ typedef int (*rs_node_cb_t)(struct rs_node *node, void *data);
 int match_##member(struct rs_node *__n, const void *__d) \
 { \
 	type *__o = container_of(__n, type, node_member); \
+	if (NULL == __d) \
+		return 0; \
 	typeof(((type *)0)->member)*__v = (typeof(((type *)0)->member)*)__d; \
 	return __o->member == *__v; \
 }
