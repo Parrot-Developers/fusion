@@ -11,6 +11,7 @@
 #define RS_FAUTES_H_
 
 extern struct suite_t dll_suite;
+extern struct suite_t hmap_suite;
 extern struct suite_t node_suite;
 extern struct suite_t rb_suite;
 
