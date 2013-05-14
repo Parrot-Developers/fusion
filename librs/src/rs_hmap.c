@@ -175,6 +175,8 @@ int rs_hmap_remove(struct rs_hmap *map, const char *key,
 
 	if (NULL == map || str_is_invalid(key) || NULL == data)
 		return -EINVAL;
+	if (NULL != data)
+		*data = NULL;
 
 	hash = hash_string(key);
 	hash = hash % map->size;
