@@ -29,58 +29,6 @@
 #define to_src_msg_uad(p) container_of(p, struct io_src_msg_uad, src_msg)
 
 /**
- * Performs input
- * @param uad Source
- * @return errno compatible value on error, 0 on success
- */
-static int process_in_event(struct io_src_msg_uad *uad)
-{
-	ssize_t sret;
-
-	sret = io_recvfrom(uad->src_msg.src.fd, uad->src_msg.rcv_buf,
-			uad->src_msg.len, 0, NULL, NULL);
-	if (-1 == sret)
-		return -errno;
-
-	uad->cb(uad, IO_IN);
-
-	return 0;
-}
-
-/**
- * Performs output
- * @param uad Source
- * @return errno compatible value on error, 0 on success
- */
-static int process_out_event(struct io_src_msg_uad *uad)
-{
-	ssize_t sret;
-
-	uad->cb(uad, IO_OUT);
-
-	sret = io_sendto(uad->src_msg.src.fd, uad->src_msg.send_buf,
-			uad->src_msg.len, 0,
-			(const struct sockaddr *)&(uad->addr),
-			sizeof(uad->addr));
-	if (-1 == sret)
-		return -errno;
-
-	return 0;
-}
-
-/**
- * Performs I/O, after arguments are already verified
- * @param uad Source
- * @param evt Either IO_IN or IO_OUT, not both
- * @return errno compatible value on error, 0 on success
- */
-static int process_event(struct io_src_msg_uad *uad, enum io_src_event evt)
-{
-	/* here evt is either IO_IN or IO_OUT, not both */
-	return IO_IN == evt ? process_in_event(uad) : process_out_event(uad);
-}
-
-/**
  * Called when the underlying io_src_msg has I/O ready. Performs I/O via
  * recvfrom / sendto
  * @param src Source
@@ -93,7 +41,7 @@ static void uad_cb(struct io_src_msg *src, enum io_src_event evt)
 	if (IO_IN != evt && IO_OUT != evt)
 		return;
 
-	process_event(uad, evt);
+	uad->cb(uad, evt);
 }
 
 static int uad_init_args_are_invalid(struct io_src_msg_uad *uad,
@@ -149,11 +97,18 @@ int io_src_msg_uad_init(struct io_src_msg_uad *uad, io_src_msg_uad_cb_t *cb,
 		goto out;
 	}
 
+	ret = connect(sockfd, (struct sockaddr *) &(uad->addr),
+			sizeof(uad->addr));
+	if (ret < 0) {
+		ret = -errno;
+		goto out;
+	}
+
 	uad->cb = cb;
 
 	/* can fail only on parameters */
 	return io_src_msg_init(&(uad->src_msg), sockfd, IO_DUPLEX, uad_cb,
-			rcv_buf, len, 0);
+			rcv_buf, len, 1);
 
 out:
 	close(sockfd);
