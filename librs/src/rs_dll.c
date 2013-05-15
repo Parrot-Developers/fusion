@@ -100,6 +100,14 @@ struct rs_node *rs_dll_find_match(struct rs_dll *dll, rs_node_match_cb_t match,
 	return rs_node_find_match(dll->head, match, data);
 }
 
+int rs_dll_is_empty(struct rs_dll *dll)
+{
+	if (NULL == dll)
+		return 0;
+
+	return rs_dll_get_count(dll) == 0;
+}
+
 struct rs_node *rs_dll_find(struct rs_dll *dll, struct rs_node *node)
 {
 	int match(struct rs_node *n, const void *data)

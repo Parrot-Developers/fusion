@@ -144,6 +144,40 @@ static void testRS_DLL_GET_COUNT(void)
 	CU_ASSERT_EQUAL(count, UINT_MAX);
 }
 
+static void testRS_DLL_IS_EMPTY(void)
+{
+	struct int_node int_node_a = {.val = 17,};
+	struct int_node int_node_b = {.val = 42,};
+	struct int_node int_node_c = {.val = 666,};
+	int result;
+	struct rs_dll dll;
+	int f_ret = 0;
+
+	f_ret = rs_dll_init(&dll, &dll_test_vtable);
+	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
+
+	/* normal use cases */
+	result = rs_dll_is_empty(&dll);
+	CU_ASSERT(result);
+
+	rs_dll_push(&dll, &(int_node_a.node));
+	result = rs_dll_is_empty(&dll);
+	CU_ASSERT_FALSE(result);
+
+	rs_dll_push(&dll, &(int_node_b.node));
+	result = rs_dll_is_empty(&dll);
+	CU_ASSERT_FALSE(result);
+
+	rs_dll_pop(&dll);
+	rs_dll_pop(&dll);
+	result = rs_dll_is_empty(&dll);
+	CU_ASSERT(result);
+
+	/* error use case */
+	result = rs_dll_is_empty(NULL);
+	CU_ASSERT_FALSE(result);
+}
+
 static void testRS_DLL_FIND(void)
 {
 	struct int_node int_node_a = {.val = 17,};
@@ -431,6 +465,10 @@ static const struct test_t tests[] = {
 		{
 				.fn = testRS_DLL_GET_COUNT,
 				.name = "rs_dll_get_count"
+		},
+		{
+				.fn = testRS_DLL_IS_EMPTY,
+				.name = "rs_dll_is_empty"
 		},
 		{
 				.fn = testRS_DLL_FIND,

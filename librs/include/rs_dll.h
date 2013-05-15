@@ -68,6 +68,13 @@ int rs_dll_push(struct rs_dll *dll, struct rs_node *node);
 unsigned rs_dll_get_count(struct rs_dll *dll);
 
 /**
+ * Says whether or not th dll contains at least one element or not
+ * @param dll Doubly linked-list
+ * @return non-zero if the dll is empty, 0 if it is
+ */
+int rs_dll_is_empty(struct rs_dll *dll);
+
+/**
  * Searches a node in the list, based on the user defined equality method
  * @param dll Doubly linked list
  * @param node Node to find
