@@ -25,10 +25,10 @@ static int in_msg(struct io_src_msg *msg, int fd)
 
 	/* get some data */
 	if (msg->perform_io) {
-		sret = io_read(fd, msg->rcv_buf, msg->len);
+		sret = io_read(fd, msg->rcv_buf, msg->rcv_buf_size);
 		if (-1 == sret)
 			return -errno;
-		if ((ssize_t)msg->len != sret)
+		if ((ssize_t)msg->rcv_buf_size != sret)
 			return -EIO;
 	} /* else, the source implementation performs input itself */
 
@@ -52,12 +52,9 @@ static int out_msg(struct io_src_msg *msg, int fd)
 	msg->cb(msg, IO_OUT);
 
 	if (msg->perform_io) {
-		/* TODO this is uber cretinism...
-		 * msg->len is NOT the size of the message to write, but the
-		 * size of the receive buffer
-		 */
 		/* msg->msg contains the message to send */
-		sret = io_write(fd, msg->send_buf, msg->len);
+		/* casting to void * is needed because of write's prototype */
+		sret = io_write(fd, (void *)msg->send_buf, msg->send_buf_size);
 		if (-1 == sret)
 			return -errno;
 	} /* else, the source implementation performs output itself */
@@ -87,12 +84,13 @@ static void msg_cb(struct io_src *src)
 }
 
 int io_src_msg_set_next_message(struct io_src_msg *msg_src,
-		const void *send_buf)
+		const void *send_buf, unsigned send_buf_size)
 {
 	if (NULL == msg_src || NULL == send_buf)
 		return -EINVAL;
 
 	msg_src->send_buf = send_buf;
+	msg_src->send_buf_size = send_buf_size;
 
 	return 0;
 }
@@ -119,7 +117,8 @@ int io_src_msg_init(struct io_src_msg *msg_src, int fd, enum io_src_event type,
 
 	msg_src->cb = cb;
 	msg_src->rcv_buf = rcv_buf;
-	msg_src->len = len;
+	msg_src->rcv_buf_size = len;
+	msg_src->send_buf_size = 0;
 	msg_src->perform_io = perform_io;
 
 	/* can fail only on parameters */
@@ -132,7 +131,7 @@ void io_src_msg_clean(struct io_src_msg *msg)
 		return;
 
 	msg->cb = NULL;
-	msg->len = 0;
+	msg->rcv_buf_size = 0;
 	msg->rcv_buf = NULL;
 	msg->send_buf = NULL;
 	msg->perform_io = 0;

@@ -51,13 +51,15 @@ struct io_src_msg {
 	struct io_src src;
 	/** user callback, notified when I/O is possible */
 	io_src_msg_cb_t *cb;
-	/** fixed-length of the messages to read/write */
-	unsigned len;
+	/** size of the message to read */
+	unsigned rcv_buf_size;
 	/**
 	 * points to a user buffer able to contain a whole message, filled at
 	 * each cb call with the message just read on an IO_IN event
 	 */
 	void *rcv_buf;
+	/** size of the message to write */
+	unsigned send_buf_size;
 	/** points to a user buffer containing the next message to send */
 	const void *send_buf;
 	/**
@@ -71,11 +73,12 @@ struct io_src_msg {
  * Facility function to set the next message to be sent on the next "OUT" event.
  * Must be used in user callback on such events.
  * @param msg_src Message source
- * @param send_buf Points to a buffer containing the next mesage to send.
+ * @param send_buf Points to a buffer containing the next message to send.
+ * @param send_buf_size Size of the message to send
  * @return errno compatible negative value on error, 0 on success
  */
 int io_src_msg_set_next_message(struct io_src_msg *msg_src,
-		const void *send_buf);
+		const void *send_buf, unsigned send_buf_size);
 
 /**
  * Gets the address of the receive buffer

@@ -55,11 +55,12 @@ struct io_src_msg_uad {
  * Facility function to set the next message to be sent on the next "OUT" event.
  * Must be used in user callback on such events.
  * @param uad_src UAD source
- * @param msg Points to a buffer containing the next message to send.
+ * @param send_buf Points to a buffer containing the next message to send.
+ * @param send_buf_size Size of the message to send
  * @return errno compatible negative value on error, 0 on success
  */
 int io_src_msg_uad_set_next_message(struct io_src_msg_uad *uad,
-		const void *rcv_buf);
+		const void *send_buf, unsigned send_buf_size);
 
 /**
  * Gets the address of the receive buffer

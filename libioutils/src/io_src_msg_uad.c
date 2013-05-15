@@ -52,14 +52,14 @@ static int uad_init_args_are_invalid(struct io_src_msg_uad *uad,
 			NULL == fmt || '\0' == *fmt;
 }
 
-/* TODO allow to specify the length */
 int io_src_msg_uad_set_next_message(struct io_src_msg_uad *uad,
-		const void *rcv_buf)
+		const void *rcv_buf, unsigned send_buf_size)
 {
 	if (NULL == uad)
 		return -EINVAL;
 
-	return io_src_msg_set_next_message(&(uad->src_msg), rcv_buf);
+	return io_src_msg_set_next_message(&(uad->src_msg), rcv_buf,
+			send_buf_size);
 }
 
 int io_src_msg_uad_get_message(struct io_src_msg_uad *uad, void **msg)

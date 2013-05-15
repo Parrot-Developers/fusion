@@ -77,14 +77,14 @@ static void testSRC_MSG_SET_NEXT_MESSAGE(void)
 	char msg[1024];
 	struct io_src_msg src;
 
-	ret = io_src_msg_set_next_message(&src, &msg);
+	ret = io_src_msg_set_next_message(&src, &msg, sizeof(msg));
 	CU_ASSERT_NOT_EQUAL(ret, -1);
 	CU_ASSERT_PTR_EQUAL(src.send_buf, &msg);
 
 	/* error use cases */
-	ret = io_src_msg_set_next_message(NULL, &msg);
+	ret = io_src_msg_set_next_message(NULL, &msg, sizeof(msg));
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_src_msg_set_next_message(&src, NULL);
+	ret = io_src_msg_set_next_message(&src, NULL, sizeof(msg));
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 }
 
@@ -111,21 +111,21 @@ static void msg_cb_read(struct io_src_msg *src, enum io_src_event evt)
 	ret = io_src_msg_get_message(src, &msg);
 	CU_ASSERT_EQUAL(ret, 0);
 
-	if (0 == memcmp(msg, &MSG1, src->len)) {
+	if (0 == memcmp(msg, &MSG1, src->rcv_buf_size)) {
 		CU_ASSERT_EQUAL(state, STATE_START);
 		reached_state(&state, STATE_MSG1_RECEIVED);
 
 		ret = write(my_src->pipefds[1], &MSG2,
 				sizeof(struct msg));
 		CU_ASSERT_NOT_EQUAL(ret, -1);
-	} else if (0 == memcmp(msg, &MSG2, src->len)) {
+	} else if (0 == memcmp(msg, &MSG2, src->rcv_buf_size)) {
 		CU_ASSERT_EQUAL(state, STATE_MSG1_RECEIVED);
 		reached_state(&state, STATE_MSG2_RECEIVED);
 
 		ret = write(my_src->pipefds[1], &MSG3,
 				sizeof(struct msg));
 		CU_ASSERT_NOT_EQUAL(ret, -1);
-	} else if (0 == memcmp(msg, &MSG3, src->len)) {
+	} else if (0 == memcmp(msg, &MSG3, src->rcv_buf_size)) {
 		CU_ASSERT_EQUAL(state, STATE_MSG1_RECEIVED |
 				STATE_MSG2_RECEIVED);
 		reached_state(&state, STATE_MSG3_RECEIVED);
@@ -133,7 +133,7 @@ static void msg_cb_read(struct io_src_msg *src, enum io_src_event evt)
 		ret = write(my_src->pipefds[1], &MSG4,
 				sizeof(struct msg));
 		CU_ASSERT_NOT_EQUAL(ret, -1);
-	} else if (0 == memcmp(msg, &MSG4, src->len)) {
+	} else if (0 == memcmp(msg, &MSG4, src->rcv_buf_size)) {
 		CU_ASSERT_EQUAL(state, STATE_MSG1_RECEIVED |
 				STATE_MSG2_RECEIVED |
 				STATE_MSG3_RECEIVED);
@@ -247,13 +247,13 @@ static void msg_cb_write(struct io_src_msg *src, enum io_src_event evt)
 	CU_ASSERT_EQUAL(evt, IO_OUT);
 
 	if (0 == (state & STATE_MSG1_RECEIVED))
-		io_src_msg_set_next_message(src, &MSG1);
+		io_src_msg_set_next_message(src, &MSG1, sizeof(MSG1));
 	else if (0 == (state & STATE_MSG2_RECEIVED))
-		io_src_msg_set_next_message(src, &MSG2);
+		io_src_msg_set_next_message(src, &MSG2, sizeof(MSG2));
 	else if (0 == (state & STATE_MSG3_RECEIVED))
-		io_src_msg_set_next_message(src, &MSG3);
+		io_src_msg_set_next_message(src, &MSG3, sizeof(MSG3));
 	else if (0 == (state & STATE_MSG4_RECEIVED))
-		io_src_msg_set_next_message(src, &MSG4);
+		io_src_msg_set_next_message(src, &MSG4, sizeof(MSG4));
 	else
 		CU_ASSERT(0);
 }

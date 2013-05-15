@@ -63,16 +63,13 @@ static void uad_cb(struct io_src_msg_uad *src, enum io_src_event evt)
 	if (io_src_has_out(evt)) {
 		/* this occurs before write */
 		if (STATE_START == state) {
-			/*
-			 * TODO check why no bug although write size ised it
-			 * that of receive
-			 * TODO provoke the bug
-			 */
-			ret = io_src_msg_uad_set_next_message(src, &MSG1);
+			ret = io_src_msg_uad_set_next_message(src, &MSG1,
+					sizeof(MSG1));
 			CU_ASSERT_NOT_EQUAL(ret, -1);
 			reached_state(STATE_MSG1_SENT);
 		} else if ((STATE_MSG1_SENT | STATE_MSG1_RECEIVED) == state) {
-			ret = io_src_msg_uad_set_next_message(src, &MSG2);
+			ret = io_src_msg_uad_set_next_message(src, &MSG2,
+					sizeof(MSG2));
 			CU_ASSERT_NOT_EQUAL(ret, -1);
 			reached_state(STATE_MSG2_SENT);
 			ret = io_mon_activate_out_source(&mon,
@@ -105,14 +102,14 @@ static void testSRC_MSG_UAD_SET_NEXT_MESSAGE(void)
 	char msg[1024] = {0};
 	struct io_src_msg_uad src;
 
-	ret = io_src_msg_uad_set_next_message(&src, msg);
+	ret = io_src_msg_uad_set_next_message(&src, msg, sizeof(msg));
 	CU_ASSERT_NOT_EQUAL(ret, -1);
 	CU_ASSERT_PTR_EQUAL(src.src_msg.send_buf, msg);
 
 	/* error use cases */
-	ret = io_src_msg_uad_set_next_message(NULL, &msg);
+	ret = io_src_msg_uad_set_next_message(NULL, &msg, sizeof(msg));
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_src_msg_uad_set_next_message(&src, NULL);
+	ret = io_src_msg_uad_set_next_message(&src, NULL, sizeof(msg));
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 }
 
