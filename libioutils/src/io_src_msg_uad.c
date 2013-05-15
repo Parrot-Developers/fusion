@@ -52,6 +52,7 @@ static int uad_init_args_are_invalid(struct io_src_msg_uad *uad,
 			NULL == fmt || '\0' == *fmt;
 }
 
+/* TODO allow to specify the length */
 int io_src_msg_uad_set_next_message(struct io_src_msg_uad *uad,
 		const void *rcv_buf)
 {

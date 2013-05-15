@@ -37,6 +37,10 @@ struct io_src_msg;
  * IO_DUPLEX
  */
 typedef void (io_src_msg_cb_t)(struct io_src_msg *src, enum io_src_event evt);
+/*
+ * TODO add a buffer parameter, which for IN events, can be read, and for OUT
+ * events, must be filled
+ */
 
 /**
  * @typedef io_src_msg

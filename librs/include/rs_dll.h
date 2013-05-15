@@ -85,7 +85,9 @@ struct rs_node *rs_dll_find(struct rs_dll *dll, struct rs_node *node);
 /**
  * Searches a node in the list, based on a matching callback
  * @param dll Doubly linked list
- * @param match Matching function
+ * @param match Matching function.
+ * @note An action can be performed in the matching callback, when there is a
+ * match
  * @param data User data, passed to the match callback
  * @return Node if found, NULL otherwise
  */

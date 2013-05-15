@@ -57,6 +57,11 @@ static int out_msg(struct io_src_msg *msg, int fd)
 	msg->cb(msg, IO_OUT);
 
 	if (msg->perform_io) {
+		/* TODO implement an io_write */
+		/* TODO this is uber cretinism...
+		 * msg->len is NOT the size of the message to write, but the
+		 * size of the receive buffer
+		 */
 		/* msg->msg contains the message to send */
 		sret = TEMP_FAILURE_RETRY(write(fd, msg->send_buf, msg->len));
 		if (-1 == sret)

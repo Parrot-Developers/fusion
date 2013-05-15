@@ -22,6 +22,7 @@ struct io_src_pid;
  * @param pid Signal source
  */
 typedef void (io_pid_cb_t)(struct io_src_pid *pid);
+/* TODO add pid and status parameters */
 
 /**
  * @typedef io_src_pid

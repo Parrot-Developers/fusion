@@ -63,6 +63,11 @@ static void uad_cb(struct io_src_msg_uad *src, enum io_src_event evt)
 	if (io_src_has_out(evt)) {
 		/* this occurs before write */
 		if (STATE_START == state) {
+			/*
+			 * TODO check why no bug although write size ised it
+			 * that of receive
+			 * TODO provoke the bug
+			 */
 			ret = io_src_msg_uad_set_next_message(src, &MSG1);
 			CU_ASSERT_NOT_EQUAL(ret, -1);
 			reached_state(STATE_MSG1_SENT);

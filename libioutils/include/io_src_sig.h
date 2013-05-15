@@ -26,6 +26,7 @@ struct io_src_sig;
  * @param sig Signal source
  */
 typedef void (io_sig_cb_t)(struct io_src_sig *sig);
+/* TODO add a signal info parameter */
 
 /**
  * @typedef io_src_sig
