@@ -6,11 +6,6 @@
  *
  * Copyright (C) 2012 Parrot S.A.
  */
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif /* _GNU_SOURCE */
-#include <unistd.h>
-
 #include <errno.h>
 #include <string.h>
 
@@ -57,13 +52,12 @@ static int out_msg(struct io_src_msg *msg, int fd)
 	msg->cb(msg, IO_OUT);
 
 	if (msg->perform_io) {
-		/* TODO implement an io_write */
 		/* TODO this is uber cretinism...
 		 * msg->len is NOT the size of the message to write, but the
 		 * size of the receive buffer
 		 */
 		/* msg->msg contains the message to send */
-		sret = TEMP_FAILURE_RETRY(write(fd, msg->send_buf, msg->len));
+		sret = io_write(fd, msg->send_buf, msg->len);
 		if (-1 == sret)
 			return -errno;
 	} /* else, the source implementation performs output itself */
