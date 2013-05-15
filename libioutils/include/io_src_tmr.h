@@ -1,43 +1,47 @@
-/******************************************************************************
-* @file mb_timer.h
-*
-* @brief mambo timer
-*
-* Copyright (C) 2011 Parrot S.A.
-*
-* @author Jean-Baptiste Dubois
-* @date May 2011
-******************************************************************************/
+/**
+ * @file io_tmr.h
+ *
+ * @brief mambo timer
+ *
+ * Copyright (C) 2011 Parrot S.A.
+ *
+ * @author Jean-Baptiste Dubois
+ * @date May 2011
+ */
 
-#ifndef _MB_TIMER_H_
-#define _MB_TIMER_H_
+#ifndef IO_SRC_TMR_H_
+#define IO_SRC_TMR_H_
 
 #include <stdint.h>
 
-struct mb_timer;
-typedef void (*mb_timer_cb_t) (struct mb_timer *timer, uint64_t *nbexpired,
+#include <io_src.h>
+
+/* usefull time ratio value */
+#define MSEC_PER_SEC  1000
+#define NSEC_PER_SEC  1000000000
+
+struct io_timer;
+typedef void (*io_timer_cb_t) (struct io_timer *timer, uint64_t *nbexpired,
 		void *data);
 
 /* timer */
-struct mb_timer {
-	struct mb_fd mbfd;
-	struct mb_fd_loop *loop;
+struct io_timer {
+	struct io_src src;
 	int timeout;
-	mb_timer_cb_t cb;
+	io_timer_cb_t cb;
 	void *data;
 };
 
 /* create timer */
-int mb_timer_create(struct mb_timer *timer, struct mb_fd_loop *loop,
-		    mb_timer_cb_t cb, void *data);
+int io_timer_create(struct io_timer *timer, io_timer_cb_t cb, void *data);
 
 /* destroy timer */
-int mb_timer_destroy(struct mb_timer *timer);
+int io_timer_destroy(struct io_timer *timer);
 
 /* set relative timer timeout in ms */
-int mb_timer_set(struct mb_timer *timer, int timeout);
+int io_timer_set(struct io_timer *timer, int timeout);
 
 /* clear timer */
-int mb_timer_clear(struct mb_timer *timer);
+int io_timer_clear(struct io_timer *timer);
 
-#endif /*_MB_TIMER_H_*/
+#endif /* IO_SRC_TMR_H_ */
