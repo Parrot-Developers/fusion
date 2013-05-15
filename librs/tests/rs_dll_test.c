@@ -148,7 +148,6 @@ static void testRS_DLL_IS_EMPTY(void)
 {
 	struct int_node int_node_a = {.val = 17,};
 	struct int_node int_node_b = {.val = 42,};
-	struct int_node int_node_c = {.val = 666,};
 	int result;
 	struct rs_dll dll;
 	int f_ret = 0;
