@@ -156,7 +156,8 @@ static inline int io_src_get_fd(struct io_src *src)
 }
 
 /**
- * Reinitializes the source for further use, closing the file descriptor.
+ * Reinitializes the source for further use, closing the file descriptor. If it
+ * was chained to other nodes, the source is unchained.
  * @param src Source to initialize. Can't be NULL
  */
 void io_src_clean(struct io_src *src);

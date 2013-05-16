@@ -75,6 +75,7 @@ void io_src_clean(struct io_src *src)
 
 	if (-1 != src->fd)
 		close(src->fd);
+	rs_node_remove(&src->node, &src->node);
 	memset(src, 0, sizeof(*src));
 
 	src->fd = -1;
