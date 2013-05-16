@@ -1,11 +1,12 @@
 /**
  * @file io_tmr.c
  *
- * @brief mambo timer
+ * @brief Timer io source, imported and adapted from mambo
  *
  * Copyright (C) 2011 Parrot S.A.
  *
  * @author Jean-Baptiste Dubois
+ * @author nicolas.carrier@parrot.com
  * @date May 2011
  */
 
@@ -23,57 +24,66 @@
 #include <poll.h>
 
 #include "io_platform.h"
+#include "io_utils.h"
 #include "io_src_tmr.h"
 
-/**
- * @def to_src
- * @brief Convert a source to it's signal source container
- */
-#define to_src_tmr(p) container_of(p, struct io_timer, src)
+/* useful time ratio value */
+#define MSEC_PER_SEC  1000
+#define NSEC_PER_SEC  1000000000
 
-/*
- * set a timer timeout in ms
- * */
-static int io_timer_read(struct io_timer *timer, uint64_t *val)
+/**
+ * @def to_tmr_src
+ * @brief Convert a source to it's timer source container
+ */
+#define to_tmr_src(p) container_of(p, struct io_src_tmr, src)
+
+/**
+ * Read a value from a timer which has expired
+ * @param tmr Time to read the value of
+ * @param val In output, value read. Can't be NULL, or you will suffer great
+ * pain
+ * @return errno compatible negative value on error, 0 on success
+ */
+static int tmr_read(struct io_src_tmr *tmr, uint64_t *val)
 {
-	uint64_t u;
-	ssize_t status;
+	ssize_t sret;
 	int ret = 0;
 
-	status = read(timer->src.fd, &u, sizeof(u));
-	if (status != sizeof(u)) {
+	sret = io_read(tmr->src.fd, val, sizeof(*val));
+	if (sret != sizeof(*val))
 		ret = -errno;
-	} else if (val) {
-		*val = u;
-	}
+
 	return ret;
 }
 
+/**
+ * io_str calback for io_tmr_src events
+ * @param src Underlying io source
+ */
 static void tmr_cb(struct io_src *src)
 {
-	struct io_timer *timer = to_src_tmr(src);
+	struct io_src_tmr *tmr = to_tmr_src(src);
 	uint64_t nbexpired = 0;
+
+	if (NULL == src)
+		return;
 
 	if (io_src_has_in(src->events)) {
 		/* read timer value */
-		io_timer_read(timer, &nbexpired);
+		tmr_read(tmr, &nbexpired);
 
 		/* invoke timer callback */
-		(*timer->cb)(timer, &nbexpired, timer->data);
+		tmr->cb(tmr, &nbexpired);
 	}
 
-	/* is it possible for a timer fd ? */
-	if (io_src_has_error(src->events)) {
-		/* TODO do something ? */
-	}
-
+	/* nothing to do on epoll error, source is automatically removed */
 }
 
-int io_timer_create(struct io_timer *timer, io_timer_cb_t cb, void *data)
+int io_src_tmr_init(struct io_src_tmr *tmr, io_tmr_cb_t cb)
 {
 	int fd;
 
-	if (!timer || !cb)
+	if (NULL == tmr || NULL == cb)
 		return -EINVAL;
 
 	/* create timerfd with CLOCK_MONOTONIC clock*/
@@ -81,47 +91,51 @@ int io_timer_create(struct io_timer *timer, io_timer_cb_t cb, void *data)
 	if (fd == -1)
 		return -errno;
 
-	timer->cb = cb;
-	timer->data = data;
-	timer->timeout = 0;
+	tmr->cb = cb;
 
-	return io_src_init(&timer->src, fd, IO_IN, &tmr_cb);
+	return io_src_init(&tmr->src, fd, IO_IN, &tmr_cb);
 }
 
-int io_timer_destroy(struct io_timer *timer)
+void io_src_tmr_clean(struct io_src_tmr *tmr)
 {
-	int ret = close(timer->src.fd);
+	int ret;
 
-	return ret == -1 ? errno : 0;
+	if (NULL == tmr)
+		return;
+
+	ret = close(tmr->src.fd);
+
+	tmr->src.fd = -1;
+	tmr->cb = NULL;
+
+	io_src_clean(&(tmr->src));;
 }
 
-int io_timer_set(struct io_timer *timer, int timeout)
+int io_src_tmr_set(struct io_src_tmr *tmr, int timeout)
 {
 	int ret = 0;
-	struct itimerspec nval, oval;
+	struct itimerspec nval = {
+			.it_value = { /* disarm */
+					.tv_sec = 0,
+					.tv_nsec = 0,
+			},
+			.it_interval = { /* one shot */
+					.tv_sec = 0,
+					.tv_nsec = 0,
+			},
+	};
 
-	/* configure one shot */
-	nval.it_interval.tv_sec = 0;
-	nval.it_interval.tv_nsec = 0;
+	if (NULL == tmr)
+		return -EINVAL;
 
-	if (timeout > 0) {
+	if (IO_SRC_TMR_DISARM != timeout) {
 		nval.it_value.tv_sec = timeout / MSEC_PER_SEC;
 		nval.it_value.tv_nsec = (timeout % MSEC_PER_SEC) * NSEC_PER_SEC;
-	} else {
-		/* clear timer */
-		nval.it_value.tv_sec = 0;
-		nval.it_value.tv_nsec = 0;
-	}
-	ret = timerfd_settime(timer->src.fd, 0, &nval, &oval);
-	if (ret == -1) {
-		ret = -errno;
-	} else {
-		timer->timeout = timeout;
-	}
-	return ret;
-}
+	} /* else, disarm */
 
-int io_timer_clear(struct io_timer *timer)
-{
-	return io_timer_set(timer, 0);
+	ret = timerfd_settime(tmr->src.fd, 0, &nval, NULL);
+	if (ret == -1)
+		ret = -errno;
+
+	return ret;
 }

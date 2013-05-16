@@ -1,11 +1,12 @@
 /**
  * @file io_tmr.h
  *
- * @brief mambo timer
+ * @brief Timer io source, imported and adapted from mambo
  *
  * Copyright (C) 2011 Parrot S.A.
  *
  * @author Jean-Baptiste Dubois
+ * @author nicolas.carrier@parrot.com
  * @date May 2011
  */
 
@@ -16,32 +17,59 @@
 
 #include <io_src.h>
 
-/* usefull time ratio value */
-#define MSEC_PER_SEC  1000
-#define NSEC_PER_SEC  1000000000
+/**
+ * @def IO_SRC_TMR_DISARM
+ * @brief timeout value to disarm a timer
+ */
+#define IO_SRC_TMR_DISARM 0
 
-struct io_timer;
-typedef void (*io_timer_cb_t) (struct io_timer *timer, uint64_t *nbexpired,
-		void *data);
+/**
+ * @struct io_tmr_src
+ * @brief Timer source type
+ */
+struct io_src_tmr;
 
-/* timer */
-struct io_timer {
+/**
+ * @typedef io_pid_cb_t
+ * @brief Called when the timer has expired
+ * @param tmr Timer source
+ * @param nbexpired Number of expirations of the timer. Always 0 or 1, since the
+ * timer is forced one shot
+ */
+typedef void (*io_tmr_cb_t) (struct io_src_tmr *tmr, uint64_t *nbexpired);
+
+/**
+ * @struct io_src_tmr
+ * @brief Timer source type
+ */
+struct io_src_tmr {
+	/** inner monitor source */
 	struct io_src src;
-	int timeout;
-	io_timer_cb_t cb;
-	void *data;
+	/** user callback, notified the timer expires */
+	io_tmr_cb_t cb;
 };
 
-/* create timer */
-int io_timer_create(struct io_timer *timer, io_timer_cb_t cb, void *data);
+/**
+ * Initializes a relative one shot timer.
+ * @param tmr Timer source to initialize
+ * @param cb User callback, notified the timer expires
+ * @return errno compatible negative value on error, 0 on success
+ */
+int io_src_tmr_init(struct io_src_tmr *tmr, io_tmr_cb_t cb);
 
-/* destroy timer */
-int io_timer_destroy(struct io_timer *timer);
+/*  */
+/**
+ * Arms (or disarms) the timer and sets it's relative timeout
+ * @param tmr Timer source to arm
+ * @param timeout Timeout of the timer IO_SRC_TMR_DISARM for timeout to disarm
+ * @return errno compatible negative value on error, 0 on success
+ */
+int io_src_tmr_set(struct io_src_tmr *tmr, int timeout);
 
-/* set relative timer timeout in ms */
-int io_timer_set(struct io_timer *timer, int timeout);
-
-/* clear timer */
-int io_timer_clear(struct io_timer *timer);
+/**
+ * Cleans up a timer source, by properly closing fd, zeroing fields etc...
+ * @param tmr Timer source
+ */
+void io_src_tmr_clean(struct io_src_tmr *tmr);
 
 #endif /* IO_SRC_TMR_H_ */
