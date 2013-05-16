@@ -20,6 +20,7 @@ struct suite_t *libioutils_test_suites[] = {
 		&src_sep_suite,
 		&src_sig_suite,
 		&src_suite,
+		&src_tmr_suite,
 
 		NULL, /* NULL guard */
 };
@@ -33,4 +34,5 @@ void libioutils_init_test_suites(void)
 	src_sep_suite.active = 1;
 	src_sig_suite.active = 1;
 	src_suite.active = 1;
+	src_tmr_suite.active = 1;
 }
