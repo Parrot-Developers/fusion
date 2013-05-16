@@ -29,7 +29,7 @@
 
 /* useful time ratio value */
 #define MSEC_PER_SEC  1000
-#define NSEC_PER_SEC  1000000000
+#define NSEC_PER_MSEC 1000000
 
 /**
  * @def to_tmr_src
@@ -130,7 +130,8 @@ int io_src_tmr_set(struct io_src_tmr *tmr, int timeout)
 
 	if (IO_SRC_TMR_DISARM != timeout) {
 		nval.it_value.tv_sec = timeout / MSEC_PER_SEC;
-		nval.it_value.tv_nsec = (timeout % MSEC_PER_SEC) * NSEC_PER_SEC;
+		nval.it_value.tv_nsec = ((long long)timeout % MSEC_PER_SEC) *
+				NSEC_PER_MSEC;
 	} /* else, disarm */
 
 	ret = timerfd_settime(tmr->src.fd, 0, &nval, NULL);
