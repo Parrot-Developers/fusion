@@ -98,14 +98,9 @@ int io_src_tmr_init(struct io_src_tmr *tmr, io_tmr_cb_t cb)
 
 void io_src_tmr_clean(struct io_src_tmr *tmr)
 {
-	int ret;
-
 	if (NULL == tmr)
 		return;
 
-	ret = close(tmr->src.fd);
-
-	tmr->src.fd = -1;
 	tmr->cb = NULL;
 
 	io_src_clean(&(tmr->src));;
