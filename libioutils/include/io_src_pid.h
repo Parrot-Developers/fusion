@@ -11,7 +11,13 @@
 #include "io_src.h"
 
 /**
- * @typedef io_src_pid
+ * @def IO_SRC_PID_DISABLE
+ * @brief Value to disable a pid source temporarily, with io_src_pid_set_pid()
+ */
+#define IO_SRC_PID_DISABLE 1
+
+/**
+ * @struct io_src_pid
  * @brief Pid source type
  */
 struct io_src_pid;
@@ -25,7 +31,7 @@ typedef void (io_pid_cb_t)(struct io_src_pid *pid);
 /* TODO add pid and status parameters */
 
 /**
- * @typedef io_src_pid
+ * @struct io_src_pid
  * @brief Pid source type
  */
 struct io_src_pid {
@@ -42,11 +48,19 @@ struct io_src_pid {
 /**
  * Initializes a pid source.
  * @param pid_src Pid source to initialize
- * @param pid Pid of the process to monitor
  * @param cb User calback, notified when the process dies
  * @return errno compatible negative value
  */
-int io_src_pid_init(struct io_src_pid *pid_src, pid_t pid, io_pid_cb_t *cb);
+int io_src_pid_init(struct io_src_pid *pid_src, io_pid_cb_t *cb);
+
+/**
+ * Configures up a pid_src to monitor a given pid
+ * @param pid_src Pid source to configure
+ * @param pid Pid of the process to monitor, IO_SRC_PID_DISABLE to temporarily
+ * disable the monitoring
+ * @return errno-compatible negative value on error, 0 otherwise
+ */
+int io_src_pid_set_pid(struct io_src_pid *pid_src, pid_t pid);
 
 /**
  * Returns the underlying io_src of the pid source

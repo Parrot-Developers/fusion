@@ -42,18 +42,18 @@ static void pid_cb(struct io_src *src)
 	pid->cb(pid);
 }
 
-int io_src_pid_init(struct io_src_pid *pid_src, pid_t pid, io_pid_cb_t *cb)
+int io_src_pid_init(struct io_src_pid *pid_src, io_pid_cb_t *cb)
 {
 	int pidfd;
 
 	if (NULL == pid_src || NULL == cb)
 		return -EINVAL;
 
-	pidfd = pidwatch_create(pid, SOCK_CLOEXEC | SOCK_NONBLOCK);
+	pidfd = pidwatch_create(SOCK_CLOEXEC | SOCK_NONBLOCK);
 	if (0 > pidfd)
 		goto out;
 
-	pid_src->pid = pid;
+	pid_src->pid = IO_SRC_PID_DISABLE;
 	pid_src->status = 0;
 	pid_src->cb = cb;
 
@@ -63,6 +63,16 @@ out:
 	io_src_pid_clean(pid_src);
 
 	return -errno;
+}
+
+int io_src_pid_set_pid(struct io_src_pid *pid_src, pid_t pid)
+{
+	if (NULL == pid_src)
+		return -EINVAL;
+
+	pid_src->pid = pid;
+
+	return pidwatch_set_pid(pid_src->src.fd, pid);
 }
 
 void io_src_pid_clean(struct io_src_pid *pid)

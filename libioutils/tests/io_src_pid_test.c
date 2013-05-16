@@ -9,6 +9,8 @@
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif /* _GNU_SOURCE */
+#include <sys/wait.h>
+
 #include <unistd.h>
 
 #include <stdlib.h>
@@ -95,8 +97,10 @@ static void testSRC_PID_INIT(void)
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
 	pid = launch("sleep", "1", NULL);
 	CU_ASSERT_NOT_EQUAL_FATAL(pid, -1);
-	ret = io_src_pid_init(&pid_src, pid, cb);
-	CU_ASSERT_NOT_EQUAL(ret, -1);
+	ret = io_src_pid_init(&pid_src, cb);
+	CU_ASSERT_EQUAL(ret, 0);
+	ret = io_src_pid_set_pid(&pid_src, pid);
+	CU_ASSERT_EQUAL(ret, 0);
 	ret = io_mon_add_source(&mon, &(pid_src.src));
 	CU_ASSERT_EQUAL(ret, 0);
 
@@ -132,11 +136,113 @@ out :
 	io_src_pid_clean(&pid_src);
 
 	/* error use cases */
-	ret = io_src_pid_init(0, pid, cb);
+	ret = io_src_pid_init(0, cb);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_src_pid_init(&pid_src, -1, cb);
+	ret = io_src_pid_init(&pid_src, NULL);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_src_pid_init(&pid_src, pid, NULL);
+}
+
+static void testSRC_PID_SET_PID(void)
+{
+	int ret;
+	fd_set rfds;
+	struct io_mon mon;
+	struct io_src_pid pid_src;
+	pid_t pid;
+	struct timeval timeout;
+	bool process_dead = 0;
+	void cb(struct io_src_pid *src_pid)
+	{
+		int status;
+
+		CU_ASSERT(WIFEXITED(src_pid->status));
+		CU_ASSERT_EQUAL(WEXITSTATUS(src_pid->status), 0);
+		process_dead = true;
+		waitpid(src_pid->pid, &status, 0);
+		CU_ASSERT_EQUAL(src_pid->status, status);
+	};
+
+	/* normal use cases */
+	ret = io_mon_init(&mon);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	pid = launch("sleep", "1", NULL);
+	CU_ASSERT_NOT_EQUAL_FATAL(pid, -1);
+	ret = io_src_pid_init(&pid_src, cb);
+	CU_ASSERT_EQUAL(ret, 0);
+	ret = io_src_pid_set_pid(&pid_src, pid);
+	CU_ASSERT_EQUAL(ret, 0);
+	ret = io_mon_add_source(&mon, &(pid_src.src));
+	CU_ASSERT_EQUAL(ret, 0);
+
+	/* set the timer */
+	timeout.tv_sec = 3;
+	timeout.tv_usec = 0;
+
+	/* restore the read file descriptor set */
+	FD_ZERO(&rfds);
+	FD_SET(mon.epollfd, &rfds);
+
+	ret = select(mon.epollfd + 1, &rfds, NULL, NULL, &timeout);
+	/* error, not normal */
+	CU_ASSERT_NOT_EQUAL(ret, -1);
+	if (-1 == ret)
+		goto out;
+
+	/* timeout, not normal */
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+	if (0 == ret)
+		goto out;
+
+	ret = io_mon_process_events(&mon);
+	CU_ASSERT_EQUAL(ret, 0);
+	if (0 != ret)
+		goto out;
+
+	CU_ASSERT(process_dead)
+
+	/* reuse the pid source */
+	process_dead = true;
+	pid = launch("sleep", "1", NULL);
+	CU_ASSERT_NOT_EQUAL_FATAL(pid, -1);
+	ret = io_src_pid_set_pid(&pid_src, pid);
+	CU_ASSERT_EQUAL(ret, 0);
+
+	/* set the timer */
+	timeout.tv_sec = 3;
+	timeout.tv_usec = 0;
+
+	/* restore the read file descriptor set */
+	FD_ZERO(&rfds);
+	FD_SET(mon.epollfd, &rfds);
+
+	ret = select(mon.epollfd + 1, &rfds, NULL, NULL, &timeout);
+	/* error, not normal */
+	CU_ASSERT_NOT_EQUAL(ret, -1);
+	if (-1 == ret)
+		goto out;
+
+	/* timeout, not normal */
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+	if (0 == ret)
+		goto out;
+
+	ret = io_mon_process_events(&mon);
+	CU_ASSERT_EQUAL(ret, 0);
+	if (0 != ret)
+		goto out;
+
+	CU_ASSERT(process_dead)
+
+out :
+	/* cleanup */
+	io_mon_clean(&mon);
+	io_src_pid_clean(&pid_src);
+
+	/* error use cases */
+	/* fail if watching an already dead process */
+	ret = io_src_pid_set_pid(&pid_src, pid);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+	ret = io_src_pid_set_pid(NULL, 1);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 }
 
@@ -152,7 +258,7 @@ static void testSRC_PID_GET_SOURCE(void)
 	}
 
 	/* normal use cases */
-	ret = io_src_pid_init(&(pid_src), 1, dummy_cb);
+	ret = io_src_pid_init(&(pid_src), dummy_cb);
 	CU_ASSERT_EQUAL(ret, 0);
 	src = io_src_pid_get_source(&(pid_src));
 	CU_ASSERT_EQUAL(src, &(pid_src.src));
@@ -173,6 +279,10 @@ static const struct test_t tests[] = {
 		{
 				.fn = testSRC_PID_GET_SOURCE,
 				.name = "io_src_pid_get_source"
+		},
+		{
+				.fn = testSRC_PID_SET_PID,
+				.name = "io_src_pid_set_pid"
 		},
 
 		/* NULL guard */
