@@ -19,10 +19,10 @@
  * @brief global monitor's context, handles the pool of sources and callbacks
  */
 struct io_mon {
-	/** file descriptor for monitoring all the sources */
-	int epollfd;
 	/** sources list for I/O operations */
 	struct rs_node *source;
+	/** file descriptor for monitoring all the sources */
+	int epollfd;
 	/** number of sources currently registered */
 	unsigned nb_sources;
 };
