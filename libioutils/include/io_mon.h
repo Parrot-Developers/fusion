@@ -105,9 +105,8 @@ int io_mon_activate_in_source(struct io_mon *mon, struct io_src *src,
  * When monitor's fd is ready for reading operation, a call to
  * io_mon_process_events will dispatch each event to the relevant
  * callback.<br />
- * Sources which encounter errors are removed automatically, be it any I/O
- * error or a negative return from the source's callback. On I/O error, the
- * callback is notified anyhow
+ * Sources which encounter errors (io_src_has_error() returns true) are removed
+ * automatically
  *
  * @param mon Monitor's context
  * @return negative errno value on error, 0 otherwise
