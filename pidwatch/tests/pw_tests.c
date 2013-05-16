@@ -23,7 +23,7 @@
 
 pid_t g_pid_max;
 
-void read_pid_max(void)
+static void read_pid_max(void)
 {
 	int ret;
 	FILE *pmf = NULL;
@@ -32,7 +32,7 @@ void read_pid_max(void)
 	pmf = fopen("/proc/sys/kernel/pid_max", "rb");
 	if (NULL == pmf) {
 		fprintf(stderr, "Can't read /proc/sys/kernel/pid_max\n");
-		exit(1);
+		goto out;
 	}
 
 	ret = fscanf(pmf, "%lld", &ll_pm);
@@ -41,10 +41,13 @@ void read_pid_max(void)
 			perror("fscanf");
 		else
 			fprintf(stderr, "unexpected EOF reading pid_max\n");
-		exit(1);
+		goto out;
 	}
 
 	g_pid_max = (pid_t)ll_pm;
+
+out:
+	fclose(pmf);
 }
 
 void dump_args(int argc, char *argv[])
@@ -115,41 +118,18 @@ pid_t __attribute__((sentinel)) launch(char *prog, ...)
 
 void testPIDWATCH_CREATE(void)
 {
-	pid_t pid;
 	int pidfd;
-	int status;
 	int invalid_flag;
 
 	/* normal cases */
-	pid = E(pid_t, launch("sleep", "1", NULL));
-	CU_ASSERT_NOT_EQUAL(pid, -1);
-	pidfd = E(int, pidwatch_create(pid, SOCK_CLOEXEC));
+	pidfd = E(int, pidwatch_create(SOCK_CLOEXEC));
 	CU_ASSERT_NOT_EQUAL(pidfd, -1);
 	/* cleanup */
-	waitpid(pid, &status, 0);
 	close(pidfd);
 
 	/* error cases */
-	pid = E(pid_t, launch("ls", "supercalifragilistic", NULL));
-	CU_ASSERT_NOT_EQUAL(pid, -1);
-	sleep(1);
-	/*
-	 * if the child dies before we set up the watch, it is a zombie, thus
-	 * considered dead, ESRCH is raised
-	 */
-	pidfd = pidwatch_create(pid, SOCK_CLOEXEC);
-	CU_ASSERT(ESRCH == errno);
-	CU_ASSERT_EQUAL(pidfd, -1);
-	/* cleanup */
-	waitpid(pid, &status, 0);
-
-	/* invalid arguments */
-	pidfd = pidwatch_create(-63, SOCK_CLOEXEC);
-	CU_ASSERT_EQUAL(pidfd, -1);
 	invalid_flag = ~(SOCK_CLOEXEC | SOCK_NONBLOCK);
-	pidfd = pidwatch_create(g_pid_max, SOCK_CLOEXEC);
-	CU_ASSERT_EQUAL(pidfd, -1);
-	pidfd = pidwatch_create(1, invalid_flag); /* pid 1 is always valid */
+	pidfd = pidwatch_create(invalid_flag);
 	CU_ASSERT_EQUAL(pidfd, -1);
 }
 
@@ -162,24 +142,27 @@ void testPIDWATCH_WAIT(void)
 	int wstatus;
 	int ret;
 
+	/* initialization */
+	pidfd = E(int, pidwatch_create(SOCK_CLOEXEC));
+	CU_ASSERT_NOT_EQUAL(pidfd, -1);
+
 	/* normal cases */
 	/* normal termination */
 	pid = E(pid_t, launch("sleep", "1", NULL));
 	CU_ASSERT_NOT_EQUAL(pid, -1);
-	pidfd = E(int, pidwatch_create(pid, SOCK_CLOEXEC));
-	CU_ASSERT_NOT_EQUAL(pidfd, -1);
+	ret = E(int, pidwatch_set_pid(pidfd, pid));
+	CU_ASSERT_NOT_EQUAL(ret, -1);
 	pid_ret = E(pid_t, pidwatch_wait(pidfd, &status));
 	CU_ASSERT_NOT_EQUAL(pid_ret, -1);
 	/* cleanup */
 	waitpid(pid, &wstatus, 0);
 	CU_ASSERT_EQUAL(status, wstatus);
-	close(pidfd);
 
 	/* terminated by signal */
 	pid = E(pid_t, launch("sleep", "1", NULL));
 	CU_ASSERT_NOT_EQUAL(pid, -1);
-	pidfd = E(int, pidwatch_create(pid, SOCK_CLOEXEC));
-	CU_ASSERT_NOT_EQUAL(pidfd, -1);
+	ret = E(int, pidwatch_set_pid(pidfd, pid));
+	CU_ASSERT_NOT_EQUAL(ret, -1);
 	ret = E(int, kill(pid, 9));
 	CU_ASSERT_NOT_EQUAL(ret, -1);
 	pid_ret = E(pid_t, pidwatch_wait(pidfd, &status));
@@ -187,14 +170,66 @@ void testPIDWATCH_WAIT(void)
 	/* cleanup */
 	waitpid(pid, &wstatus, 0);
 	CU_ASSERT_EQUAL(status, wstatus);
-	close(pidfd);
-
 
 	/* error cases */
 	pid_ret = pidwatch_wait(-1, &status);
 	CU_ASSERT_EQUAL(pid_ret, -1);
-	pid_ret = pidwatch_wait(1, NULL);
-	CU_ASSERT_EQUAL(pid_ret, -1);
+
+	close(pidfd);
+}
+
+static void testPIDWATCH_SET_PID(void)
+{
+	pid_t pid;
+	pid_t pid_ret;
+	int pidfd;
+	int status;
+	int ret;
+
+	/* initialization */
+	pidfd = E(int, pidwatch_create(SOCK_CLOEXEC));
+	CU_ASSERT_NOT_EQUAL(pidfd, -1);
+
+	/* normal cases */
+	pid = E(pid_t, launch("sleep", "1", NULL));
+	CU_ASSERT_NOT_EQUAL(pid, -1);
+	ret = E(int, pidwatch_set_pid(pidfd, pid));
+	CU_ASSERT_NOT_EQUAL(ret, -1);
+	pid_ret = E(pid_t, pidwatch_wait(pidfd, &status));
+	CU_ASSERT_NOT_EQUAL(pid_ret, -1);
+	waitpid(pid, &status, 0);
+
+	/* pidwatch can be reused to monitor an new process */
+	pid = E(pid_t, launch("sleep", "1", NULL));
+	CU_ASSERT_NOT_EQUAL(pid, -1);
+	ret = E(int, pidwatch_set_pid(pidfd, pid));
+	CU_ASSERT_NOT_EQUAL(ret, -1);
+	pid_ret = E(pid_t, pidwatch_wait(pidfd, &status));
+	CU_ASSERT_NOT_EQUAL(pid_ret, -1);
+	waitpid(pid, &status, 0);
+
+	/* error cases */
+	pid = E(pid_t, launch("ls", "supercalifragilistic", NULL));
+	CU_ASSERT_NOT_EQUAL(pid, -1);
+	sleep(1);
+	/*
+	 * if the child dies before we set up the watch, it is a zombie, thus
+	 * considered dead, ESRCH is raised
+	 */
+	ret = pidwatch_set_pid(pidfd, pid);
+	CU_ASSERT_EQUAL(ret, -1);
+	CU_ASSERT(ESRCH == errno);
+	/* reap */
+	waitpid(pid, &status, 0);
+
+	/* invalid arguments */
+	ret =  pidwatch_set_pid(-1, pid);
+	CU_ASSERT_EQUAL(ret, -1);
+	ret = pidwatch_set_pid(pidfd, g_pid_max);
+	CU_ASSERT_EQUAL(ret, -1);
+
+	/* cleanup */
+	close(pidfd);
 }
 
 #ifdef PIDWATCH_HAS_CAPABILITY_SUPPORT
@@ -248,6 +283,10 @@ static const struct test_t tests[] = {
 				.fn = testPIDWATCH_WAIT,
 				.name = "pidwatch_wait"
 		},
+		{
+				.fn = testPIDWATCH_SET_PID,
+				.name = "pidwatch_set_pid"
+		},
 
 		/* NULL guard */
 		{.fn = NULL, .name = NULL},
@@ -264,6 +303,8 @@ static int init_pw_suite(void)
 		return 1;
 	}
 #endif /* PIDWATCH_HAS_CAPABILITY_SUPPORT */
+
+	read_pid_max();
 
 	return 0;
 }

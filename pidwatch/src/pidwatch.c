@@ -176,7 +176,7 @@ static int read_process_state(pid_t pid)
 #undef BUF_MAX
 }
 
-int pidwatch_create(pid_t pid, int flags)
+int pidwatch_create(int flags)
 {
 	int pidfd;
 	int ret;
@@ -193,7 +193,6 @@ int pidwatch_create(pid_t pid, int flags)
 		.nl_groups = CN_IDX_PROC,
 	};
 	int saved_errno;
-	int state;
 
 	if (((SOCK_NONBLOCK | SOCK_CLOEXEC) & flags) != flags) {
 		errno = EINVAL;
@@ -208,13 +207,47 @@ int pidwatch_create(pid_t pid, int flags)
 		goto err;
 
 	/* must filter before subscription (start of message stream) */
-	ret = install_filter(pidfd, pid);
+	/*
+	 * monitor for init's death : quite unlikely...
+	 * by doing this, we avoid receiving messages until we knwo which
+	 * process we want to monitor
+	 */
+	ret = install_filter(pidfd, 1);
 	if (-1 == ret)
 		goto err;
 
 	ret = subscription_message(pidfd);
 	if (-1 == ret)
 		goto err;
+
+	return pidfd;
+err:
+	/* is saving errno really needed ? i.e. does close modify errno ? */
+	saved_errno = errno;
+	close(pidfd);
+	errno = saved_errno;
+
+	return -1;
+}
+
+int pidwatch_set_pid(int pidfd, pid_t pid)
+{
+	int state;
+	int ret;
+
+	if (0 > pidfd || 1 >= pid) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	/*
+	 * there is a risk of tocttou here :
+	 *
+	 */
+
+	ret = install_filter(pidfd, pid);
+	if (-1 == ret)
+		return -1;
 
 	/* once subscribed, check the process still exists */
 	state = read_process_state(pid);
@@ -227,12 +260,14 @@ int pidwatch_create(pid_t pid, int flags)
 		goto err;
 	}
 
-	return pidfd;
+	return 0;
 err:
-	/* is saving errno really needed ? i.e. does close modify errno ? */
-	saved_errno = errno;
-	close(pidfd);
-	errno = saved_errno;
+	/*
+	 * be sure we continue to filter and we don't get messages concerning a
+	 * process we're not interested in and which could have obtained the
+	 * pid we wanted to watch, in the interval.
+	 */
+	install_filter(pidfd, 1);
 
 	return -1;
 }
@@ -274,7 +309,8 @@ int pidwatch_wait(int pidfd, int *status)
 	ev = (struct proc_event *)cn_msg->data;
 
 	/* exit_code has the same semantic as status from wait(2) */
-	*status = ev->event_data.exit.exit_code;
+	if (NULL != status)
+		*status = ev->event_data.exit.exit_code;
 
 	return ev->event_data.exit.process_pid;
 }

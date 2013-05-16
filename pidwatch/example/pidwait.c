@@ -168,6 +168,7 @@ int main(int argc, char *argv[])
 	int __attribute__((cleanup(close_p))) pidfd;
 	int status;
 	int child = 0;
+	int ret = 0;
 #ifdef PIDWATCH_HAS_CAPABILITY_SUPPORT
 	int ret;
 #endif /* PIDWATCH_HAS_CAPABILITY_SUPPORT */
@@ -185,9 +186,14 @@ int main(int argc, char *argv[])
 	}
 #endif /* PIDWATCH_HAS_CAPABILITY_SUPPORT */
 
-	pidfd = pidwatch_create(pid, SOCK_CLOEXEC);
+	pidfd = pidwatch_create(SOCK_CLOEXEC);
 	if (-1 == pidfd) {
 		perror("pidwatch_create");
+		return EXIT_FAILURE;
+	}
+	ret = pidwatch_set_pid(pidfd, pid);
+	if (-1 == ret) {
+		perror("pidwatch_set_pid");
 		return EXIT_FAILURE;
 	}
 	/* here, block directly. One can rather use a select-like event loop */
