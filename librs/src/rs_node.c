@@ -57,6 +57,30 @@ struct rs_node *rs_node_insert_before(struct rs_node *next,
 	return node;
 }
 
+struct rs_node *rs_node_insert_after(struct rs_node *prev, struct rs_node *node)
+{
+	struct rs_node *next;
+
+	if (NULL == node)
+		return prev;
+
+	/* chain with prev */
+	node->prev = prev;
+	if (prev) {
+		next = prev->next;
+		prev->next = node;
+
+		/* chain with next */
+		node->next = next;
+		if (next)
+			next->prev = node;
+	} else {
+		node->prev = NULL;
+	}
+
+	return node;
+}
+
 int rs_node_push(struct rs_node **head, struct rs_node *node)
 {
 	if (NULL == head)

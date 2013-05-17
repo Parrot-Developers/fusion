@@ -79,6 +79,15 @@ struct rs_node *rs_node_insert_before(struct rs_node *next,
 		struct rs_node *node);
 
 /**
+ * Inserts a node after another one
+ * @param next Node after which the node will be inserted
+ * @param node Node to insert
+ * @return node if not NULL, prev otherwise
+ */
+struct rs_node *rs_node_insert_after(struct rs_node *prev,
+		struct rs_node *node);
+
+/**
  * Pushes a node to a list whose head is given
  * @param head Head of the list to push to, can point to NULL but can't be NULL.
  * If it has a previous element, an insertion is performed
