@@ -46,8 +46,9 @@ void dll_test_print(struct rs_node *node)
 {
 	struct int_node *int_node = to_int_node(node);
 
-	printf("| %d ", int_node->val);
-
+	fprintf(stderr, "| [%p] %d (p %p, n %p) ", node,
+			int_node->val,
+			node->prev, node->next);
 }
 static const struct rs_dll_vtable dll_test_vtable = {
 		.equals = dll_test_equals,
@@ -119,6 +120,13 @@ static void testRS_DLL_PUSH(void)
 	CU_ASSERT_NOT_EQUAL(f_ret, 0);
 }
 
+#define DUMP_DLL(d) do { \
+	fprintf(stderr, "list content : "); \
+	rs_dll_dump((d)); \
+	fprintf(stderr, "| head %p, tail %p\n", (d)->head, (d)->tail); \
+} while (0)
+
+
 static void testRS_DLL_ENQUEUE(void)
 {
 	struct int_node int_node_a = {.val = 17,};
@@ -142,17 +150,12 @@ static void testRS_DLL_ENQUEUE(void)
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
 
 	/* normal use cases */
-	rs_dll_dump(&dll); printf("\n");
 	ret = rs_dll_enqueue(&dll, &(int_node_a.node));
-	rs_dll_dump(&dll); printf("\n");
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
 	ret = rs_dll_enqueue(&dll, &(int_node_b.node));
-	rs_dll_dump(&dll); printf("\n");
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
 	ret = rs_dll_enqueue(&dll, &(int_node_c.node));
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
-
-	rs_dll_dump(&dll); printf("\n");
 
 	CU_ASSERT_EQUAL(dll.head, &(int_node_a.node));
 	CU_ASSERT_PTR_NULL(dll.head->prev);
@@ -161,6 +164,12 @@ static void testRS_DLL_ENQUEUE(void)
 	CU_ASSERT_EQUAL(dll.head->next->next, &(int_node_c.node));
 	CU_ASSERT_EQUAL(dll.head->next->next->prev, &(int_node_b.node));
 	CU_ASSERT_PTR_NULL(dll.head->next->next->next);
+	rs_dll_pop(&dll);
+	CU_ASSERT_EQUAL(dll.head, &(int_node_b.node));
+	rs_dll_pop(&dll);
+	CU_ASSERT_EQUAL(dll.head, &(int_node_c.node));
+	rs_dll_pop(&dll);
+	CU_ASSERT_PTR_NULL(dll.head);
 
 	/* error use case */
 	ret = rs_dll_enqueue(NULL, &(int_node_a.node));
