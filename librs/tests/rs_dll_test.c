@@ -347,15 +347,22 @@ static void testRS_DLL_POP(void)
 	f_ret = rs_dll_push(&dll, &(int_node_c.node));
 	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
 
+	CU_ASSERT_PTR_EQUAL(dll.tail, &(int_node_a.node));
+	CU_ASSERT_PTR_EQUAL(dll.tail->prev, &(int_node_b.node));
+	CU_ASSERT_PTR_EQUAL(dll.tail->prev->prev, &(int_node_c.node));
+
 	/* normal use cases */
 	node = rs_dll_pop(&dll);
 	CU_ASSERT_EQUAL(to_int_node(node)->val, 666);
+	CU_ASSERT_PTR_EQUAL(dll.tail, &(int_node_a.node));
 	node = rs_dll_pop(&dll);
 	CU_ASSERT_EQUAL(to_int_node(node)->val, 42);
+	CU_ASSERT_PTR_EQUAL(dll.tail, &(int_node_a.node));
 	node = rs_dll_pop(&dll);
 	CU_ASSERT_EQUAL(to_int_node(node)->val, 17);
 	node = rs_dll_pop(&dll);
 	CU_ASSERT_PTR_NULL(node);
+	CU_ASSERT_PTR_NULL(dll.tail);
 
 	/* error use case */
 	node = rs_dll_pop(NULL);
