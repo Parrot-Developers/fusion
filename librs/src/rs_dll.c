@@ -48,6 +48,7 @@ int rs_dll_init(struct rs_dll *dll, const struct rs_dll_vtable *vtable)
 	dll->count = 0;
 	dll->cur = NULL;
 	dll->head = NULL;
+	dll->tail = NULL;
 	memcpy(&(dll->vtable), vtable, sizeof(*vtable));
 	if (NULL == dll->vtable.equals)
 		dll->vtable.equals = default_equals;
@@ -78,12 +79,33 @@ int rs_dll_push(struct rs_dll *dll, struct rs_node *node)
 	if (NULL == dll || NULL == node)
 		return -EINVAL;
 
+	if (rs_dll_is_empty(dll))
+		dll->tail = node;
+
 	err = rs_node_push(&(dll->head), node);
 
 	dll->count++;
 	dll->cur = dll->head;
 
 	return err ? -EINVAL : 0;
+}
+
+int rs_dll_enqueue(struct rs_dll *dll, struct rs_node *node)
+{
+	if (NULL == dll || NULL == node)
+		return -EINVAL;
+
+	if (rs_dll_is_empty(dll)) {
+		dll->head = dll->tail = node;
+		node->next = node->prev = NULL;
+		dll->count++;
+		dll->cur = dll->head;
+	} else {
+		rs_node_insert(node, dll->tail);
+		dll->tail = node;
+	}
+
+	return 0;
 }
 
 unsigned rs_dll_get_count(struct rs_dll *dll)
@@ -120,10 +142,17 @@ struct rs_node *rs_dll_find(struct rs_dll *dll, struct rs_node *node)
 
 struct rs_node *rs_dll_pop(struct rs_dll *dll)
 {
+	struct rs_node * ret;
+
 	if (NULL == dll)
 		return NULL;
 
-	return rs_dll_remove(dll, dll->head);
+	ret = rs_dll_remove(dll, dll->head);
+
+	if (0 == dll->count)
+		dll->tail = NULL;
+
+	return ret;
 }
 
 struct rs_node *rs_dll_next(struct rs_dll *dll)
@@ -147,6 +176,7 @@ struct rs_node *rs_dll_remove_match(struct rs_dll *dll,
 		rs_node_match_cb_t match, void *data)
 {
 	struct rs_node *head_next_bkp = NULL;
+	struct rs_node *tail_prev_bkp = NULL;
 	struct rs_node *needle;
 
 	if (NULL == dll || NULL == match)
@@ -154,12 +184,16 @@ struct rs_node *rs_dll_remove_match(struct rs_dll *dll,
 
 	/* in case we remove the head, we want it to be replaced by it's next */
 	head_next_bkp = rs_node_next(dll->head);
+	/* in case we remove the tail, we want it to be replaced by it's prev */
+	tail_prev_bkp = rs_node_prev(dll->tail);
 
 	needle = rs_node_remove_match(dll->head, match, data);
 	if (NULL != needle) {
 		/* keep list coherent */
 		if (needle == dll->head)
 			dll->head = head_next_bkp;
+		if (needle == dll->tail)
+			dll->tail = tail_prev_bkp;
 		dll->cur = dll->head;
 		dll->count--;
 	}

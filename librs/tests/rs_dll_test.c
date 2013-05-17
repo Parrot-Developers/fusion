@@ -42,8 +42,16 @@ static int dll_test_equals(struct rs_node *a, const struct rs_node *b)
 	return 0 == (int_node_a->val - int_node_b->val);
 }
 
+void dll_test_print(struct rs_node *node)
+{
+	struct int_node *int_node = to_int_node(node);
+
+	printf("| %d ", int_node->val);
+
+}
 static const struct rs_dll_vtable dll_test_vtable = {
 		.equals = dll_test_equals,
+		.print = dll_test_print,
 };
 
 static void testRS_DLL_INIT(void)
@@ -109,6 +117,56 @@ static void testRS_DLL_PUSH(void)
 	CU_ASSERT_NOT_EQUAL(f_ret, 0);
 	f_ret = rs_dll_push(&dll, NULL);
 	CU_ASSERT_NOT_EQUAL(f_ret, 0);
+}
+
+static void testRS_DLL_ENQUEUE(void)
+{
+	struct int_node int_node_a = {.val = 17,};
+	struct int_node int_node_b = {.val = 42,};
+	struct int_node int_node_c = {.val = 666,};
+	struct rs_dll dll;
+	int ret = 0;
+	int two_times_cb(struct rs_node *node, void *data)
+	{
+		struct int_node *in = to_int_node(node);
+
+		CU_ASSERT_EQUAL_FATAL((uint32_t)data, 0xdeadbeef);
+		CU_ASSERT_PTR_NOT_NULL(node);
+
+		in->val *= 2;
+
+		return 0;
+	};
+
+	ret = rs_dll_init(&dll, &dll_test_vtable);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+
+	/* normal use cases */
+	rs_dll_dump(&dll); printf("\n");
+	ret = rs_dll_enqueue(&dll, &(int_node_a.node));
+	rs_dll_dump(&dll); printf("\n");
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = rs_dll_enqueue(&dll, &(int_node_b.node));
+	rs_dll_dump(&dll); printf("\n");
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = rs_dll_enqueue(&dll, &(int_node_c.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+
+	rs_dll_dump(&dll); printf("\n");
+
+	CU_ASSERT_EQUAL(dll.head, &(int_node_a.node));
+	CU_ASSERT_PTR_NULL(dll.head->prev);
+	CU_ASSERT_EQUAL(dll.head->next, &(int_node_b.node));
+	CU_ASSERT_EQUAL(dll.head->next->prev, &(int_node_a.node));
+	CU_ASSERT_EQUAL(dll.head->next->next, &(int_node_c.node));
+	CU_ASSERT_EQUAL(dll.head->next->next->prev, &(int_node_b.node));
+	CU_ASSERT_PTR_NULL(dll.head->next->next->next);
+
+	/* error use case */
+	ret = rs_dll_enqueue(NULL, &(int_node_a.node));
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+	ret = rs_dll_enqueue(&dll, NULL);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
 }
 
 static void testRS_DLL_GET_COUNT(void)
@@ -460,6 +518,10 @@ static const struct test_t tests[] = {
 		{
 				.fn = testRS_DLL_PUSH,
 				.name = "rs_dll_push"
+		},
+		{
+				.fn = testRS_DLL_ENQUEUE,
+				.name = "rs_dll_enqueue"
 		},
 		{
 				.fn = testRS_DLL_GET_COUNT,

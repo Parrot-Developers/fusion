@@ -30,6 +30,8 @@ struct rs_dll_vtable {
 struct rs_dll {
 	/** first element of the list */
 	struct rs_node *head;
+	/** last element of the list */
+	struct rs_node *tail;
 	/** cursor of the list, i.e. next element returned by rs_dll_next */
 	struct rs_node *cur;
 	/** number of elements of the list */
@@ -54,12 +56,20 @@ int rs_dll_init(struct rs_dll *dll, const struct rs_dll_vtable *vtable);
 void rs_dll_dump(struct rs_dll *dll);
 
 /**
- * Adds an element to the list
+ * Adds an element to the list in first position
  * @param dll Doubly linked list
  * @param node Node to push
  * @return RS_ERROR_PARAM
  */
 int rs_dll_push(struct rs_dll *dll, struct rs_node *node);
+
+/**
+ * Adds an element to the list in last position
+ * @param dll Doubly linked list
+ * @param node Node to enqueue
+ * @return RS_ERROR_PARAM
+ */
+int rs_dll_enqueue(struct rs_dll *dll, struct rs_node *node);
 
 /**
  * @param dll Doubly linked list
