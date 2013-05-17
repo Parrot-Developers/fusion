@@ -28,19 +28,16 @@ struct io_src_msg;
  * @typedef io_src_msg_cb_t
  * @brief Called when an entire message has been received or when the source is
  * ready to write a message. No partial message can be read or written.
- * If the event type is IO_IN, the message received is stored in src->msg and
- * can be used by the callback.
- * If the event type is IO_OUT, the callback must set src->msg to point to the
- * message to send, which will be sent just after the callback has been called.
+ * If the event type is IO_IN, the message received can be retrieved with a call
+ * to io_src_msg_get_message() and is of the length given at initialization
+ * If the event type is IO_OUT, the callback must set the next message to be
+ * sent with a call to io_src_msg_set_next_message(). It will be sent just after
+ * the callback returns.
  * @param src Message source
  * @param evt Type of the event to process, either IO_IN or IO_OUT, not
  * IO_DUPLEX
  */
 typedef void (io_src_msg_cb_t)(struct io_src_msg *src, enum io_src_event evt);
-/*
- * TODO add a buffer parameter, which for IN events, can be read, and for OUT
- * events, must be filled
- */
 
 /**
  * @typedef io_src_msg
