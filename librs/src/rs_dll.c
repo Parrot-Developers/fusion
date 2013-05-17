@@ -101,7 +101,7 @@ int rs_dll_enqueue(struct rs_dll *dll, struct rs_node *node)
 		dll->count++;
 		dll->cur = dll->head;
 	} else {
-		rs_node_insert(node, dll->tail);
+		rs_node_insert_before(node, dll->tail);
 		dll->tail = node;
 	}
 

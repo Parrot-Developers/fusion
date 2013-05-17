@@ -75,7 +75,8 @@ struct rs_node *rs_node_head(struct rs_node *node);
  * @param node Node to insert
  * @return node if not NULL, next otherwise
  */
-struct rs_node *rs_node_insert(struct rs_node *next, struct rs_node *node);
+struct rs_node *rs_node_insert_before(struct rs_node *next,
+		struct rs_node *node);
 
 /**
  * Pushes a node to a list whose head is given

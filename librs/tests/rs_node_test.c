@@ -68,7 +68,7 @@ static void testRS_NODE_HEAD(void)
 	/* error cases : none */
 }
 
-static void testRS_NODE_INSERT(void)
+static void testRS_NODE_INSERT_BEFORE(void)
 {
 	struct int_node int_node_a = {.val = 17,};
 	struct int_node int_node_b = {.val = 42,};
@@ -78,13 +78,13 @@ static void testRS_NODE_INSERT(void)
 
 	/* normal use cases */
 	/* inserting to a NULL (empty) list returns a list composed of node */
-	list = rs_node_insert(list, &(int_node_a.node));
+	list = rs_node_insert_before(list, &(int_node_a.node));
 	CU_ASSERT_EQUAL(list, &(int_node_a.node));
 	CU_ASSERT_EQUAL(to_int_node(list)->val, 17);
 	CU_ASSERT_PTR_NULL(list->next);
 	CU_ASSERT_PTR_NULL(list->prev);
 
-	list = rs_node_insert(list, &(int_node_b.node));
+	list = rs_node_insert_before(list, &(int_node_b.node));
 	CU_ASSERT_EQUAL(list, &(int_node_b.node));
 	CU_ASSERT_EQUAL(to_int_node(list)->val, 42);
 	CU_ASSERT_PTR_NULL(list->next->next);
@@ -95,12 +95,12 @@ static void testRS_NODE_INSERT(void)
 
 
 
-	list = rs_node_insert(list, &(int_node_c.node));
+	list = rs_node_insert_before(list, &(int_node_c.node));
 	CU_ASSERT_EQUAL(list, &(int_node_c.node));
 	CU_ASSERT_EQUAL(to_int_node(list)->val, 666);
 
 	/* inserting a NULL element returns the initial list unchanged */
-	tmp = rs_node_insert(list, NULL);
+	tmp = rs_node_insert_before(list, NULL);
 	CU_ASSERT_EQUAL(list, tmp);
 
 	/* error cases : none */
@@ -431,7 +431,7 @@ static const struct test_t tests[] = {
 				.name = "rs_node_head"
 		},
 		{
-				.fn = testRS_NODE_INSERT,
+				.fn = testRS_NODE_INSERT_BEFORE,
 				.name = "rs_node_insert"
 		},
 		{

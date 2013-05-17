@@ -32,7 +32,8 @@ struct rs_node *rs_node_head(struct rs_node *node)
 	return node;
 }
 
-struct rs_node *rs_node_insert(struct rs_node *next, struct rs_node *node)
+struct rs_node *rs_node_insert_before(struct rs_node *next,
+		struct rs_node *node)
 {
 	struct rs_node *prev;
 
@@ -64,7 +65,7 @@ int rs_node_push(struct rs_node **head, struct rs_node *node)
 	if (NULL == node)
 		return 0;
 
-	*head = rs_node_insert(*head, node);
+	*head = rs_node_insert_before(*head, node);
 
 	return 0;
 }
