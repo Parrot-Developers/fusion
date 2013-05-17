@@ -25,10 +25,11 @@ struct io_src_pid;
 /**
  * @typedef io_pid_cb_t
  * @brief Called when the monitored process has died
- * @param pid Signal source
+ * @param pid_src Signal source
+ * @param pid Pid of the process which has just died
+ * @param status Status of the process, same as that of waitpid(2)
  */
-typedef void (io_pid_cb_t)(struct io_src_pid *pid);
-/* TODO add pid and status parameters */
+typedef void (io_pid_cb_t)(struct io_src_pid *pid_src, pid_t pid, int status);
 
 /**
  * @struct io_src_pid

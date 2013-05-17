@@ -85,7 +85,7 @@ static void testSRC_PID_INIT(void)
 	pid_t pid;
 	struct timeval timeout;
 	bool process_dead = 0;
-	void cb(struct io_src_pid *src_pid)
+	void cb(struct io_src_pid *src_pid, pid_t pid, int status)
 	{
 		CU_ASSERT(WIFEXITED(src_pid->status));
 		CU_ASSERT_EQUAL(WEXITSTATUS(src_pid->status), 0);
@@ -151,15 +151,15 @@ static void testSRC_PID_SET_PID(void)
 	pid_t pid;
 	struct timeval timeout;
 	bool process_dead = 0;
-	void cb(struct io_src_pid *src_pid)
+	void cb(struct io_src_pid *src_pid, pid_t pid, int status)
 	{
-		int status;
+		int wait_status;
 
-		CU_ASSERT(WIFEXITED(src_pid->status));
-		CU_ASSERT_EQUAL(WEXITSTATUS(src_pid->status), 0);
+		CU_ASSERT(WIFEXITED(status));
+		CU_ASSERT_EQUAL(WEXITSTATUS(status), 0);
 		process_dead = true;
-		waitpid(src_pid->pid, &status, 0);
-		CU_ASSERT_EQUAL(src_pid->status, status);
+		waitpid(src_pid->pid, &wait_status, 0);
+		CU_ASSERT_EQUAL(status, wait_status);
 	};
 
 	/* normal use cases */
@@ -252,7 +252,7 @@ static void testSRC_PID_GET_SOURCE(void)
 	struct io_src_pid pid_src;
 	struct io_src *src;
 
-	void dummy_cb(struct io_src_pid *src)
+	void dummy_cb(struct io_src_pid *src, pid_t pid, int status)
 	{
 
 	}

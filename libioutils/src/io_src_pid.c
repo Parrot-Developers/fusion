@@ -26,20 +26,19 @@
  */
 static void pid_cb(struct io_src *src)
 {
-	int status;
 	pid_t pid_ret;
-	struct io_src_pid *pid = to_src_pid(src);
+	struct io_src_pid *pid_src = to_src_pid(src);
 
 	/* TODO treat I/O THEN errors */
 	if (io_src_has_error(src->events))
 		return;
 
-	pid_ret = pidwatch_wait(src->fd, &status);
-	assert(pid_ret == pid->pid);
+	pid_ret = pidwatch_wait(src->fd, &pid_src->status);
+	assert(pid_ret == pid_src->pid);
 	if (-1 == pid_ret)
 		return;
 
-	pid->cb(pid);
+	pid_src->cb(pid_src, pid_src->pid, pid_src->status);
 }
 
 int io_src_pid_init(struct io_src_pid *pid_src, io_pid_cb_t *cb)
