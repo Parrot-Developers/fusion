@@ -25,8 +25,7 @@ struct io_src_sig;
  * signalfd_siginfo field properly filled for use by the client
  * @param sig Signal source
  */
-typedef void (io_sig_cb_t)(struct io_src_sig *sig);
-/* TODO add a signal info parameter */
+typedef void (io_sig_cb_t)(struct io_src_sig *sig, struct signalfd_siginfo *si);
 
 /**
  * @typedef io_src_sig

@@ -54,13 +54,13 @@ static void testSRC_SIG_INIT(void)
 #define STATE_SIGUSR2_RECEIVED 2
 #define STATE_ALL_DONE 3
 	int state = STATE_START;
-	void sig_cb(struct io_src_sig *sig)
+	void sig_cb(struct io_src_sig *sig, struct signalfd_siginfo *si)
 	{
-		if (SIGUSR1 == sig->si.ssi_signo) {
+		if (SIGUSR1 == si->ssi_signo) {
 			CU_ASSERT(!(STATE_SIGUSR2_RECEIVED & state));
 			reached_state(&state, STATE_SIGUSR1_RECEIVED);
 			ret = kill(getpid(), SIGUSR2);
-		} else if (SIGUSR2 == sig->si.ssi_signo) {
+		} else if (SIGUSR2 == si->ssi_signo) {
 			CU_ASSERT(STATE_SIGUSR1_RECEIVED & state);
 			reached_state(&state, STATE_SIGUSR2_RECEIVED);
 			loop = false;
@@ -142,7 +142,7 @@ static void testSRC_SIG_GET_SOURCE(void)
 	struct io_src_sig sig_src;
 	struct io_src *src;
 
-	void dummy_cb(struct io_src_sig *src)
+	void dummy_cb(struct io_src_sig *src, struct signalfd_siginfo *si)
 	{
 
 	}

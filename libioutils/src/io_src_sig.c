@@ -44,7 +44,7 @@ static void sig_cb(struct io_src *src)
 	if (sizeof(sig->si) != ret)
 		return;
 
-	sig->cb(sig);
+	sig->cb(sig, &sig->si);
 }
 
 /**
