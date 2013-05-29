@@ -6,6 +6,10 @@
  *
  * Copyright (C) 2013 Parrot S.A.
  */
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 #include <assert.h>
 #include <errno.h>
 
@@ -13,6 +17,32 @@
 
 #include "io_mon.h"
 #include "io_src_pid.h"
+
+#ifndef O_CLOEXEC
+#ifdef __arm__
+	/* value taken from linux kernel header
+	 * include/asm-generic/fcntl.h */
+	#define O_CLOEXEC 02000000
+#else
+	#error O_CLOEXEC not defined !
+#endif
+#endif
+
+#ifndef SOCK_CLOEXEC
+/**
+ * @def SOCK_CLOEXEC
+ * @brief Set the flag O_CLOEXEC at socket's creation
+ */
+#define SOCK_CLOEXEC O_CLOEXEC
+#endif
+
+#ifndef SOCK_NONBLOCK
+/**
+ * @def SOCK_NONBLOCK
+ * @brief Set the flag O_NONBLOCK at socket's creation
+ */
+#define SOCK_NONBLOCK O_NONBLOCK
+#endif
 
 /**
  * @def to_src
