@@ -99,7 +99,6 @@ pid_t __attribute__((sentinel)) launch(char *prog, ...)
 	int ret;
 	int child_argc = 0;
 	char *child_argv[10] = {NULL};
-	char *child_envp[] = {NULL};
 	char *arg = (char *)-1;
 	va_list args;
 	pid_t pid;
@@ -128,7 +127,7 @@ pid_t __attribute__((sentinel)) launch(char *prog, ...)
 		fprintf(stderr, "Executing ");
 		dump_args(child_argc, child_argv);
 		fprintf(stderr, "\n");
-		ret = execvpe(child_argv[0], child_argv, child_envp);
+		ret = execvp(child_argv[0], child_argv);
 		if (-1 == ret) {
 			perror("execve");
 			exit(1);
