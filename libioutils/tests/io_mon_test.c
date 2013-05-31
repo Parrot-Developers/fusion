@@ -31,7 +31,6 @@ static void testMON_INIT(void)
 	ret = io_mon_init(&mon);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_NOT_EQUAL(mon.epollfd, -1);
-	CU_ASSERT_EQUAL(mon.nb_sources, 0);
 	CU_ASSERT_EQUAL(mon.source, NULL);
 
 	/* cleanup */
@@ -198,10 +197,8 @@ static void testMON_REMOVE_SOURCE(void)
 	CU_ASSERT_EQUAL(ret, 0);
 
 	/* normal use cases */
-	CU_ASSERT_EQUAL(mon.nb_sources, 1);
 	ret = io_mon_remove_source(&mon, &src);
 	CU_ASSERT_EQUAL(ret, 0);
-	CU_ASSERT_EQUAL(mon.nb_sources, 0);
 
 	/* error use cases */
 	/* a source can't be removed twice */
@@ -506,7 +503,6 @@ static void testMON_CLEAN(void)
 	ret = io_mon_clean(&mon);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_EQUAL(mon.epollfd, -1);
-	CU_ASSERT_EQUAL(mon.nb_sources, 0);
 	CU_ASSERT_EQUAL(mon.source, NULL);
 
 	/* cleanup */

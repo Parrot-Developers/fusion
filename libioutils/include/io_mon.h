@@ -24,7 +24,6 @@ struct io_mon {
 	/** file descriptor for monitoring all the sources */
 	int epollfd;
 	/** number of sources currently registered */
-	unsigned nb_sources;
 };
 
 /**

@@ -71,7 +71,6 @@ static int add_source(struct io_mon *mon, struct io_src *src)
 	if (rs_node_find(&(src->node), mon->source))
 		return -EEXIST;
 	rs_node_push(&(mon->source), &(src->node));
-	mon->nb_sources++;
 
 	return 0;
 }
@@ -289,7 +288,6 @@ int io_mon_remove_source(struct io_mon *mon, struct io_src *src)
 	node = rs_node_remove(old_mon_src, &(src->node));
 	if (NULL == node)
 		return -EINVAL;
-	mon->nb_sources--;
 
 	old_src = to_src(node);
 	if (IO_NONE != old_src->active) {
