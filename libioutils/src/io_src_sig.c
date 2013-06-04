@@ -104,9 +104,25 @@ static int build_sfd(sigset_t *m, sigset_t *old_mask)
 		return -errno;
 
 	/* set up signal fd */
-	fd = signalfd(-1, m, SFD_NONBLOCK | SFD_CLOEXEC);
-	if (0 > fd)
-		return -errno;
+	ret = fd = signalfd(-1, m, SFD_NONBLOCK | SFD_CLOEXEC);
+	if (0 > ret) {
+		/* error can be related to unsupported flags. try the safe
+		 * version first and the racy one on error
+		 */
+		ret = fd = signalfd(-1, m, 0);
+		if (0 > ret)
+			return -errno;
+		ret = fcntl(fd, F_SETFD, FD_CLOEXEC);
+		if (0 > ret) {
+			close(fd);
+			return -errno;
+		}
+		ret = fcntl(fd, F_SETFL, O_NONBLOCK);
+		if (0 > ret) {
+			close(fd);
+			return -errno;
+		}
+	}
 
 	return 0 > fd ? -errno : fd;
 }
@@ -134,7 +150,7 @@ int io_src_sig_init(struct io_src_sig *sig, io_sig_cb_t *cb, ...)
 	if (0 > ret)
 		return ret;
 
-	fd = build_sfd(m, &(sig->old_mask));
+	ret = fd = build_sfd(m, &(sig->old_mask));
 	if (0 > fd)
 		goto out;
 
