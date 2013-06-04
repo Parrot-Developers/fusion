@@ -13,6 +13,7 @@
 
 #include <fcntl.h>       /* O_CLOEXEC */
 
+#include <signal.h>
 /* Give us a chance to use regular definitions: */
 #include <sys/epoll.h>   /* EPOLL_CLOEXEC */
 
@@ -94,5 +95,13 @@
  * @return -1 is returned, with errno set, file descriptor created on success
  */
 int io_epoll_create1(int flags);
+
+/**
+ * Wrapper around signalfd which performs separately the opening of the file
+ * descriptor and the setting of the flags, if an error is encountered when
+ * performing both two at once.
+ * @see signalfd
+ */
+int io_signalfd(int fd, const sigset_t *mask, int flags);
 
 #endif /* IO_PLATFORM_H_ */

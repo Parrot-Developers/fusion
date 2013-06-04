@@ -9,7 +9,6 @@
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif /* _GNU_SOURCE */
-#include <signal.h>
 #include <unistd.h>
 
 #include <errno.h>
@@ -93,7 +92,6 @@ static int sig_init_args_are_invalid(struct io_src_sig *sig, io_sig_cb_t *cb,
 static int build_sfd(sigset_t *m, sigset_t *old_mask)
 {
 	int ret;
-	int fd;
 
 	/*
 	 * block signals so that they aren't handled according to their default
@@ -104,27 +102,7 @@ static int build_sfd(sigset_t *m, sigset_t *old_mask)
 		return -errno;
 
 	/* set up signal fd */
-	ret = fd = signalfd(-1, m, SFD_NONBLOCK | SFD_CLOEXEC);
-	if (0 > ret) {
-		/* error can be related to unsupported flags. try the safe
-		 * version first and the racy one on error
-		 */
-		ret = fd = signalfd(-1, m, 0);
-		if (0 > ret)
-			return -errno;
-		ret = fcntl(fd, F_SETFD, FD_CLOEXEC);
-		if (0 > ret) {
-			close(fd);
-			return -errno;
-		}
-		ret = fcntl(fd, F_SETFL, O_NONBLOCK);
-		if (0 > ret) {
-			close(fd);
-			return -errno;
-		}
-	}
-
-	return 0 > fd ? -errno : fd;
+	return io_signalfd(-1, m, 0);
 }
 
 int io_src_sig_init(struct io_src_sig *sig, io_sig_cb_t *cb, ...)
@@ -135,7 +113,7 @@ int io_src_sig_init(struct io_src_sig *sig, io_sig_cb_t *cb, ...)
 	sigset_t *m;
 	int signo;
 
-	/* firts signal MUST be retrieved before any modification of sig */
+	/* first signal MUST be retrieved before any modification of sig */
 	va_start(args, cb);
 	signo = va_arg(args, int);
 	if (sig_init_args_are_invalid(sig, cb, signo))
