@@ -17,9 +17,14 @@
 #include <sys/epoll.h>   /* EPOLL_CLOEXEC */
 
 #ifndef O_CLOEXEC
-#define O_CLOEXEC       02000000        /* set close_on_exec */
+#ifdef __arm__
+	/* value taken from linux kernel header
+	 * include/asm-generic/fcntl.h */
+	#define O_CLOEXEC 02000000
+#else
+	#error O_CLOEXEC not defined !
 #endif
-
+#endif
 
 /* for epoll_create1 */
 #ifndef EPOLL_CLOEXEC
@@ -46,6 +51,40 @@
  * @brief Set the flag O_NONBLOCK at signal fd's creation
  */
 #define SFD_NONBLOCK O_NONBLOCK
+#endif
+
+/* for timerfd */
+#ifndef TFD_NONBLOCK
+/**
+ * @def TFD_NONBLOCK
+ * @brief Set the flag O_NONBLOCK at timer's creation
+ */
+#define TFD_NONBLOCK O_NONBLOCK
+#endif
+
+#ifndef TFD_CLOEXEC
+/**
+ * @def TFD_CLOEXEC
+ * @brief Set the flag O_CLOEXEC at timer's creation
+ */
+#define TFD_CLOEXEC O_CLOEXEC
+#endif
+
+/* for socket */
+#ifndef SOCK_CLOEXEC
+/**
+ * @def SOCK_CLOEXEC
+ * @brief Set the flag O_CLOEXEC at socket's creation
+ */
+#define SOCK_CLOEXEC O_CLOEXEC
+#endif
+
+#ifndef SOCK_NONBLOCK
+/**
+ * @def SOCK_NONBLOCK
+ * @brief Set the flag O_NONBLOCK at socket's creation
+ */
+#define SOCK_NONBLOCK O_NONBLOCK
 #endif
 
 /**

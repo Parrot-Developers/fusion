@@ -27,22 +27,6 @@
 #include "io_utils.h"
 #include "io_src_tmr.h"
 
-#ifndef TFD_NONBLOCK
-/**
- * @def TFD_NONBLOCK
- * @brief Set the flag O_NONBLOCK at socket's creation
- */
-#define TFD_NONBLOCK O_NONBLOCK
-#endif
-
-#ifndef TFD_CLOEXEC
-/**
- * @def TFD_CLOEXEC
- * @brief Set the flag O_CLOEXEC at socket's creation
- */
-#define TFD_CLOEXEC O_CLOEXEC
-#endif
-
 /* useful time ratio value */
 #define MSEC_PER_SEC  1000
 #define NSEC_PER_MSEC 1000000
