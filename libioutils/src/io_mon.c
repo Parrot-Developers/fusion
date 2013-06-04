@@ -126,6 +126,79 @@ static int has_events_pending(struct io_src *src)
 	return src->events & (src->active | IO_EPOLL_ERROR_EVENTS);
 }
 
+static RS_NODE_MATCH_MEMBER(struct io_src, fd, node)
+
+/**
+ * Retrieves a source in a monitor, knowing it's file descriptor
+ * @param mon Monitor in which to search for the source
+ * @param fd File descriptor of the source
+ * @return Source if found, NULL if not
+ */
+static struct io_src *find_source_by_fd(struct io_mon *mon, int fd)
+{
+	struct rs_node *needle;
+
+	if (NULL == mon || -1 == fd)
+		return NULL;
+
+	needle = rs_node_find_match(mon->source, match_fd, &fd);
+	if (NULL == needle)
+		return NULL;
+
+	return to_src(needle);
+}
+
+/**
+ * Removes a source from a monitor
+ * @param mon Monitor
+ * @param src Source to remove
+ * @return negative errno value on error, 0 otherwise
+ */
+static int remove_source(struct io_mon *mon, struct io_src *src)
+{
+	int ret;
+	struct io_src *old_src;
+	struct rs_node *old_mon_src;
+	struct rs_node *node;
+
+	old_mon_src = mon->source;
+	if (&(src->node) == mon->source)
+		mon->source = rs_node_next(mon->source);
+
+	node = rs_node_remove(old_mon_src, &(src->node));
+	if (NULL == node)
+		return -EINVAL;
+
+	old_src = to_src(node);
+	if (IO_NONE != old_src->active) {
+		old_src->active = IO_NONE;
+		ret = alter_source(mon->epollfd, old_src, EPOLL_CTL_DEL);
+		if (-1 == ret)
+			return -errno;
+	}
+
+	return 0;
+}
+
+/**
+ * Removes a source from a monitor, knowing it's file descriptor
+ * @param mon Monitor
+ * @param fd File descriptor of the source to remove
+ * @return negative errno value on error, 0 otherwise
+ */
+static int remove_source_by_fd(struct io_mon *mon, int fd)
+{
+	struct io_src *src;
+
+	if (NULL == mon || -1 == fd)
+		return -EINVAL;
+	src = find_source_by_fd(mon, fd);
+	if (NULL == src)
+		return 0;
+
+	return remove_source(mon, src);
+}
+
 /**
  * Notifies client of I/O events for a source and checks for errors.
  * @param mon Monitor
@@ -135,17 +208,21 @@ static int has_events_pending(struct io_src *src)
  */
 static int process_event_sets(struct io_mon *mon, struct io_src *src)
 {
+	uint32_t events;
+	int fd;
+
 	/*
 	 * if during processing, sources are altered, some events may
 	 * have become irrelevant and must be filtered out
 	 */
 	if (!has_events_pending(src))
 		return 0;
-
+	events = src->events;
+	fd = src->fd;
 	src->cb(src);
 
-	if (io_src_has_error(src->events))
-		io_mon_remove_source(mon, src);
+	if (io_src_has_error(events))
+		remove_source_by_fd(mon, fd);
 
 	return 0;
 }
@@ -271,36 +348,6 @@ int io_mon_add_sources(struct io_mon *mon, ...)
 	return 0;
 }
 
-int io_mon_remove_source(struct io_mon *mon, struct io_src *src)
-{
-	int ret;
-	struct rs_node *node;
-	struct rs_node *old_mon_src;
-	struct io_src *old_src;
-
-	if (NULL == mon || NULL == src)
-		return -EINVAL;
-
-	old_mon_src = mon->source;
-	if (&(src->node) == mon->source)
-		mon->source = rs_node_next(mon->source);
-
-	node = rs_node_remove(old_mon_src, &(src->node));
-	if (NULL == node)
-		return -EINVAL;
-
-	old_src = to_src(node);
-	if (IO_NONE != old_src->active) {
-		old_src->active = IO_NONE;
-		ret = alter_source(mon->epollfd, old_src, EPOLL_CTL_DEL);
-		if (-1 == ret)
-			return -errno;
-	}
-
-
-	return 0;
-}
-
 void io_mon_dump_epoll_event(uint32_t events)
 {
 	fprintf(stderr, "epoll events :\n");
@@ -358,7 +405,7 @@ int io_mon_clean(struct io_mon *mon)
 
 	while (mon->source) {
 		src = to_src(mon->source);
-		io_mon_remove_source(mon, src);
+		remove_source(mon, src);
 	}
 
 	if (-1 != mon->epollfd)

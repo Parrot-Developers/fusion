@@ -180,40 +180,6 @@ static void testMON_ADD_SOURCES(void)
 	close(fd);
 }
 
-static void testMON_REMOVE_SOURCE(void)
-{
-	int fd;
-	struct io_mon mon;
-	struct io_src src;
-	int ret;
-
-	ret = io_mon_init(&mon);
-	CU_ASSERT_EQUAL(ret, 0);
-	fd = open("/dev/random", O_RDWR | O_CLOEXEC);
-	CU_ASSERT_NOT_EQUAL_FATAL(fd, -1);
-	ret = io_src_init(&src, fd, IO_DUPLEX, my_dummy_callback);
-	CU_ASSERT_EQUAL(ret, 0);
-	ret = io_mon_add_source(&mon, &src);
-	CU_ASSERT_EQUAL(ret, 0);
-
-	/* normal use cases */
-	ret = io_mon_remove_source(&mon, &src);
-	CU_ASSERT_EQUAL(ret, 0);
-
-	/* error use cases */
-	/* a source can't be removed twice */
-	ret = io_mon_remove_source(&mon, &src);
-	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_mon_remove_source(&mon, NULL);
-	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_mon_remove_source(NULL, &src);
-	CU_ASSERT_NOT_EQUAL(ret, 0);
-
-	/* cleanup */
-	io_mon_clean(&mon);
-	close(fd);
-}
-
 static void testMON_DUMP_EPOLL_EVENT(void)
 {
 	char str[1024];
@@ -529,10 +495,6 @@ static const struct test_t tests[] = {
 		{
 				.fn = testMON_ADD_SOURCES,
 				.name = "io_mon_add_sources"
-		},
-		{
-				.fn = testMON_REMOVE_SOURCE,
-				.name = "io_mon_remove_source"
 		},
 		{
 				.fn = testMON_DUMP_EPOLL_EVENT,
