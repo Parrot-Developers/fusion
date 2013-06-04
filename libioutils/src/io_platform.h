@@ -104,4 +104,10 @@ int io_epoll_create1(int flags);
  */
 int io_signalfd(int fd, const sigset_t *mask, int flags);
 
+/**
+ * Wrapper around io_pipe2, defining it on toolchains where it is missing
+ * @see pipe2
+ */
+int io_pipe2(int pipefd[2], int flags);
+
 #endif /* IO_PLATFORM_H_ */

@@ -62,3 +62,13 @@ int io_signalfd(int fd, const sigset_t *mask, int flags)
 
 	return new_fd;
 }
+
+int io_pipe2(int pipefd[2], int flags)
+{
+#ifdef __arm__
+	/* __NR_pipe2 == 359 on arm */
+	return syscall(359, pipefd, flags);
+#else
+	return pipe2(pipefd, flags);
+#endif
+}
