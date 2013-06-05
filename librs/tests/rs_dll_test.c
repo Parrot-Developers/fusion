@@ -148,14 +148,18 @@ static void testRS_DLL_ENQUEUE(void)
 
 	ret = rs_dll_init(&dll, &dll_test_vtable);
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	CU_ASSERT_EQUAL(dll.count, 0);
 
 	/* normal use cases */
 	ret = rs_dll_enqueue(&dll, &(int_node_a.node));
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	CU_ASSERT_EQUAL(dll.count, 1);
 	ret = rs_dll_enqueue(&dll, &(int_node_b.node));
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	CU_ASSERT_EQUAL(dll.count, 2);
 	ret = rs_dll_enqueue(&dll, &(int_node_c.node));
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	CU_ASSERT_EQUAL(dll.count, 3);
 
 	CU_ASSERT_EQUAL(dll.head, &(int_node_a.node));
 	CU_ASSERT_PTR_NULL(dll.head->prev);
@@ -166,10 +170,13 @@ static void testRS_DLL_ENQUEUE(void)
 	CU_ASSERT_PTR_NULL(dll.head->next->next->next);
 	rs_dll_pop(&dll);
 	CU_ASSERT_EQUAL(dll.head, &(int_node_b.node));
+	CU_ASSERT_EQUAL(dll.count, 2);
 	rs_dll_pop(&dll);
 	CU_ASSERT_EQUAL(dll.head, &(int_node_c.node));
+	CU_ASSERT_EQUAL(dll.count, 1);
 	rs_dll_pop(&dll);
 	CU_ASSERT_PTR_NULL(dll.head);
+	CU_ASSERT_EQUAL(dll.count, 0);
 
 	/* error use case */
 	ret = rs_dll_enqueue(NULL, &(int_node_a.node));
