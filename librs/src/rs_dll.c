@@ -98,12 +98,12 @@ int rs_dll_enqueue(struct rs_dll *dll, struct rs_node *node)
 	if (rs_dll_is_empty(dll)) {
 		dll->head = dll->tail = node;
 		node->next = node->prev = NULL;
-		dll->count++;
 		dll->cur = dll->head;
 	} else {
 		rs_node_insert_after(dll->tail, node);
 		dll->tail = node;
 	}
+	dll->count++;
 
 	return 0;
 }
