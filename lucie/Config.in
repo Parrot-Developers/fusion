@@ -1,0 +1,6 @@
+# Global menu for fusion.git packages
+# please follow alphabetical order
+menu "fusion"
+
+
+endmenu
