@@ -2,5 +2,19 @@
 # please follow alphabetical order
 menu "fusion"
 
+config BR2_PACKAGE_FAUTES
+	bool "fautes"
+	default n
+	select BR2_PACKAGE_LIBFAUTES
+	select BR2_PACKAGE_LIBCUNIT
+	help
+	  Utility to run embedded unit tests using libfautes / cunit
+
+config BR2_PACKAGE_LIBFAUTES
+	bool "libfautes"
+	default n
+	select BR2_PACKAGE_LIBCUNIT
+	help
+	  Library for adding fautes support to shared libraries
 
 endmenu
