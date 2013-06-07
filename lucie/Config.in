@@ -17,4 +17,30 @@ config BR2_PACKAGE_LIBFAUTES
 	help
 	  Library for adding fautes support to shared libraries
 
+config BR2_PACKAGE_LIBIOUTILS
+	bool "libioutils"
+	default n
+	select BR2_PACKAGE_LIBRS
+	select BR2_PACKAGE_LIBPIDWATCH
+	select BR2_PACKAGE_LIBFAUTES
+	select BR2_PACKAGE_LIBCUNIT
+	help
+	  Utils for event loop based asynchronous I/O
+
+config BR2_PACKAGE_LIBPIDWATCH
+	bool "libpidwatch"
+	default n
+	select BR2_PACKAGE_LIBFAUTES
+	select BR2_PACKAGE_LIBCUNIT
+	help
+	  Library for monitoring the death of processes with an fd
+
+config BR2_PACKAGE_LIBRS
+	bool "librs"
+	default n
+	select BR2_PACKAGE_LIBFAUTES
+	select BR2_PACKAGE_LIBCUNIT
+	help
+	  Library implementing some base sets in a robust way
+
 endmenu
