@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <signal.h>
 
+#define _GNU_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -102,7 +103,7 @@ static struct suite_t **get_test_suite(const char *so_lib, void **lib_handle,
 	if (-1 == ret)
 		goto out;
 	*libname = *(char **)sym;
-	if (0 != strncmp(*libname, so_lib, strlen(*libname))) {
+	if (0 != strncmp(*libname, basename(so_lib), strlen(*libname))) {
 		fprintf(stderr, "Mismatch between so name '%s' and "
 				"fautes_lib_name '%s' \n", so_lib, *libname);
 		goto out;
