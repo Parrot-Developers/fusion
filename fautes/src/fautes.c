@@ -105,7 +105,8 @@ static struct suite_t **get_test_suite(const char *so_lib, void **lib_handle,
 	*libname = *(char **)sym;
 	if (0 != strncmp(*libname, basename(so_lib), strlen(*libname))) {
 		fprintf(stderr, "Mismatch between so name '%s' and "
-				"fautes_lib_name '%s' \n", so_lib, *libname);
+				"fautes_lib_name '%s' \n", basename(so_lib),
+				*libname);
 		goto out;
 	}
 
