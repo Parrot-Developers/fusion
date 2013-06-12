@@ -36,8 +36,8 @@
 
 /**
  * @def to_read
- * @brief computes what has to be read in order to build a chunk of acceptable
- * size
+ * @brief computes the maximum number of bytes which can be read in order to
+ * build a chunk of acceptable size
  */
 #define to_read(sep) (IO_SRC_SEP_SIZE - already_read(sep))
 

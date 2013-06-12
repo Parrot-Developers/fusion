@@ -93,8 +93,8 @@ struct io_src_sep {
  * @param fd File descriptor
  * @param cb Callback called on each chunk of data, retrieved before a separator
  * @param sep1 First separator between the chunks of data (only one byte)
- * @param sep2 second separator between the chunks of data, pass
- * IO_SRC_SEP_NO_SEP2 to use only one separator (only one byte)
+ * @param sep2 second separator between the chunks of data (only one byte), pass
+ * IO_SRC_SEP_NO_SEP2 to use only one separator
  * @return Negative errno compatible value on error, 0 otherwise
  */
 int io_src_sep_init(struct io_src_sep *sep_src, int fd, io_src_sep_cb_t *cb,
