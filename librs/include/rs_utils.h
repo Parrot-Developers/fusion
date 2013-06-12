@@ -9,6 +9,8 @@
 #ifndef RS_UTILS_H_
 #define RS_UTILS_H_
 
+#include <stdlib.h>
+
 /**
  * @def rs_container_of
  * @brief Retrieves the address of a structure knowing the address of one of
