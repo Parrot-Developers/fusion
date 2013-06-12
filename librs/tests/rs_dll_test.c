@@ -22,14 +22,7 @@ struct int_node {
 	struct rs_node node;
 };
 
-#ifndef container_of
-#define container_of(ptr, type, member) ({ \
-	const typeof(((type *)0)->member)*__mptr = (ptr); \
-	(type *)((char *)__mptr - offsetof(type, member)); \
-})
-#endif /* container_of */
-
-#define to_int_node(p) container_of(p, struct int_node, node)
+#define to_int_node(p) rs_container_of(p, struct int_node, node)
 
 static int dll_test_equals(struct rs_node *a, const struct rs_node *b)
 {

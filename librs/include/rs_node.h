@@ -13,6 +13,8 @@
 
 #include <stddef.h>
 
+#include <rs_utils.h>
+
 /**
  * @struct rs_node
  * @brief Node of a doubly-linked list
@@ -55,7 +57,7 @@ typedef int (*rs_node_cb_t)(struct rs_node *node, void *data);
 #define RS_NODE_MATCH_MEMBER(type, member, node_member) \
 int match_##member(struct rs_node *__n, const void *__d) \
 { \
-	type *__o = container_of(__n, type, node_member); \
+	type *__o = rs_container_of(__n, type, node_member); \
 	if (NULL == __d) \
 		return 0; \
 	typeof(((type *)0)->member)*__v = (typeof(((type *)0)->member)*)__d; \
