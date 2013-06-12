@@ -61,7 +61,7 @@ static int notify_user(struct io_src_sep *sep, unsigned len)
 	sep->cb(sep, chunk, len);
 	sep->from += len;
 	if (sep->from >= IO_SRC_SEP_SIZE) {
-		memmove(sep->buf, buf_read_start(sep), to_read(sep));
+		memmove(sep->buf, buf_read_start(sep), already_read(sep));
 		sep->up_to -= sep->from;
 		sep->from = 0;
 	}
