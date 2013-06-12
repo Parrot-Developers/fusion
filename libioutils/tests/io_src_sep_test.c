@@ -16,6 +16,8 @@
 
 #include <CUnit/Basic.h>
 
+#include <rs_utils.h>
+
 #include <io_mon.h>
 #include <io_src_sep.h>
 
@@ -43,7 +45,7 @@ struct my_sep_src {
 	int pipefds[2];
 };
 
-#define to_my_src_sep(p) container_of(p, struct my_sep_src, src_sep)
+#define to_my_src_sep(p) rs_container_of(p, struct my_sep_src, src_sep)
 
 /**
  * Callback called when the source is removed

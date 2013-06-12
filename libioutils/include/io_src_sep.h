@@ -15,7 +15,9 @@
 
 #include <limits.h>
 
-#include "io_src.h"
+#include <rs_utils.h>
+
+#include <io_src.h>
 
 /**
  * @def IO_SRC_SEP_SIZE
@@ -85,7 +87,7 @@ struct io_src_sep {
  * @def to_src
  * @brief Convert a source to it's signal source container
  */
-#define to_src_sep(p) container_of(p, struct io_src_sep, src)
+#define to_src_sep(p) rs_container_of(p, struct io_src_sep, src)
 
 /**
  * Initializes a separator source

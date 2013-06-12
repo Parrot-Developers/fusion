@@ -10,6 +10,8 @@
 
 #include <CUnit/Basic.h>
 
+#include <rs_utils.h>
+
 #include <io_src_msg_uad.h>
 #include <io_mon.h>
 
@@ -41,7 +43,7 @@ struct my_uad_src {
 	struct io_src_msg_uad uad_src;
 };
 
-#define to_src_my_uad_src(p) container_of(p, struct my_uad_src, uad_src)
+#define to_src_my_uad_src(p) rs_container_of(p, struct my_uad_src, uad_src)
 
 static void reached_state(int s)
 {

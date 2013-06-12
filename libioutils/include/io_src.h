@@ -13,6 +13,7 @@
 
 #include <stddef.h>
 
+#include <rs_utils.h>
 #include <rs_node.h>
 
 /**
@@ -105,25 +106,10 @@ struct io_src {
 };
 
 /**
- * @def container_of
- * @brief Retrieves the address of a structure knowing the address of one of
- * it's members
- * @param ptr Member address
- * @param type Enclosing structure type
- * @param member Member name
- */
-#ifndef container_of
-#define container_of(ptr, type, member) ({ \
-	const typeof(((type *)0)->member)*__mptr##member = (ptr); \
-	(type *)((char *)__mptr##member - offsetof(type, member)); \
-})
-#endif
-
-/**
  * @def to_src
  * @brief Convert a list node to it's container interface
  */
-#define to_src(p) container_of(p, struct io_src, node)
+#define to_src(p) rs_container_of(p, struct io_src, node)
 
 /**
  * Initializes a source

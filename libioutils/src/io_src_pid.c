@@ -15,6 +15,8 @@
 
 #include <pidwatch.h>
 
+#include <rs_utils.h>
+
 #include "io_platform.h"
 #include "io_mon.h"
 #include "io_src_pid.h"
@@ -23,7 +25,7 @@
  * @def to_src
  * @brief Convert a source to it's pid source container
  */
-#define to_src_pid(p) container_of(p, struct io_src_pid, src)
+#define to_src_pid(p) rs_container_of(p, struct io_src_pid, src)
 
 /**
  * Source callback, reads the pidwatch event and notifies the client

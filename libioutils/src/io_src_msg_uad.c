@@ -19,6 +19,8 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#include <rs_utils.h>
+
 #include "io_platform.h"
 #include "io_mon.h"
 #include "io_src_msg_uad.h"
@@ -28,7 +30,7 @@
  * @def to_src_msg_uad
  * @brief Convert a source to it's message source container
  */
-#define to_src_msg_uad(p) container_of(p, struct io_src_msg_uad, src_msg)
+#define to_src_msg_uad(p) rs_container_of(p, struct io_src_msg_uad, src_msg)
 
 /**
  * Performs input

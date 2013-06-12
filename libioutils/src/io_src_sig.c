@@ -15,6 +15,8 @@
 #include <stdarg.h>
 #include <string.h>
 
+#include <rs_utils.h>
+
 #include "io_mon.h"
 #include "io_src_sig.h"
 #include "io_platform.h"
@@ -24,7 +26,7 @@
  * @def to_src
  * @brief Convert a source to it's signal source container
  */
-#define to_src_sig(p) container_of(p, struct io_src_sig, src)
+#define to_src_sig(p) rs_container_of(p, struct io_src_sig, src)
 
 /**
  * Source callback, reads the signal and notifies the client
