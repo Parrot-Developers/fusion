@@ -27,12 +27,12 @@ struct suite_t *libioutils_test_suites[] = {
 
 void libioutils_init_test_suites(void)
 {
-	mon_suite.active = 1;
-	src_msg_suite.active = 1;
-	src_msg_uad_suite.active = 1;
-	src_pid_suite.active = 1;
-	src_sep_suite.active = 1;
-	src_sig_suite.active = 1;
-	src_suite.active = 1;
-	src_tmr_suite.active = 1;
+	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(mon_suite);
+	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(src_msg_suite);
+	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(src_msg_uad_suite);
+	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(src_pid_suite);
+	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(src_sep_suite);
+	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(src_sig_suite);
+	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(src_suite);
+	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(src_tmr_suite);
 }
