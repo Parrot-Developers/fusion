@@ -52,6 +52,18 @@ ssize_t io_sendto(int sockfd, const void *buf, size_t len, int flags,
 pid_t io_waitpid(pid_t pid, int *status, int options);
 
 /**
+ * Wrapper around send, discarding EINTR errors
+ * @see send
+ */
+ssize_t io_send(int fd, const void *buf, size_t n, int flags);
+
+/**
+ * Wrapper around recv, discarding EINTR errors
+ * @see recv
+ */
+ssize_t io_recv(int fd, void *buf, size_t n, int flags);
+
+/**
  * Sets a file descriptor non-blocking
  * @param fd File descriptor
  * @return errno compatible negative value on error, 0 otherwise

@@ -53,6 +53,16 @@ pid_t io_waitpid(pid_t pid, int *status, int options)
 	return TEMP_FAILURE_RETRY(waitpid(pid, status, options));
 }
 
+ssize_t io_send(int fd, const void *buf, size_t n, int flags)
+{
+	return TEMP_FAILURE_RETRY(send(fd, buf, n, flags));
+}
+
+ssize_t io_recv(int fd, void *buf, size_t n, int flags)
+{
+	return TEMP_FAILURE_RETRY(recv(fd, buf, n, flags));
+}
+
 int io_set_non_blocking(int fd)
 {
 	int flags;
