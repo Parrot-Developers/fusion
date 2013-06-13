@@ -51,24 +51,24 @@ static const struct rs_dll_vtable dll_test_vtable = {
 static void testRS_DLL_INIT(void)
 {
 	struct rs_dll dll;
-	int f_ret = 0;
+	int ret = 0;
 
 	/* normal use cases */
-	f_ret = rs_dll_init(&dll, &dll_test_vtable);
-	CU_ASSERT_EQUAL(f_ret, 0);
+	ret = rs_dll_init(&dll, &dll_test_vtable);
+	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_EQUAL(dll.count, 0);
 	CU_ASSERT_EQUAL(dll.cur, NULL);
 	CU_ASSERT_EQUAL(dll.head, NULL);
 	CU_ASSERT_EQUAL(dll.vtable.equals, dll_test_equals);
 	CU_ASSERT_PTR_NOT_NULL(dll.vtable.print);
-	f_ret = rs_dll_init(&dll, NULL);
-	CU_ASSERT_EQUAL(f_ret, 0);
+	ret = rs_dll_init(&dll, NULL);
+	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_PTR_NOT_NULL(dll.vtable.equals);
 	CU_ASSERT_PTR_NOT_NULL(dll.vtable.print);
 
 	/* error use case */
-	f_ret = rs_dll_init(NULL, &dll_test_vtable);
-	CU_ASSERT_NOT_EQUAL(f_ret, 0);
+	ret = rs_dll_init(NULL, &dll_test_vtable);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
 }
 
 static void testRS_DLL_PUSH(void)
@@ -77,7 +77,7 @@ static void testRS_DLL_PUSH(void)
 	struct int_node int_node_b = {.val = 42,};
 	struct int_node int_node_c = {.val = 666,};
 	struct rs_dll dll;
-	int f_ret = 0;
+	int ret = 0;
 	int two_times_cb(struct rs_node *node, void *data)
 	{
 		struct int_node *in = to_int_node(node);
@@ -90,27 +90,27 @@ static void testRS_DLL_PUSH(void)
 		return 0;
 	};
 
-	f_ret = rs_dll_init(&dll, &dll_test_vtable);
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
+	ret = rs_dll_init(&dll, &dll_test_vtable);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
 
 	/* normal use cases */
-	f_ret = rs_dll_push(&dll, &(int_node_a.node));
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
-	f_ret = rs_dll_push(&dll, &(int_node_b.node));
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
-	f_ret = rs_dll_push(&dll, &(int_node_c.node));
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
-	f_ret = rs_dll_foreach(&dll, two_times_cb, (void *)0xdeadbeef);
-	CU_ASSERT_EQUAL(f_ret, 0);
+	ret = rs_dll_push(&dll, &(int_node_a.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = rs_dll_push(&dll, &(int_node_b.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = rs_dll_push(&dll, &(int_node_c.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = rs_dll_foreach(&dll, two_times_cb, (void *)0xdeadbeef);
+	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_EQUAL(int_node_a.val, 34);
 	CU_ASSERT_EQUAL(int_node_b.val, 84);
 	CU_ASSERT_EQUAL(int_node_c.val, 1332);
 
 	/* error use case */
-	f_ret = rs_dll_push(NULL, &(int_node_a.node));
-	CU_ASSERT_NOT_EQUAL(f_ret, 0);
-	f_ret = rs_dll_push(&dll, NULL);
-	CU_ASSERT_NOT_EQUAL(f_ret, 0);
+	ret = rs_dll_push(NULL, &(int_node_a.node));
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+	ret = rs_dll_push(&dll, NULL);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
 }
 
 #define DUMP_DLL(d) do { \
@@ -185,10 +185,10 @@ static void testRS_DLL_GET_COUNT(void)
 	struct int_node int_node_c = {.val = 666,};
 	unsigned count;
 	struct rs_dll dll;
-	int f_ret = 0;
+	int ret = 0;
 
-	f_ret = rs_dll_init(&dll, &dll_test_vtable);
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
+	ret = rs_dll_init(&dll, &dll_test_vtable);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
 
 	/* normal use cases */
 	count = rs_dll_get_count(&dll);
@@ -217,10 +217,10 @@ static void testRS_DLL_IS_EMPTY(void)
 	struct int_node int_node_b = {.val = 42,};
 	int result;
 	struct rs_dll dll;
-	int f_ret = 0;
+	int ret = 0;
 
-	f_ret = rs_dll_init(&dll, &dll_test_vtable);
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
+	ret = rs_dll_init(&dll, &dll_test_vtable);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
 
 	/* normal use cases */
 	result = rs_dll_is_empty(&dll);
@@ -252,17 +252,17 @@ static void testRS_DLL_FIND(void)
 	struct int_node int_needle;
 	struct rs_node *node;
 	struct rs_dll dll;
-	int f_ret = 0;
+	int ret = 0;
 
-	f_ret = rs_dll_init(&dll, &dll_test_vtable);
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
+	ret = rs_dll_init(&dll, &dll_test_vtable);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
 
-	f_ret = rs_dll_push(&dll, &(int_node_a.node));
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
-	f_ret = rs_dll_push(&dll, &(int_node_b.node));
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
-	f_ret = rs_dll_push(&dll, &(int_node_c.node));
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
+	ret = rs_dll_push(&dll, &(int_node_a.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = rs_dll_push(&dll, &(int_node_b.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = rs_dll_push(&dll, &(int_node_c.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
 
 	/* normal use cases */
 	int_needle.val = 42;
@@ -299,17 +299,17 @@ static void testRS_DLL_FIND_MATCH(void)
 	}
 	struct rs_node *node;
 	struct rs_dll dll;
-	int f_ret = 0;
+	int ret = 0;
 
-	f_ret = rs_dll_init(&dll, &dll_test_vtable);
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
+	ret = rs_dll_init(&dll, &dll_test_vtable);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
 
-	f_ret = rs_dll_push(&dll, &(int_node_a.node));
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
-	f_ret = rs_dll_push(&dll, &(int_node_b.node));
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
-	f_ret = rs_dll_push(&dll, &(int_node_c.node));
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
+	ret = rs_dll_push(&dll, &(int_node_a.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = rs_dll_push(&dll, &(int_node_b.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = rs_dll_push(&dll, &(int_node_c.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
 
 	/* normal use cases */
 	node = rs_dll_find_match(&dll, match_cb, (void *)42);
@@ -335,17 +335,17 @@ static void testRS_DLL_POP(void)
 	struct int_node int_node_c = {.val = 666,};
 	struct rs_node *node;
 	struct rs_dll dll;
-	int f_ret = 0;
+	int ret = 0;
 
-	f_ret = rs_dll_init(&dll, &dll_test_vtable);
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
+	ret = rs_dll_init(&dll, &dll_test_vtable);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
 
-	f_ret = rs_dll_push(&dll, &(int_node_a.node));
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
-	f_ret = rs_dll_push(&dll, &(int_node_b.node));
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
-	f_ret = rs_dll_push(&dll, &(int_node_c.node));
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
+	ret = rs_dll_push(&dll, &(int_node_a.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = rs_dll_push(&dll, &(int_node_b.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = rs_dll_push(&dll, &(int_node_c.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
 
 	CU_ASSERT_PTR_EQUAL(dll.tail, &(int_node_a.node));
 	CU_ASSERT_PTR_EQUAL(dll.tail->prev, &(int_node_b.node));
@@ -376,17 +376,17 @@ static void testRS_DLL_NEXT(void)
 	struct int_node int_node_c = {.val = 666,};
 	struct rs_node *node;
 	struct rs_dll dll;
-	int f_ret = 0;
+	int ret = 0;
 
-	f_ret = rs_dll_init(&dll, &dll_test_vtable);
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
+	ret = rs_dll_init(&dll, &dll_test_vtable);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
 
-	f_ret = rs_dll_push(&dll, &(int_node_a.node));
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
-	f_ret = rs_dll_push(&dll, &(int_node_b.node));
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
-	f_ret = rs_dll_push(&dll, &(int_node_c.node));
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
+	ret = rs_dll_push(&dll, &(int_node_a.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = rs_dll_push(&dll, &(int_node_b.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = rs_dll_push(&dll, &(int_node_c.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
 
 	/* normal use cases */
 	node = rs_dll_next(&dll);
@@ -464,17 +464,17 @@ static void testRS_DLL_REMOVE(void)
 	struct int_node int_node_needle = {.val = 42,};
 	struct rs_node *node;
 	struct rs_dll dll;
-	int f_ret = 0;
+	int ret = 0;
 
-	f_ret = rs_dll_init(&dll, &dll_test_vtable);
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
+	ret = rs_dll_init(&dll, &dll_test_vtable);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
 
-	f_ret = rs_dll_push(&dll, &(int_node_a.node));
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
-	f_ret = rs_dll_push(&dll, &(int_node_b.node));
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
-	f_ret = rs_dll_push(&dll, &(int_node_c.node));
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
+	ret = rs_dll_push(&dll, &(int_node_a.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = rs_dll_push(&dll, &(int_node_b.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = rs_dll_push(&dll, &(int_node_c.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
 
 	/* normal use cases */
 	node = rs_dll_remove(&dll, &(int_node_needle.node));
@@ -515,7 +515,7 @@ static void testRS_DLL_REMOVE_MATCH(void)
 	struct rs_node *node;
 	int odd;
 	struct rs_dll dll;
-	int f_ret = 0;
+	int ret = 0;
 	int parity_cb(struct rs_node *n, const void *data)
 	{
 		int my_odd = *((int *)data);
@@ -527,15 +527,15 @@ static void testRS_DLL_REMOVE_MATCH(void)
 			return !(int_node->val % 2);
 	};
 
-	f_ret = rs_dll_init(&dll, &dll_test_vtable);
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
+	ret = rs_dll_init(&dll, &dll_test_vtable);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
 
-	f_ret = rs_dll_push(&dll, &(int_node_a.node));
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
-	f_ret = rs_dll_push(&dll, &(int_node_b.node));
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
-	f_ret = rs_dll_push(&dll, &(int_node_c.node));
-	CU_ASSERT_EQUAL_FATAL(f_ret, 0);
+	ret = rs_dll_push(&dll, &(int_node_a.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = rs_dll_push(&dll, &(int_node_b.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = rs_dll_push(&dll, &(int_node_c.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
 
 	/* normal use cases */
 	/* remove the first even node */
@@ -560,7 +560,7 @@ static void testRS_DLL_REMOVE_MATCH(void)
 static void testRS_DLL_FOREACH(void)
 {
 	struct rs_dll dll;
-	int f_ret = 0;
+	int ret = 0;
 	int cb(struct rs_node __attribute__((unused))*node,
 			void __attribute__((unused))*data)
 	{
@@ -571,10 +571,10 @@ static void testRS_DLL_FOREACH(void)
 	/* normal use case is tested in testRS_DLL_PUSH */
 
 	/* error use cases */
-	f_ret = rs_dll_foreach(NULL, cb, (void *)0xB16B00B5);
-	CU_ASSERT_NOT_EQUAL(f_ret, 0);
-	f_ret = rs_dll_foreach(&dll, NULL, (void *)0xB16B00B5);
-	CU_ASSERT_NOT_EQUAL(f_ret, 0);
+	ret = rs_dll_foreach(NULL, cb, (void *)0xB16B00B5);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+	ret = rs_dll_foreach(&dll, NULL, (void *)0xB16B00B5);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
 }
 
 static const struct test_t tests[] = {

@@ -44,7 +44,7 @@ struct rs_dll {
  * Initializes the doubly linked list
  * @param dll Doubly linked list to initialize
  * @param vtable User defined operations on list nodes. Can be NULL as well as
- * any of it's members
+ * @return Negative errno compatible value on error otherwise zero
  * @return RS_ERROR_PARAM
  */
 int rs_dll_init(struct rs_dll *dll, const struct rs_dll_vtable *vtable);
@@ -59,7 +59,7 @@ void rs_dll_dump(struct rs_dll *dll);
  * Adds an element to the list in first position
  * @param dll Doubly linked list
  * @param node Node to push
- * @return RS_ERROR_PARAM
+ * @return Negative errno compatible value on error otherwise zero
  */
 int rs_dll_push(struct rs_dll *dll, struct rs_node *node);
 
@@ -67,7 +67,7 @@ int rs_dll_push(struct rs_dll *dll, struct rs_node *node);
  * Adds an element to the list in last position
  * @param dll Doubly linked list
  * @param node Node to enqueue
- * @return RS_ERROR_PARAM
+ * @return Negative errno compatible value on error otherwise zero
  */
 int rs_dll_enqueue(struct rs_dll *dll, struct rs_node *node);
 
@@ -151,8 +151,7 @@ struct rs_node *rs_dll_remove_match(struct rs_dll *dll,
  * @param dll Doubly linked list
  * @param cb Callback to apply
  * @param data User data, passe to each callback's call
- * @return RS_ERROR_PARAM if cb is NULL, or the first cb's error code which
- * isn't RS_ERROR_NONE
+ * @return Negative errno compatible value on error otherwise zero
  */
 int rs_dll_foreach(struct rs_dll *dll, rs_node_cb_t cb, void *data);
 
