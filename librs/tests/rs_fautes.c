@@ -17,6 +17,7 @@ struct suite_t *librs_test_suites[] = {
 		&hmap_suite,
 		&node_suite,
 		&rb_suite,
+		&utils_suite,
 		NULL, /* NULL guard */
 };
 
@@ -28,4 +29,5 @@ void librs_init_test_suites(void)
 	hmap_suite.active = default_active_state;
 	node_suite.active = default_active_state;
 	rb_suite.active = default_active_state;
+	utils_suite.active = default_active_state;
 }

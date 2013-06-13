@@ -14,6 +14,7 @@ extern struct suite_t dll_suite;
 extern struct suite_t hmap_suite;
 extern struct suite_t node_suite;
 extern struct suite_t rb_suite;
+extern struct suite_t utils_suite;
 
 void librs_init_test_suites(void);
 
