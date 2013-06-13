@@ -20,5 +20,5 @@ struct suite_t *libpidwatch_test_suites[] = {
 
 void libpidwatch_init_test_suites(void)
 {
-	pidwatch_suite.active = 1;
+	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(pidwatch_suite);
 }
