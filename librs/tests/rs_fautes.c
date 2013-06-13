@@ -23,11 +23,9 @@ struct suite_t *librs_test_suites[] = {
 
 void librs_init_test_suites(void)
 {
-	int default_active_state = 1;
-
-	dll_suite.active = default_active_state;
-	hmap_suite.active = default_active_state;
-	node_suite.active = default_active_state;
-	rb_suite.active = default_active_state;
-	utils_suite.active = default_active_state;
+	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(dll_suite);
+	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(hmap_suite);
+	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(node_suite);
+	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(rb_suite);
+	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(utils_suite);
 }
