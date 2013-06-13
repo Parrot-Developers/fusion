@@ -18,6 +18,7 @@ extern struct suite_t src_sep_suite;
 extern struct suite_t src_sig_suite;
 extern struct suite_t src_suite;
 extern struct suite_t src_tmr_suite;
+extern struct suite_t utils_suite;
 
 void libioutils_init_test_suites(void);
 

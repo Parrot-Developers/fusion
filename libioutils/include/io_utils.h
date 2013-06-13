@@ -51,4 +51,12 @@ ssize_t io_sendto(int sockfd, const void *buf, size_t len, int flags,
  */
 pid_t io_waitpid(pid_t pid, int *status, int options);
 
+/**
+ * Sets a file descriptor non-blocking
+ * @param fd File descriptor
+ * @return errno compatible negative value on error, 0 otherwise
+ * @see fcntl
+ */
+int io_set_non_blocking(int fd);
+
 #endif /* IO_UTILS_H_ */

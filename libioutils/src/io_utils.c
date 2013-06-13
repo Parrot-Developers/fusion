@@ -52,3 +52,23 @@ pid_t io_waitpid(pid_t pid, int *status, int options)
 {
 	return TEMP_FAILURE_RETRY(waitpid(pid, status, options));
 }
+
+int io_set_non_blocking(int fd)
+{
+	int flags;
+	int ret;
+
+	if (0 > fd)
+		return -EINVAL;
+
+	flags = fcntl(fd, F_GETFL, 0);
+	if (-1 == flags)
+		flags = 0;
+	if (!(flags & O_NONBLOCK)) {
+		ret = fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+		if (0 != ret)
+			return -errno;
+	}
+
+	return 0;
+}

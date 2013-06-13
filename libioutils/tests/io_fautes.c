@@ -21,6 +21,7 @@ struct suite_t *libioutils_test_suites[] = {
 		&src_sig_suite,
 		&src_suite,
 		&src_tmr_suite,
+		&utils_suite,
 
 		NULL, /* NULL guard */
 };
@@ -35,4 +36,5 @@ void libioutils_init_test_suites(void)
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(src_sig_suite);
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(src_suite);
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(src_tmr_suite);
+	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(utils_suite);
 }
