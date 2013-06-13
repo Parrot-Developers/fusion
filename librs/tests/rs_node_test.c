@@ -18,8 +18,13 @@
 #include <fautes_utils.h>
 
 struct int_node {
-	int val;
 	struct rs_node node;
+	int val;
+};
+
+struct str_node {
+	struct rs_node node;
+	char *val;
 };
 
 #define to_int_node(p) rs_container_of(p, struct int_node, node)
@@ -34,6 +39,16 @@ static int int_node_test_equals(struct rs_node *node_a, void *int_node_b)
 	return 0 == (int_node_a->val - ((struct int_node *)int_node_b)->val);
 }
 
+/*
+ * defines match_str_val function, waits for a pointer to the comparison data
+ * as the second argument
+ */
+static RS_NODE_MATCH_STR_MEMBER(struct str_node, val, node)
+
+/*
+ * defines match_val function, beware ! waits for a char * as the second
+ * argument
+ */
 static RS_NODE_MATCH_MEMBER(struct int_node, val, node)
 
 static void testRS_NODE_HEAD(void)
@@ -314,6 +329,43 @@ static void testRS_NODE_FIND_MATCH(void)
 	/* error cases : none */
 }
 
+static void testRS_NODE_FIND_MATCH_str(void)
+{
+	struct str_node str_node_a = {.val = "17",};
+	struct str_node str_node_b = {.val = "42",};
+	struct str_node str_node_c = {.val = "666",};
+	char *val;
+	struct rs_node *haystack = NULL;
+	struct rs_node *needle = NULL;
+
+	rs_node_push(&haystack, &(str_node_a.node));
+	rs_node_push(&haystack, &(str_node_b.node));
+	rs_node_push(&haystack, &(str_node_c.node));
+
+	/* normal use cases */
+	val = "17";
+	needle = rs_node_find_match(NULL, match_str_val, &val);
+	CU_ASSERT_PTR_NULL(needle);
+
+	val = "17";
+	needle = rs_node_find_match(haystack, match_str_val, val);
+	CU_ASSERT_PTR_EQUAL(needle, &str_node_a.node);
+	val = "42";
+	needle = rs_node_find_match(haystack, match_str_val, val);
+	CU_ASSERT_PTR_EQUAL(needle, &str_node_b.node);
+	val = "666";
+	needle = rs_node_find_match(haystack, match_str_val, val);
+	CU_ASSERT_PTR_EQUAL(needle, &str_node_c.node);
+
+	needle = rs_node_find_match(haystack, match_str_val, val);
+	CU_ASSERT_PTR_EQUAL(needle, &str_node_c.node);
+
+	needle = rs_node_find_match(haystack, match_str_val, NULL);
+	CU_ASSERT_PTR_NULL(needle);
+
+	/* error cases : none */
+}
+
 static void testRS_NODE_REMOVE(void)
 {
 	struct int_node int_node_a = {.val = 17,};
@@ -454,6 +506,10 @@ static const struct test_t tests[] = {
 		{
 				.fn = testRS_NODE_FIND_MATCH,
 				.name = "rs_node_find_match"
+		},
+		{
+				.fn = testRS_NODE_FIND_MATCH_str,
+				.name = "rs_node_find_match str"
 		},
 		{
 				.fn = testRS_NODE_REMOVE,
