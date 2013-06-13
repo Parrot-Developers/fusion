@@ -405,6 +405,57 @@ static void testRS_DLL_NEXT(void)
 	CU_ASSERT_PTR_NULL(node);
 }
 
+static void testRS_DLL_REWIND(void)
+{
+	struct int_node int_node_a = {.val = 17,};
+	struct int_node int_node_b = {.val = 42,};
+	struct int_node int_node_c = {.val = 666,};
+	struct rs_node *node;
+	struct rs_dll dll;
+	int ret = 0;
+
+	ret = rs_dll_init(&dll, &dll_test_vtable);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+
+	ret = rs_dll_push(&dll, &(int_node_a.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = rs_dll_push(&dll, &(int_node_b.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = rs_dll_push(&dll, &(int_node_c.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+
+	/* normal use cases */
+	ret = rs_dll_rewind(&dll);
+	CU_ASSERT_EQUAL(ret, 0);
+	node = rs_dll_next(&dll);
+	CU_ASSERT_EQUAL(to_int_node(node)->val, 666);
+
+	ret = rs_dll_rewind(&dll);
+	CU_ASSERT_EQUAL(ret, 0);
+	node = rs_dll_next(&dll);
+	CU_ASSERT_EQUAL(to_int_node(node)->val, 666);
+	node = rs_dll_next(&dll);
+	CU_ASSERT_EQUAL(to_int_node(node)->val, 42);
+
+	ret = rs_dll_rewind(&dll);
+	CU_ASSERT_EQUAL(ret, 0);
+	node = rs_dll_next(&dll);
+	CU_ASSERT_EQUAL(to_int_node(node)->val, 666);
+	node = rs_dll_next(&dll);
+	CU_ASSERT_EQUAL(to_int_node(node)->val, 42);
+	node = rs_dll_next(&dll);
+	CU_ASSERT_EQUAL(to_int_node(node)->val, 17);
+
+	ret = rs_dll_rewind(&dll);
+	CU_ASSERT_EQUAL(ret, 0);
+	node = rs_dll_next(&dll);
+	CU_ASSERT_EQUAL(to_int_node(node)->val, 666);
+
+	/* error use case */
+	ret = rs_dll_rewind(NULL);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+}
+
 static void testRS_DLL_REMOVE(void)
 {
 	struct int_node int_node_a = {.val = 17,};
@@ -562,6 +613,10 @@ static const struct test_t tests[] = {
 		{
 				.fn = testRS_DLL_NEXT,
 				.name = "rs_dll_next"
+		},
+		{
+				.fn = testRS_DLL_REWIND,
+				.name = "rs_dll_rewind"
 		},
 		{
 				.fn = testRS_DLL_REMOVE,

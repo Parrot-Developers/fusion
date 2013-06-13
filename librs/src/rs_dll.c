@@ -172,6 +172,16 @@ struct rs_node *rs_dll_next(struct rs_dll *dll)
 	return next;
 }
 
+int rs_dll_rewind(struct rs_dll *dll)
+{
+	if (NULL == dll)
+		return -EINVAL;
+
+	dll->cur = dll->head;
+
+	return 0;
+}
+
 struct rs_node *rs_dll_remove_match(struct rs_dll *dll,
 		rs_node_match_cb_t match, void *data)
 {

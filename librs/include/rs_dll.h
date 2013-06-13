@@ -120,6 +120,14 @@ struct rs_node *rs_dll_pop(struct rs_dll *dll);
 struct rs_node *rs_dll_next(struct rs_dll *dll);
 
 /**
+ * Rewinds the doubly linked list, so that the next call to rs_dll_next will
+ * return it's first element
+ * @param dll Doubly linked list
+ * @return Negative errno compatible value on error otherwise zero
+ */
+int rs_dll_rewind(struct rs_dll *dll);
+
+/**
  * Unchains and returns a given element of the list
  * @param dll Doubly linked list
  * @param node Node to find, matched against list's internal nodes using
