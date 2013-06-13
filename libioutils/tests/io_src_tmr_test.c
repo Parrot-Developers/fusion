@@ -105,7 +105,7 @@ static void testIO_SRC_TMR_SET(void)
 
 	CU_ASSERT_FALSE(expired);
 
-out :
+out:
 	/* cleanup */
 	io_mon_clean(&mon);
 	io_src_tmr_clean(&tmr);

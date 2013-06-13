@@ -105,7 +105,7 @@ void io_src_tmr_clean(struct io_src_tmr *tmr)
 
 	tmr->cb = NULL;
 
-	io_src_clean(&(tmr->src));;
+	io_src_clean(&(tmr->src));
 }
 
 int io_src_tmr_set(struct io_src_tmr *tmr, int timeout)

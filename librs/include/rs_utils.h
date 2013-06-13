@@ -21,8 +21,8 @@
  */
 #ifndef rs_container_of
 #define rs_container_of(ptr, type, member) ({ \
-	const typeof( ((type *)0)->member ) *__mptr = (ptr); \
-	(type *)( (char *)__mptr - offsetof(type,member) );})
+	const typeof(((type *)0)->member)*__mptr = (ptr); \
+	(type *)((char *)__mptr - offsetof(type, member)); })
 #endif /* rs_container_of */
 
 /**

@@ -142,7 +142,7 @@ struct rs_node *rs_dll_find(struct rs_dll *dll, struct rs_node *node)
 
 struct rs_node *rs_dll_pop(struct rs_dll *dll)
 {
-	struct rs_node * ret;
+	struct rs_node *ret;
 
 	if (NULL == dll)
 		return NULL;

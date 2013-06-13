@@ -51,7 +51,7 @@ struct suite_t {
 	char *__sas = getenv("FAUTES_SUITE_ACTIVE_STATE_" #suite); \
 	int __default_active_state; \
 	int __active_state; \
- \
+\
 	if (NULL == __das) \
 		__default_active_state = 1; \
 	else \
