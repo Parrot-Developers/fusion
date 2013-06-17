@@ -20,7 +20,12 @@
  */
 struct io_mon {
 	/** sources list for I/O operations */
-	struct rs_node *source;
+	/*
+	 * note the first node can't be a real source in order to guarantee that
+	 * removing directly a node from the monitor, won't let the head broken.
+	 * So the first valid source is source.next (if not NULL)
+	 */
+	struct rs_node source;
 	/** file descriptor for monitoring all the sources */
 	int epollfd;
 	/** number of sources currently registered */

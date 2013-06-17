@@ -31,7 +31,7 @@ static void testMON_INIT(void)
 	ret = io_mon_init(&mon);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_NOT_EQUAL(mon.epollfd, -1);
-	CU_ASSERT_EQUAL(mon.source, NULL);
+	CU_ASSERT_EQUAL(mon.source.next, NULL);
 
 	/* cleanup */
 	io_mon_clean(&mon);
@@ -469,7 +469,7 @@ static void testMON_CLEAN(void)
 	ret = io_mon_clean(&mon);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_EQUAL(mon.epollfd, -1);
-	CU_ASSERT_EQUAL(mon.source, NULL);
+	CU_ASSERT_EQUAL(mon.source.next, NULL);
 
 	/* cleanup */
 	io_mon_clean(&mon);

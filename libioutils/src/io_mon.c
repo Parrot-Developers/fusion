@@ -45,9 +45,10 @@ static int add_source(struct io_mon *mon, struct io_src *src)
 		return ret;
 
 	/* sources can't be present twice */
-	if (rs_node_find(&(src->node), mon->source))
+	if (rs_node_find(&(src->node), mon->source.next))
 		return -EEXIST;
-	rs_node_push(&(mon->source), &(src->node));
+	rs_node_push(&(mon->source.next), &(src->node));
+	src->node.prev = &mon->source;
 
 	return 0;
 }
@@ -118,7 +119,7 @@ static struct io_src *find_source_by_fd(struct io_mon *mon, int fd)
 	if (NULL == mon || -1 == fd)
 		return NULL;
 
-	needle = rs_node_find_match(mon->source, match_fd, &fd);
+	needle = rs_node_find_match(mon->source.next, match_fd, &fd);
 	if (NULL == needle)
 		return NULL;
 
@@ -135,14 +136,9 @@ static int remove_source(struct io_mon *mon, struct io_src *src)
 {
 	int ret;
 	struct io_src *old_src;
-	struct rs_node *old_mon_src;
 	struct rs_node *node;
 
-	old_mon_src = mon->source;
-	if (&(src->node) == mon->source)
-		mon->source = rs_node_next(mon->source);
-
-	node = rs_node_remove(old_mon_src, &(src->node));
+	node = rs_node_remove(&mon->source, &(src->node));
 	if (NULL == node)
 		return -EINVAL;
 
@@ -380,8 +376,8 @@ int io_mon_clean(struct io_mon *mon)
 	if (NULL == mon)
 		return -EINVAL;
 
-	while (mon->source) {
-		src = to_src(mon->source);
+	while (mon->source.next) {
+		src = to_src(mon->source.next);
 		remove_source(mon, src);
 	}
 
