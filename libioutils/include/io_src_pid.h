@@ -13,6 +13,8 @@
 /**
  * @def IO_SRC_PID_DISABLE
  * @brief Value to disable a pid source temporarily, with io_src_pid_set_pid()
+ * This value equals to init's pid, because this process is unlikely to generate
+ * death of process event...
  */
 #define IO_SRC_PID_DISABLE 1
 
