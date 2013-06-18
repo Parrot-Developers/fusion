@@ -71,4 +71,12 @@ ssize_t io_recv(int fd, void *buf, size_t n, int flags);
  */
 int io_set_non_blocking(int fd);
 
+/**
+ * Close a file descriptor and sets it to -1.
+ * @param fd pointer to the file descriptor to close
+ * @return 0 on success, -1 on error with errno set. On error, fd is left
+ * untouched
+ */
+int io_close(int *fd);
+
 #endif /* IO_UTILS_H_ */

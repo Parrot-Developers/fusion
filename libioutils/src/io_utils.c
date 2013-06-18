@@ -82,3 +82,21 @@ int io_set_non_blocking(int fd)
 
 	return 0;
 }
+
+int io_close(int *fd)
+{
+	int ret;
+
+	if (NULL == fd || -1 == *fd) {
+		errno = EBADF;
+		return -1;
+	}
+
+	ret = close(*fd);
+	if (-1 == ret)
+		return ret;
+
+	*fd = -1;
+
+	return 0;
+}
