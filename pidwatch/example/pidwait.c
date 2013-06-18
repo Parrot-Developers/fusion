@@ -37,7 +37,6 @@ static void dump_args(int argc, char *argv[])
 static pid_t launch(int argc, char *argv[])
 {
 	int ret;
-	char *child_envp[] = {NULL};
 	pid_t pid;
 
 	pid = fork();
@@ -46,9 +45,9 @@ static pid_t launch(int argc, char *argv[])
 
 	if (0 == pid) {
 		/* in child */
-		ret = execvpe(argv[0], argv, child_envp);
+		ret = execvp(argv[0], argv);
 		if (-1 == ret) {
-			perror("execve");
+			perror("execvp");
 			exit(1);
 		}
 	}
