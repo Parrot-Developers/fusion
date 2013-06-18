@@ -8,6 +8,7 @@
 #endif /* PIDWATCH_HAS_CAPABILITY_SUPPORT */
 
 #include <unistd.h>
+#include <fcntl.h>
 
 #include <assert.h>
 #include <stdlib.h>
@@ -16,6 +17,15 @@
 #include <errno.h>
 
 #include <pidwatch.h>
+
+/* for socket */
+#ifndef SOCK_CLOEXEC
+/**
+ * @def SOCK_CLOEXEC
+ * @brief Set the flag O_CLOEXEC at socket's creation
+ */
+#define SOCK_CLOEXEC O_CLOEXEC
+#endif
 
 static void dump_args(int argc, char *argv[])
 {
