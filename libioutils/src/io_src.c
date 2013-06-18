@@ -14,6 +14,7 @@
 #include <string.h>
 
 #include <io_src.h>
+#include <io_utils.h>
 
 /**
  * Checks if the arguments of io_src_init are valid
@@ -66,6 +67,20 @@ int io_src_is_active(struct io_src *src, enum io_src_event event_set)
 		return 0;
 
 	return (event_set & src->active) == event_set;
+}
+
+int io_src_close_fd(struct io_src *src)
+{
+	int ret;
+
+	if (NULL == src || -1 == src->fd)
+		return -EINVAL;
+
+	ret = io_close(&src->fd);
+	if (-1 == ret)
+		return -errno;
+
+	return 0;
 }
 
 void io_src_clean(struct io_src *src)

@@ -142,9 +142,17 @@ static inline int io_src_get_fd(struct io_src *src)
 }
 
 /**
+ * Closes the source's underlying file descriptor.
+ * @param src Source to close the file descriptor of
+ * @return Negative errno-compatible value on error otherwise zero
+ */
+int io_src_close_fd(struct io_src *src);
+
+/**
  * Reinitializes the source for further use. If it was chained to other nodes,
  * the source is unchained. It is the responsibility of the client to close the
- * file descriptor.
+ * file descriptor, by either calling io_src_close_fd() prior to calling
+ * io_src_clean() or by directly closing the file descriptor.
  * @param src Source to initialize. Can't be NULL
  */
 void io_src_clean(struct io_src *src);
