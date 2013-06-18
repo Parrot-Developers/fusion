@@ -89,6 +89,12 @@
 #endif
 
 /**
+ * Wrapper around dup3, defining it on toolchains where it is missing
+ * @see dup3
+ */
+int io_dup3(int oldfd, int newfd, int flags);
+
+/**
  * Wrapper around epoll_create1, defining it on toolchains where it is missing
  * @see epoll_create1
  * @param flags can be EPOLL_CLOEXEC

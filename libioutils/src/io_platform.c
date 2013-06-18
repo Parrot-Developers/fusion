@@ -26,6 +26,15 @@ int io_epoll_create1(int flags)
 #endif
 }
 
+int io_dup3(int oldfd, int newfd, int flags)
+{
+#ifdef __arm__
+	return syscall(358, oldfd, newfd, flags);
+#else
+	return io_dup3(oldfd, newfd, flags);
+#endif
+}
+
 int io_signalfd(int fd, const sigset_t *mask, int flags)
 {
 	int ret;
