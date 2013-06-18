@@ -263,7 +263,7 @@ static void testSRC_PID_GET_SOURCE(void)
 	CU_ASSERT_EQUAL(src, &(pid_src.src));
 
 	/* cleanup */
-	io_src_clean(src);
+	io_src_pid_clean(&pid_src);
 
 	/* error use cases */
 	src = io_src_pid_get_source(NULL);

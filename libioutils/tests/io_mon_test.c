@@ -14,6 +14,7 @@
 #include <CUnit/Basic.h>
 
 #include <io_mon.h>
+#include <io_utils.h>
 
 #include <fautes.h>
 #include <fautes_utils.h>
@@ -120,9 +121,9 @@ static void testMON_ADD_SOURCE(void)
 
 	/* cleanup */
 	io_mon_clean(&mon);
-	close(pipefd[0]);
-	close(pipefd[1]);
-	close(fd);
+	io_close(&pipefd[0]);
+	io_close(&pipefd[1]);
+	io_close(&fd);
 }
 
 static void testMON_ADD_SOURCES(void)
@@ -175,9 +176,9 @@ static void testMON_ADD_SOURCES(void)
 
 	/* cleanup */
 	io_mon_clean(&mon);
-	close(pipefd[0]);
-	close(pipefd[1]);
-	close(fd);
+	io_close(&pipefd[0]);
+	io_close(&pipefd[1]);
+	io_close(&fd);
 }
 
 static void testMON_DUMP_EPOLL_EVENT(void)
@@ -262,9 +263,9 @@ static void testMON_ACTIVATE_OUT_SOURCE(void)
 
 	/* cleanup */
 	io_mon_clean(&mon);
-	close(pipefd[0]);
-	close(pipefd[1]);
-	close(fd);
+	io_close(&pipefd[0]);
+	io_close(&pipefd[1]);
+	io_close(&fd);
 }
 
 static void testMON_ACTIVATE_IN_SOURCE(void)
@@ -325,9 +326,9 @@ static void testMON_ACTIVATE_IN_SOURCE(void)
 
 	/* cleanup */
 	io_mon_clean(&mon);
-	close(pipefd[0]);
-	close(pipefd[1]);
-	close(fd);
+	io_close(&pipefd[0]);
+	io_close(&pipefd[1]);
+	io_close(&fd);
 }
 
 static void reached_state(int *glob_state, int state)
@@ -377,7 +378,8 @@ static void testMON_PROCESS_EVENTS(void)
 			CU_ASSERT(0 == (state & STATE_MSG2_RECEIVED));
 			reached_state(&state, STATE_MSG2_RECEIVED);
 			/* generates an input/output error */
-			close(pipefd[0]);
+			io_close(&pipefd[0]);
+			io_close(&pipefd[1]);
 		}
 
 		return;

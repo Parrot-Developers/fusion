@@ -12,6 +12,7 @@
 #include <CUnit/Basic.h>
 
 #include <io_src.h>
+#include <io_utils.h>
 
 #include <fautes.h>
 
@@ -94,16 +95,16 @@ static void testSRC_INIT(void)
 	ret = io_src_init(&src, pipefd[0], 0, my_dummy_cb);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 
-	close(fd);
+	io_close(&fd);
 	fd = open("/tmp/toto", O_RDWR | O_CREAT);
 	CU_ASSERT_NOT_EQUAL(fd, -1);
 	ret = io_src_init(&src, fd, IO_IN, my_dummy_cb);
 	CU_ASSERT_EQUAL(ret, -EBADF);
 
 	/* cleanup */
-	close(pipefd[0]);
-	close(pipefd[1]);
-	close(fd);
+	io_close(&pipefd[0]);
+	io_close(&pipefd[1]);
+	io_close(&fd);
 	unlink("/tmp/toto");
 }
 
@@ -137,7 +138,8 @@ static void testSRC_IS_ACTIVE(void)
 	CU_ASSERT(!io_src_is_active(NULL, IO_IN));
 
 	io_src_clean(&src);
-	close(pipefd[1]);
+	io_close(&pipefd[0]);
+	io_close(&pipefd[1]);
 }
 
 void testSRC_GET_FD(void)
@@ -161,7 +163,8 @@ void testSRC_GET_FD(void)
 	CU_ASSERT_EQUAL(ret, -1);
 
 	io_src_clean(&src);
-	close(pipefd[1]);
+	io_close(&pipefd[0]);
+	io_close(&pipefd[1]);
 }
 
 static const struct test_t tests[] = {

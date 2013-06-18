@@ -20,6 +20,7 @@
 
 #include <io_mon.h>
 #include <io_src_sep.h>
+#include <io_utils.h>
 
 #include <fautes.h>
 #include <fautes_utils.h>
@@ -56,8 +57,8 @@ static void my_sep_clean(struct my_sep_src *my_sep)
 	if (NULL == my_sep)
 		return;
 
-	close(my_sep->pipefds[0]);
-	close(my_sep->pipefds[1]);
+	io_close(&my_sep->pipefds[0]);
+	io_close(&my_sep->pipefds[1]);
 
 	io_src_sep_clean(&(my_sep->src_sep));
 }
@@ -207,8 +208,9 @@ static void testSRC_SEP_GET_SOURCE(void)
 	CU_ASSERT_EQUAL(src, &(sep_src.src));
 
 	/* cleanup */
-	io_src_clean(src);
-	close(pipefd[1]);
+	io_src_sep_clean(&sep_src);
+	io_close(&pipefd[0]);
+	io_close(&pipefd[1]);
 
 	/* error use cases */
 	src = io_src_sep_get_source(NULL);

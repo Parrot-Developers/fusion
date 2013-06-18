@@ -36,7 +36,7 @@ static void testSET_NON_BLOCKING(void)
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	/* cleanup */
-	close(fd);
+	io_close(&fd);
 }
 
 static const struct test_t tests[] = {

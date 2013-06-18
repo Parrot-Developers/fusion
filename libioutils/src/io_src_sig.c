@@ -149,6 +149,7 @@ void io_src_sig_clean(struct io_src_sig *sig)
 	if (NULL == sig)
 		return;
 
+	io_close(&sig->src.fd);
 	/* restore gently the signal mask */
 	sigprocmask(SIG_SETMASK, &(sig->old_mask), NULL);
 	sigemptyset(&(sig->mask));

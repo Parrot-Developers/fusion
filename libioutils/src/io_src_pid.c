@@ -18,6 +18,7 @@
 #include <rs_utils.h>
 
 #include "io_platform.h"
+#include "io_utils.h"
 #include "io_mon.h"
 #include "io_src_pid.h"
 
@@ -92,6 +93,7 @@ void io_src_pid_clean(struct io_src_pid *pid)
 	pid->pid = 0;
 	pid->status = 0;
 	pid->cb = NULL;
+	io_close(&pid->src.fd);
 
 	io_src_clean(&(pid->src));
 }

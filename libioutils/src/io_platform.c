@@ -15,7 +15,8 @@
 
 #include <errno.h>
 
-#include "io_platform.h"
+#include <io_platform.h>
+#include <io_utils.h>
 
 int io_epoll_create1(int flags)
 {
@@ -54,7 +55,7 @@ int io_signalfd(int fd, const sigset_t *mask, int flags)
 			if (0 > ret) {
 				/* free fd only if allocated by us */
 				if (-1 == fd)
-					close(new_fd);
+					io_close(&new_fd);
 				return -errno;
 			}
 		}
@@ -63,7 +64,7 @@ int io_signalfd(int fd, const sigset_t *mask, int flags)
 			if (0 > ret) {
 				/* free fd only if allocated by us */
 				if (-1 == fd)
-					close(new_fd);
+					io_close(&new_fd);
 				return -errno;
 			}
 		}

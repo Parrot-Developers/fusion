@@ -21,6 +21,7 @@
 
 #include <io_mon.h>
 #include <io_src_msg.h>
+#include <io_utils.h>
 
 #include <fautes.h>
 #include <fautes_utils.h>
@@ -46,18 +47,12 @@ struct my_msg_src {
 
 static void my_msg_src_clean(struct my_msg_src *my_src)
 {
-	/*
-	 * don't close the source fd, it will be closed by the io_src_msg_clean
-	 */
-	if (!io_src_has_in(my_src->msg_src.src.type))
-		close(my_src->pipefds[0]);
-	if (!io_src_has_out(my_src->msg_src.src.type))
-		close(my_src->pipefds[1]);
+	io_close(&my_src->pipefds[0]);
+	io_close(&my_src->pipefds[1]);
 
 	memset(&(my_src->msg), 0, sizeof(my_src->msg));
 
 	io_src_msg_clean(&(my_src->msg_src));
-	my_src->pipefds[0] = my_src->pipefds[1] = -1;
 }
 
 static const struct msg MSG1 = {11, 11111, 11.111};

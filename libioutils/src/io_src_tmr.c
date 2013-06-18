@@ -104,6 +104,7 @@ void io_src_tmr_clean(struct io_src_tmr *tmr)
 		return;
 
 	tmr->cb = NULL;
+	io_close(&tmr->src.fd);
 
 	io_src_clean(&(tmr->src));
 }

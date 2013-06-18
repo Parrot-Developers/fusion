@@ -382,7 +382,7 @@ int io_mon_clean(struct io_mon *mon)
 	}
 
 	if (-1 != mon->epollfd)
-		close(mon->epollfd);
+		io_close(&mon->epollfd);
 	memset(mon, 0, sizeof(*mon));
 	mon->epollfd = -1;
 

@@ -158,7 +158,7 @@ static void testSRC_SIG_GET_SOURCE(void)
 	CU_ASSERT_EQUAL(src, &(sig_src.src));
 
 	/* cleanup */
-	io_src_clean(src);
+	io_src_sig_clean(&sig_src);
 
 	/* error use cases */
 	src = io_src_sig_get_source(NULL);

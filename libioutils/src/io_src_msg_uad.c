@@ -161,7 +161,7 @@ int io_src_msg_uad_init(struct io_src_msg_uad *uad, io_src_msg_uad_cb_t *cb,
 			rcv_buf, len, 0);
 
 out:
-	close(sockfd);
+	io_close(&sockfd);
 
 	return ret;
 }
@@ -174,6 +174,8 @@ void io_src_msg_uad_clean(struct io_src_msg_uad *uad)
 	uad->cb = NULL;
 	memset(&(uad->addr), 0, sizeof(uad->addr));
 	shutdown(uad->src_msg.src.fd, SHUT_RDWR);
+
+	io_close(&uad->src_msg.src.fd);
 
 	io_src_msg_clean((&uad->src_msg));
 }

@@ -220,7 +220,7 @@ static void testSRC_MSG_UAD_GET_SOURCE(void)
 	CU_ASSERT_EQUAL(src, &(uad_src.src_msg.src));
 
 	/* cleanup */
-	io_src_clean(src);
+	io_src_msg_uad_clean(&(uad_src));
 
 	/* error use cases */
 	src = io_src_msg_uad_get_source(NULL);
