@@ -9,8 +9,7 @@
 
 #ifndef IO_UTILS_H_
 #define IO_UTILS_H_
-#include <sys/epoll.h>
-#include <sys/socket.h>
+#include <io_platform.h>
 
 /**
  * Wrapper around read, discarding EINTR errors

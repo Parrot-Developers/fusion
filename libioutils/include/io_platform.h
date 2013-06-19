@@ -10,12 +10,19 @@
 
 #ifndef IO_PLATFORM_H_
 #define IO_PLATFORM_H_
-
-#include <fcntl.h>       /* O_CLOEXEC */
-
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif /* _GNU_SOURCE */
 #include <signal.h>
+
 /* Give us a chance to use regular definitions: */
+#include <fcntl.h>       /* O_CLOEXEC */
 #include <sys/epoll.h>   /* EPOLL_CLOEXEC */
+#include <sys/timerfd.h>
+#include <sys/signalfd.h>
+#include <sys/socket.h>
+
+#include <unistd.h>
 
 #ifndef O_CLOEXEC
 #ifdef __arm__

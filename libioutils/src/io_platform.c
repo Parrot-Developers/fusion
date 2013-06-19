@@ -7,15 +7,12 @@
  *
  * Copyright (C) 2012 Parrot S.A.
  */
-#include <sys/syscall.h> /* syscall */
-#include <sys/epoll.h>   /* epoll_create1 */
-#include <sys/signalfd.h>
+#include <io_platform.h>
 
 #include <unistd.h>
 
 #include <errno.h>
 
-#include <io_platform.h>
 #include <io_utils.h>
 
 int io_epoll_create1(int flags)
