@@ -13,6 +13,10 @@
 #ifndef RS_HMAP_H_
 #define RS_HMAP_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @def RS_HMAP_PRIME_MAX
  * @brief Maximum size of a has map's bucket, which is a big prime number,
@@ -92,5 +96,9 @@ int rs_hmap_insert(struct rs_hmap *map, const char* key, void *data);
  * the entry wasn't found
  */
 int rs_hmap_remove(struct rs_hmap *map, const char *key, void **data);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* RS_HTABLE_H_ */

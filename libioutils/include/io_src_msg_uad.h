@@ -15,6 +15,10 @@
 
 #include "io_src_msg.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @typedef io_src_msg_uad
  * @brief Fixed length message source type, from an UAD
@@ -100,5 +104,9 @@ static inline struct io_src *io_src_msg_uad_get_source(struct io_src_msg_uad
  * @param uad Source to clean
  */
 void io_src_msg_uad_clean(struct io_src_msg_uad *uad);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* IO_SRC_MSG_UAD_H_ */

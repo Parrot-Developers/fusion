@@ -14,6 +14,10 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Launches a shell command and read it's output.
  * @param buf Buffer where the output will be stored
@@ -164,5 +168,9 @@ __old_out_fd = dup(filedes); \
 #define store_function_stdoutput_to_string(string, len, out_func, ...) \
 	store_function_output_to_string(string, len, out_func, STDOUT_FILENO, \
 			__VA_ARGS__)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* FAUTES_UTILS_H_ */

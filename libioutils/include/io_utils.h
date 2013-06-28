@@ -11,6 +11,10 @@
 #define IO_UTILS_H_
 #include <io_platform.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Wrapper around read, discarding EINTR errors
  * @see read
@@ -77,5 +81,9 @@ int io_set_non_blocking(int fd);
  * untouched
  */
 int io_close(int *fd);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* IO_UTILS_H_ */

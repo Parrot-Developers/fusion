@@ -24,6 +24,10 @@
 
 #include <unistd.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef O_CLOEXEC
 #ifdef __arm__
 	/* value taken from linux kernel header
@@ -122,5 +126,9 @@ int io_signalfd(int fd, const sigset_t *mask, int flags);
  * @see pipe2
  */
 int io_pipe2(int pipefd[2], int flags);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* IO_PLATFORM_H_ */

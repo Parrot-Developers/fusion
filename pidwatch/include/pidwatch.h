@@ -12,6 +12,10 @@
 /* for pid_t */
 #include <signal.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Creates a watch for watching a process. This is a privileged action, the
  * corresponding mandatory capability is cap_net_admin.
@@ -46,5 +50,9 @@ int pidwatch_set_pid(int pidfd, pid_t pid);
  * terminated. for possible errno values see recvmsg(2)
  */
 int pidwatch_wait(int pidfd, int *status);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* PIDWATCH_H_ */

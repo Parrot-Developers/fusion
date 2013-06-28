@@ -10,6 +10,10 @@
 #define IO_SRC_PID_H_
 #include "io_src.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @def IO_SRC_PID_DISABLE
  * @brief Value to disable a pid source temporarily, with io_src_pid_set_pid()
@@ -80,5 +84,9 @@ static inline struct io_src *io_src_pid_get_source(struct io_src_pid *pid)
  * @param pid Pid source
  */
 void io_src_pid_clean(struct io_src_pid *pid);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* IO_SRC_PID_H_ */

@@ -19,6 +19,10 @@
 
 #include <io_src.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @def IO_SRC_SEP_SIZE
  * @brief Maximum size of a message that can be reads
@@ -117,5 +121,9 @@ static inline struct io_src *io_src_sep_get_source(struct io_src_sep *sep)
  * @param sep Separator source
  */
 void io_src_sep_clean(struct io_src_sep *sep);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* IO_SRC_SEP_H_ */

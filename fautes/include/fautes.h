@@ -14,6 +14,10 @@
 
 #include <CUnit/CUError.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @typedef test_t
  * @brief Unit test
@@ -62,5 +66,9 @@ struct suite_t {
 		__active_state = 0 != strcmp(__sas, "0"); \
 	suite.active = __active_state; \
 } while (0)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* FAUTES_H_ */

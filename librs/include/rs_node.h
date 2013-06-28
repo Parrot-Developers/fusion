@@ -15,6 +15,10 @@
 
 #include <rs_utils.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @struct rs_node
  * @brief Node of a doubly-linked list
@@ -199,5 +203,9 @@ struct rs_node *rs_node_remove_match(struct rs_node *list,
  * @return 0 on success, or the first cb's call non-zero return value
  */
 int rs_node_foreach(struct rs_node *list, rs_node_cb_t cb, void *data);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* RS_NODE_H_ */

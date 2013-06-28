@@ -14,6 +14,10 @@
 
 #include <io_src.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @typedef io_src_msg
  * @brief Fixed length message source type
@@ -120,5 +124,9 @@ static inline struct io_src *io_src_msg_get_source(struct io_src_msg *msg)
  * @param msg Message source to clean
  */
 void io_src_msg_clean(struct io_src_msg *msg);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* IO_SRC_MSG_H_ */

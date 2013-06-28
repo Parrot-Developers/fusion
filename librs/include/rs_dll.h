@@ -12,6 +12,10 @@
 
 #include <rs_node.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @struct rs_dll_vtable
  * @brief User defined operation on list nodes
@@ -154,5 +158,9 @@ struct rs_node *rs_dll_remove_match(struct rs_dll *dll,
  * @return Negative errno compatible value on error otherwise zero
  */
 int rs_dll_foreach(struct rs_dll *dll, rs_node_cb_t cb, void *data);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* RS_DLL_H_ */

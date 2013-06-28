@@ -13,6 +13,10 @@
 
 #include "io_src.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @typedef io_src_sig
  * @brief Signal source type
@@ -72,5 +76,9 @@ static inline struct io_src *io_src_sig_get_source(struct io_src_sig *sig)
  * @param sig Signal source
  */
 void io_src_sig_clean(struct io_src_sig *sig);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* IO_SRC_SIG_H_ */

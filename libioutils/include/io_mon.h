@@ -14,6 +14,10 @@
 
 #include <io_src.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @struct io_mon
  * @brief global monitor's context, handles the pool of sources and callbacks
@@ -114,5 +118,9 @@ int io_mon_process_events(struct io_mon *mon);
  * @return negative errno value on error, 0 otherwise
  */
 int io_mon_clean(struct io_mon *mon);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* IO_MONITOR_H_ */

@@ -17,6 +17,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @struct rs_rb
  * @brief Ring buffer structure
@@ -139,5 +143,9 @@ size_t rs_rb_get_write_length_no_wrap(struct rs_rb *rb);
  * @return non-zero negative errno-compatible value on error, 0 otherwise
  */
 int rs_rb_write_incr(struct rs_rb *rb, size_t length);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* RS_RB_H_ */

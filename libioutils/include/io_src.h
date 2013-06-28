@@ -16,6 +16,10 @@
 #include <rs_utils.h>
 #include <rs_node.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @enum io_src_event
  * @brief Indicates if one can read or write to a given source
@@ -156,5 +160,9 @@ int io_src_close_fd(struct io_src *src);
  * @param src Source to initialize. Can't be NULL
  */
 void io_src_clean(struct io_src *src);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* IO_SOURCE_H_ */

@@ -11,6 +11,10 @@
 
 #include <stdlib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @def rs_container_of
  * @brief Retrieves the address of a structure knowing the address of one of
@@ -57,5 +61,9 @@ static inline int rs_str_is_invalid(const char *str)
 {
 	return NULL == str || '\0' == *str;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* RS_UTILS_H_ */

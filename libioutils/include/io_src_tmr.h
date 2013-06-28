@@ -17,6 +17,10 @@
 
 #include <io_src.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @def IO_SRC_TMR_DISARM
  * @brief timeout value to disarm a timer
@@ -71,5 +75,9 @@ int io_src_tmr_set(struct io_src_tmr *tmr, int timeout);
  * @param tmr Timer source
  */
 void io_src_tmr_clean(struct io_src_tmr *tmr);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* IO_SRC_TMR_H_ */
