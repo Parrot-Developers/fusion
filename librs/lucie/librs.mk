@@ -19,6 +19,7 @@ LIBRS_OBJ_FILES := $(LIBRS_BUILD_DIR)/src/rs_rb.c.o \
 	$(LIBRS_BUILD_DIR)/src/rs_hmap.c.o \
 	$(LIBRS_BUILD_DIR)/src/rs_node.c.o \
 	$(LIBRS_BUILD_DIR)/tests/rs_fautes.c.o \
+	$(LIBRS_BUILD_DIR)/tests/rs_utils_test.c.o \
 	$(LIBRS_BUILD_DIR)/tests/rs_node_test.c.o \
 	$(LIBRS_BUILD_DIR)/tests/rs_hmap_test.c.o \
 	$(LIBRS_BUILD_DIR)/tests/rs_dll_test.c.o \
@@ -97,6 +98,17 @@ $(LIBRS_BUILD_DIR)/src/rs_node.c.o: $(LIBRS_PACKAGE_DIR)/src/rs_node.c
 		-DBUILD_LIBFAUTES -DBUILD_LIBCUNIT -O0 -g -c -MMD -MP -o $@ $< -fPIC
 
 $(LIBRS_BUILD_DIR)/tests/rs_fautes.c.o: $(LIBRS_PACKAGE_DIR)/tests/rs_fautes.c
+	$(Q) mkdir -p $(dir $@)
+	$(TARGET_CC) -I$(LIBRS_BUILD_DIR) \
+		-I$(LIBRS_PACKAGE_DIR) \
+		-I$(LIBRS_PACKAGE_DIR)/include \
+		-I$(STAGING_DIR)/usr/include/libfautes/include \
+		-I$(STAGING_DIR)/usr/include/libcunit \
+		-I$(STAGING_DIR)/usr/include/\
+		$(TARGET_GLOBAL_CFLAGS) \
+		-DBUILD_LIBFAUTES -DBUILD_LIBCUNIT -O0 -g -c -MMD -MP -o $@ $< -fPIC
+
+$(LIBRS_BUILD_DIR)/tests/rs_utils_test.c.o: $(LIBRS_PACKAGE_DIR)/tests/rs_utils_test.c
 	$(Q) mkdir -p $(dir $@)
 	$(TARGET_CC) -I$(LIBRS_BUILD_DIR) \
 		-I$(LIBRS_PACKAGE_DIR) \

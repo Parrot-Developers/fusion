@@ -27,6 +27,7 @@ LIBIOUTILS_OBJ_FILES := $(LIBIOUTILS_BUILD_DIR)/src/io_src_pid.c.o \
 	$(LIBIOUTILS_BUILD_DIR)/tests/io_src_msg_uad_test.c.o \
 	$(LIBIOUTILS_BUILD_DIR)/tests/io_mon_test.c.o \
 	$(LIBIOUTILS_BUILD_DIR)/tests/io_src_tmr_test.c.o \
+	$(LIBIOUTILS_BUILD_DIR)/tests/io_utils_test.c.o \
 	$(LIBIOUTILS_BUILD_DIR)/tests/io_src_test.c.o \
 	$(LIBIOUTILS_BUILD_DIR)/tests/io_src_sig_test.c.o \
 	$(LIBIOUTILS_BUILD_DIR)/tests/io_src_pid_test.c.o \
@@ -219,6 +220,19 @@ $(LIBIOUTILS_BUILD_DIR)/tests/io_mon_test.c.o: $(LIBIOUTILS_PACKAGE_DIR)/tests/i
 		-DBUILD_LIBRS -DBUILD_LIBPIDWATCH -DBUILD_LIBFAUTES -DBUILD_LIBCUNIT -O0 -g -c -MMD -MP -o $@ $< -fPIC
 
 $(LIBIOUTILS_BUILD_DIR)/tests/io_src_tmr_test.c.o: $(LIBIOUTILS_PACKAGE_DIR)/tests/io_src_tmr_test.c
+	$(Q) mkdir -p $(dir $@)
+	$(TARGET_CC) -I$(LIBIOUTILS_BUILD_DIR) \
+		-I$(LIBIOUTILS_PACKAGE_DIR) \
+		-I$(LIBIOUTILS_PACKAGE_DIR)/include \
+		-I$(STAGING_DIR)/usr/include/librs/include \
+		-I$(STAGING_DIR)/usr/include/libpidwatch/include \
+		-I$(STAGING_DIR)/usr/include/libfautes/include \
+		-I$(STAGING_DIR)/usr/include/libcunit \
+		-I$(STAGING_DIR)/usr/include/\
+		$(TARGET_GLOBAL_CFLAGS) \
+		-DBUILD_LIBRS -DBUILD_LIBPIDWATCH -DBUILD_LIBFAUTES -DBUILD_LIBCUNIT -O0 -g -c -MMD -MP -o $@ $< -fPIC
+
+$(LIBIOUTILS_BUILD_DIR)/tests/io_utils_test.c.o: $(LIBIOUTILS_PACKAGE_DIR)/tests/io_utils_test.c
 	$(Q) mkdir -p $(dir $@)
 	$(TARGET_CC) -I$(LIBIOUTILS_BUILD_DIR) \
 		-I$(LIBIOUTILS_PACKAGE_DIR) \
