@@ -212,12 +212,6 @@ int main(int argc, char *argv[])
 		dlclose(lib_handle);
 	} while (*(++so_lib));
 
-
-	/* to clean up valgrind's output */
-	close(STDIN_FILENO);
-	close(STDOUT_FILENO);
-	close(STDERR_FILENO);
-
 	failure = CU_get_error() != CUE_SUCCESS || tests_failed != 0;
 
 	return failure ? EXIT_FAILURE : EXIT_SUCCESS;
