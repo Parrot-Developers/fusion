@@ -64,9 +64,6 @@ out:
 	return ret;
 }
 
-/**
- * TODO move in an utils module
- */
 static void str_free(char **str)
 {
 	if (NULL == str || NULL == *str)

@@ -208,4 +208,9 @@ int rs_node_foreach(struct rs_node *list, rs_node_cb_t cb, void *data);
 }
 #endif
 
+// TODO add a destroy function e.g. :
+// int rs_node_destroy(struct rs_node **list, rs_node_cb_t cb, void *data);
+// which pops each elements and calls cb on each so that the client can perform
+// the cleanup action it wants
+
 #endif /* RS_NODE_H_ */
