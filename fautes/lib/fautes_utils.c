@@ -178,6 +178,15 @@ char *get_tun_path(void)
 		return NULL;
 	}
 
+	if (0 != access(tun_path, R_OK | W_OK)) {
+		str_free(&tun_path);
+		ret = asprintf(&tun_path, "/dev/net/tun");
+		if (-1 == ret) {
+			fprintf(stderr, "memory allocation\n");
+			return NULL;
+		}
+	}
+
 	return tun_path;
 }
 
