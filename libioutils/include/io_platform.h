@@ -21,6 +21,7 @@
 #include <sys/timerfd.h>
 #include <sys/signalfd.h>
 #include <sys/socket.h>
+#include <sys/inotify.h>
 
 #include <unistd.h>
 
@@ -97,6 +98,23 @@ extern "C" {
  * @brief Set the flag O_NONBLOCK at socket's creation
  */
 #define SOCK_NONBLOCK O_NONBLOCK
+#endif
+
+/* for inotify */
+#ifndef IN_CLOEXEC
+/**
+ * @def IN_CLOEXEC
+ * @brief Set the flag O_CLOEXEC at inotify fd's creation
+ */
+#define IN_CLOEXEC O_CLOEXEC
+#endif
+
+#ifndef IN_NONBLOCK
+/**
+ * @def IN_NONBLOCK
+ * @brief Set the flag O_NONBLOCK at inotify fd's creation
+ */
+#define IN_NONBLOCK O_NONBLOCK
 #endif
 
 /**
