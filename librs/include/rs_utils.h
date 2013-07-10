@@ -10,6 +10,7 @@
 #define RS_UTILS_H_
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,6 +51,14 @@ static inline void rs_str_free(char **str)
 
 	free(*str);
 	*str = NULL;
+}
+
+static inline void rs_file_close(FILE **file)
+{
+	if (NULL == file || NULL == *file)
+		return;
+
+	fclose(*file);
 }
 
 /**
