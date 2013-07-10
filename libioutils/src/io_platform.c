@@ -15,6 +15,11 @@
 
 #include <io_utils.h>
 
+/*
+ * note, syscall numbers are extracted from arch/arm/include/asm/unistd.h in the
+ * linux kernel
+ */
+
 int io_epoll_create1(int flags)
 {
 #ifdef __arm__
@@ -77,5 +82,14 @@ int io_pipe2(int pipefd[2], int flags)
 	return syscall(359, pipefd, flags);
 #else
 	return pipe2(pipefd, flags);
+#endif
+}
+
+int io_inotify_init1(int flags)
+{
+#ifdef __arm__
+	return syscall(360, flags);
+#else
+	return inotify_init1(flags);
 #endif
 }

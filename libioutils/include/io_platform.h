@@ -145,6 +145,12 @@ int io_signalfd(int fd, const sigset_t *mask, int flags);
  */
 int io_pipe2(int pipefd[2], int flags);
 
+/**
+ * Wrapper around io_pipe1, defining it on toolchains where it is missing
+ * @see pipe2
+ */
+int io_inotify_init1(int flags);
+
 #ifdef __cplusplus
 }
 #endif
