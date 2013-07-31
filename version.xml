@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!DOCTYPE version PUBLIC "-//IDN parrot.com//DTD SOFTWARE_VERSION 0.1//EN" "http://mallard/gitweb/?p=release;a=blob_plain;f=version.dtd;hb=HEAD">
+<!-- name attributes must be unique across instances of a given tag -->
+<version>
+	<!-- kernel configuration is common, thus by default, build_system == "all" -->
+	<config_list name="kernel">
+		<config name="CONFIG_CONNECTOR"/>
+		<config name="CONFIG_PROC_EVENTS"/>
+	</config_list>
+	<!-- the following config_list corresponds to global.config alchemy file -->
+<!--
+	<config_list name="global" build_system="alchemy">
+		this one is optional, dependencies should be are explicitely given by atom.mk files
+	</config_list>
+ -->
+</version>
