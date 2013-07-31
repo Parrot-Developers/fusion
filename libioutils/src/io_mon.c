@@ -321,6 +321,16 @@ int io_mon_add_sources(struct io_mon *mon, ...)
 	return 0;
 }
 
+int io_mon_remove_source(struct io_mon *mon, struct io_src *src)
+{
+	if (NULL == mon || NULL == src)
+		return -EINVAL;
+
+	rs_node_remove(&mon->source, &src->node);
+
+	return 0;
+}
+
 void io_mon_dump_epoll_event(uint32_t events)
 {
 	fprintf(stderr, "epoll events :\n");
