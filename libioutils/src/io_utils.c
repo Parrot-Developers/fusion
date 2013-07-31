@@ -87,6 +87,16 @@ int io_close(int *fd)
 {
 	int ret;
 
+	/*
+	 * Although 0 is a perfectly valid file descriptor, we forbid closing it
+	 * because allowing close(0) can hide some subtle bugs. The aim is to
+	 * fail early when these bugs occur.
+	 * If one really want to close 0, he must use close explicitly.
+	 */
+	if (0 == *fd) {
+		errno = EBADF;
+		return -1;
+	}
 	if (NULL == fd || -1 == *fd) {
 		errno = EBADF;
 		return -1;
