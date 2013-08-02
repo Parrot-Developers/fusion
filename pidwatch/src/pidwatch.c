@@ -304,7 +304,7 @@ err:
 	 * process we're not interested in and which could have obtained the
 	 * pid we wanted to watch, in the interval.
 	 */
-	install_filter(pidfd, 1);
+	(void)install_filter(pidfd, 1);
 
 	return -1;
 }
