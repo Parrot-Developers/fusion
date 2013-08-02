@@ -118,8 +118,10 @@ int io_src_sig_init(struct io_src_sig *sig, io_sig_cb_t *cb, ...)
 	/* first signal MUST be retrieved before any modification of sig */
 	va_start(args, cb);
 	signo = va_arg(args, int);
-	if (sig_init_args_are_invalid(sig, cb, signo))
+	if (sig_init_args_are_invalid(sig, cb, signo)) {
+		va_end(args);
 		return -EINVAL;
+	}
 
 	/* here we can start to modify the context */
 	memset(sig, 0, sizeof(*sig));
