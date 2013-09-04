@@ -86,9 +86,13 @@ static void testSRC_PID_INIT(void)
 	bool process_dead = 0;
 	void cb(struct io_src_pid *src_pid, pid_t pid, int status)
 	{
+		int wait_status;
+
 		CU_ASSERT(WIFEXITED(src_pid->status));
 		CU_ASSERT_EQUAL(WEXITSTATUS(src_pid->status), 0);
 		process_dead = true;
+		waitpid(src_pid->pid, &wait_status, 0);
+		CU_ASSERT_EQUAL(status, wait_status);
 	};
 
 	/* normal use cases */
