@@ -52,7 +52,7 @@ int io_signalfd(int fd, const sigset_t *mask, int flags)
 		ret = new_fd = signalfd(fd, mask, 0);
 		if (0 > ret)
 			return -errno;
-		if (SFD_NONBLOCK & flags) {
+		if (SFD_CLOEXEC & flags) {
 			ret = fcntl(new_fd, F_SETFD, FD_CLOEXEC);
 			if (0 > ret) {
 				/* free fd only if allocated by us */
