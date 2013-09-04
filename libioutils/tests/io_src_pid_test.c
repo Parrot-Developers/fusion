@@ -91,7 +91,7 @@ static void testSRC_PID_INIT(void)
 		CU_ASSERT(WIFEXITED(src_pid->status));
 		CU_ASSERT_EQUAL(WEXITSTATUS(src_pid->status), 0);
 		process_dead = true;
-		waitpid(src_pid->pid, &wait_status, 0);
+		waitpid(pid, &wait_status, 0);
 		CU_ASSERT_EQUAL(status, wait_status);
 	};
 
@@ -161,7 +161,7 @@ static void testSRC_PID_SET_PID(void)
 		CU_ASSERT(WIFEXITED(status));
 		CU_ASSERT_EQUAL(WEXITSTATUS(status), 0);
 		process_dead = true;
-		waitpid(src_pid->pid, &wait_status, 0);
+		waitpid(pid, &wait_status, 0);
 		CU_ASSERT_EQUAL(status, wait_status);
 	};
 

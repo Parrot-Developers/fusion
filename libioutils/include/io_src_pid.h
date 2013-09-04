@@ -34,6 +34,8 @@ struct io_src_pid;
  * @param pid_src Signal source
  * @param pid Pid of the process which has just died
  * @param status Status of the process, same as that of waitpid(2)
+ * @note the pid field of the io_src_pid context is invalid in the context of
+ * the callback. One _must_ use the pid parameter instead
  */
 typedef void (io_pid_cb_t)(struct io_src_pid *pid_src, pid_t pid, int status);
 
