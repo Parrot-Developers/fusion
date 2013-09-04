@@ -46,10 +46,8 @@ static void pid_cb(struct io_src *src)
 	if (-1 == pid_ret)
 		return;
 
-	pid_src->cb(pid_src, pid_src->pid, pid_src->status);
-
-	pid_src->pid = IO_SRC_PID_DISABLE;
 	io_src_pid_set_pid(pid_src, IO_SRC_PID_DISABLE);
+	pid_src->cb(pid_src, pid_src->pid, pid_src->status);
 }
 
 int io_src_pid_init(struct io_src_pid *pid_src, io_pid_cb_t *cb)
