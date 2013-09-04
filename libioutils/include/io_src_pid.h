@@ -65,7 +65,8 @@ int io_src_pid_init(struct io_src_pid *pid_src, io_pid_cb_t *cb);
  * @param pid_src Pid source to configure
  * @param pid Pid of the process to monitor, IO_SRC_PID_DISABLE to temporarily
  * disable the monitoring
- * @return errno-compatible negative value on error, 0 otherwise
+ * @return errno-compatible negative value on error, 0 otherwise. -ESRCH if the
+ * process doesn't exist anymore, or that it waits to be wait(2)-ed for.
  */
 int io_src_pid_set_pid(struct io_src_pid *pid_src, pid_t pid);
 

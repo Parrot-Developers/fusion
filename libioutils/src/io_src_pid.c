@@ -77,12 +77,18 @@ out:
 
 int io_src_pid_set_pid(struct io_src_pid *pid_src, pid_t pid)
 {
+	int ret;
+
 	if (NULL == pid_src)
 		return -EINVAL;
 
 	pid_src->pid = pid;
 
-	return pidwatch_set_pid(pid_src->src.fd, pid);
+	ret = pidwatch_set_pid(pid_src->src.fd, pid);
+	if (-1 == ret)
+		return -errno;
+
+	return 0;
 }
 
 void io_src_pid_clean(struct io_src_pid *pid)
