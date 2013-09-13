@@ -15,8 +15,6 @@
 #ifndef RS_RB_H_
 #define RS_RB_H_
 
-#include <stdint.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -107,7 +105,7 @@ int rs_rb_read_incr(struct rs_rb *rb, size_t length);
  * @param value Must point to a storage for the value to retrieve. Can't be NULL
  * @return non-zero negative errno-compatible value on error, 0 otherwise
  */
-int rs_rb_read_at(struct rs_rb *rb, size_t offset, uint8_t *value);
+int rs_rb_read_at(struct rs_rb *rb, size_t offset, char *value);
 
 /* * ring buffer write functions * */
 

@@ -74,7 +74,7 @@ void *rs_rb_get_read_ptr(struct rs_rb *rb)
 	if (NULL == rb)
 		return NULL;
 
-	return (uint8_t *)(rb->base) + rb->read;
+	return (char *)(rb->base) + rb->read;
 }
 
 size_t rs_rb_get_read_length(struct rs_rb *rb)
@@ -104,12 +104,12 @@ int rs_rb_read_incr(struct rs_rb *rb, size_t length)
 	return 0;
 }
 
-int rs_rb_read_at(struct rs_rb *rb, size_t offset, uint8_t *value)
+int rs_rb_read_at(struct rs_rb *rb, size_t offset, char *value)
 {
 	if (NULL == rb || offset >= rb->len || NULL == value)
 		return -EINVAL;
 
-	*value = ((uint8_t *) rb->base)[(rb->read + offset) & rb->size_mask];
+	*value = ((char *) rb->base)[(rb->read + offset) & rb->size_mask];
 
 	return 0;
 }
@@ -119,7 +119,7 @@ void *rs_rb_get_write_ptr(struct rs_rb *rb)
 	if (NULL == rb)
 		return NULL;
 
-	return (uint8_t *) rb->base + rb->write;
+	return (char *) rb->base + rb->write;
 }
 
 size_t rs_rb_get_write_length(struct rs_rb *rb)

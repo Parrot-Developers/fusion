@@ -226,7 +226,7 @@ static void testRS_RB_READ_AT(void)
 	struct rs_rb rb;
 	int ret;
 	char buffer[4] = {1, 2, 3, 4};
-	uint8_t value;
+	char value;
 
 	/* initialization */
 	/* fill buffer with data, wrapping from 2 to 2 */
@@ -279,12 +279,12 @@ static void testRS_RB_GET_WRITE_PTR(void)
 
 	/* normal use cases */
 	p = rs_rb_get_write_ptr(&rb);
-	CU_ASSERT_PTR_EQUAL(p, (uint8_t *)rb.base + 2);
+	CU_ASSERT_PTR_EQUAL(p, (char *)rb.base + 2);
 
 	ret = rs_rb_write_incr(&rb, 3);
 	CU_ASSERT_EQUAL(ret, 0);
 	p = rs_rb_get_write_ptr(&rb);
-	CU_ASSERT_PTR_EQUAL(p, (uint8_t *)rb.base + 1);
+	CU_ASSERT_PTR_EQUAL(p, (char *)rb.base + 1);
 
 	/* error use cases */
 	p = rs_rb_get_write_ptr(NULL);
