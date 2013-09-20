@@ -130,6 +130,9 @@ int io_src_tmr_set(struct io_src_tmr *tmr, int timeout)
 		nval.it_value.tv_sec = timeout / MSEC_PER_SEC;
 		nval.it_value.tv_nsec = ((long long)timeout % MSEC_PER_SEC) *
 				NSEC_PER_MSEC;
+		nval.it_interval.tv_sec = timeout / MSEC_PER_SEC;
+		nval.it_interval.tv_nsec = ((long long)timeout % MSEC_PER_SEC) *
+				NSEC_PER_MSEC;
 	} /* else, disarm */
 
 	ret = timerfd_settime(tmr->src.fd, 0, &nval, NULL);

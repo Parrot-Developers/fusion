@@ -37,8 +37,7 @@ struct io_src_tmr;
  * @typedef io_pid_cb_t
  * @brief Called when the timer has expired
  * @param tmr Timer source
- * @param nbexpired Number of expirations of the timer. Always 0 or 1, since the
- * timer is forced one shot
+ * @param nbexpired Number of expirations of the timer
  */
 typedef void (*io_tmr_cb_t) (struct io_src_tmr *tmr, uint64_t *nbexpired);
 
@@ -54,7 +53,7 @@ struct io_src_tmr {
 };
 
 /**
- * Initializes a relative one shot timer.
+ * Initializes a relative periodic timer.
  * @param tmr Timer source to initialize
  * @param cb User callback, notified the timer expires
  * @return errno compatible negative value on error, 0 on success
