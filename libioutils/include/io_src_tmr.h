@@ -50,24 +50,35 @@ struct io_src_tmr {
 	struct io_src src;
 	/** user callback, notified the timer expires */
 	io_tmr_cb_t cb;
+	/** 0 if the timer triggers only once, non-zero if it is periodic */
+	int periodic;
 };
 
 /**
- * Initializes a relative periodic timer.
+ * Initializes a relative timer.
  * @param tmr Timer source to initialize
  * @param cb User callback, notified the timer expires
  * @return errno compatible negative value on error, 0 on success
  */
 int io_src_tmr_init(struct io_src_tmr *tmr, io_tmr_cb_t cb);
 
-/*  */
 /**
- * Arms (or disarms) the timer and sets it's relative timeout
+ * Arms (or disarms) the timer and sets it's relative timeout. By default, the
+ * timer is one shot. Use io_src_tmr_set_periodic() to make it periodic.
  * @param tmr Timer source to arm
  * @param timeout Timeout of the timer IO_SRC_TMR_DISARM for timeout to disarm
  * @return errno compatible negative value on error, 0 on success
  */
 int io_src_tmr_set(struct io_src_tmr *tmr, int timeout);
+
+/**
+ * Allows to choose if the timer is periodic or one shot. This will be taken
+ * into account at the following call to io_src_tmr_set()
+ * @param tmr Timer source to alter
+ * @param periodic 1 for a periodic timer, 0 for a one shot timer
+ * @return errno compatible negative value on error, 0 on success
+ */
+int io_src_tmr_set_periodic(struct io_src_tmr *tmr, int periodic);
 
 /**
  * Cleans up a timer source, by properly closing fd, zeroing fields etc...

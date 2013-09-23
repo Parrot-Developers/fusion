@@ -135,6 +135,33 @@ static void testIO_SRC_TMR_CLEAN(void)
 	/* error use cases */
 	io_src_tmr_clean(&tmr);
 }
+
+static void testIO_SRC_SET_PERIODIC(void)
+{
+	int ret;
+	struct io_src_tmr tmr;
+	void dummy_tmr_cb(struct io_src_tmr *tmr, uint64_t *nbexpired)
+	{
+		/* does nothing */
+	};
+
+	/* initialization */
+	ret = io_src_tmr_init(&tmr, dummy_tmr_cb);
+	CU_ASSERT_EQUAL(ret, 0);
+
+	/* normal use cases */
+	ret = io_src_tmr_set_periodic(&tmr, 1);
+	CU_ASSERT_EQUAL(tmr.periodic, 1);
+	CU_ASSERT_EQUAL(ret, 0);
+
+	/* error use cases */
+	ret = io_src_tmr_set_periodic(NULL, 1);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+
+	/* cleanup */
+	io_src_tmr_clean(&tmr);
+}
+
 static const struct test_t tests[] = {
 		{
 				.fn = testIO_SRC_TMR_INIT,
@@ -147,6 +174,10 @@ static const struct test_t tests[] = {
 		{
 				.fn = testIO_SRC_TMR_CLEAN,
 				.name = "io_src_tmr_clean"
+		},
+		{
+				.fn = testIO_SRC_SET_PERIODIC,
+				.name = "io_src_tmr_set_periodic"
 		},
 
 		/* NULL guard */

@@ -94,6 +94,7 @@ int io_src_tmr_init(struct io_src_tmr *tmr, io_tmr_cb_t cb)
 		return -errno;
 
 	tmr->cb = cb;
+	tmr->periodic = 0;
 
 	return io_src_init(&tmr->src, fd, IO_IN, &tmr_cb);
 }
@@ -107,6 +108,16 @@ void io_src_tmr_clean(struct io_src_tmr *tmr)
 	io_close(&tmr->src.fd);
 
 	io_src_clean(&(tmr->src));
+}
+
+int io_src_tmr_set_periodic(struct io_src_tmr *tmr, int periodic)
+{
+	if (NULL == tmr)
+		return -EINVAL;
+
+	tmr->periodic = !!periodic;
+
+	return 0;
 }
 
 int io_src_tmr_set(struct io_src_tmr *tmr, int timeout)
@@ -130,9 +141,11 @@ int io_src_tmr_set(struct io_src_tmr *tmr, int timeout)
 		nval.it_value.tv_sec = timeout / MSEC_PER_SEC;
 		nval.it_value.tv_nsec = ((long long)timeout % MSEC_PER_SEC) *
 				NSEC_PER_MSEC;
-		nval.it_interval.tv_sec = timeout / MSEC_PER_SEC;
-		nval.it_interval.tv_nsec = ((long long)timeout % MSEC_PER_SEC) *
-				NSEC_PER_MSEC;
+		if (tmr->periodic) {
+			nval.it_interval.tv_sec = timeout / MSEC_PER_SEC;
+			nval.it_interval.tv_nsec = ((long long)timeout
+					% MSEC_PER_SEC) * NSEC_PER_MSEC;
+		}
 	} /* else, disarm */
 
 	ret = timerfd_settime(tmr->src.fd, 0, &nval, NULL);
