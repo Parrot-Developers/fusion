@@ -35,7 +35,6 @@ static const int sep_mono[2] = {'\n', INT_MAX};
 static const int sep_double[2] = {'\r', '\n'};
 #define SSEP_DOUBLE "\r\n"
 
-#define CSEP '\n'
 #define MSG1 "lou lou lou, je cueille des pommes"
 #define MSG2 "lou lou lou, et toi itou"
 #define MSG3 ""
@@ -172,7 +171,7 @@ out:
 
 static void testSRC_SEP_INIT(void)
 {
-#define BIG_MSG(sep) MSG1 sep MSG2 sep MSG3 sep MSG4
+#define BIG_MSG(sep) (MSG1 sep MSG2 sep MSG3 sep MSG4)
 	const char big_msg_mono[] = BIG_MSG(SSEP_MONO);
 	const char big_msg_double[] =  BIG_MSG(SSEP_DOUBLE);
 

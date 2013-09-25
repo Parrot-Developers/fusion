@@ -104,9 +104,8 @@ static struct suite_t **get_test_suite(const char *so_lib, void **lib_handle,
 		goto out;
 	*libname = *(char **)sym;
 	if (0 != strncmp(*libname, basename(so_lib), strlen(*libname))) {
-		fprintf(stderr, "Mismatch between so name '%s' and "
-				"fautes_lib_name '%s'\n", basename(so_lib),
-				*libname);
+		fprintf(stderr, "so name '%s' mismatches with _lib_name '%s'\n",
+				basename(so_lib), *libname);
 		goto out;
 	}
 
@@ -161,8 +160,8 @@ int main(int argc, char *argv[])
 	do {
 		suite = get_test_suite(*so_lib, &lib_handle, &libname);
 		if (NULL == suite) {
-			fprintf(stderr, "Shared object %s does not contain a "
-					"valid Fautes test suite\n", *so_lib);
+			fprintf(stderr, "no valid Fautes test suite in %s\n",
+					*so_lib);
 			continue;
 		}
 

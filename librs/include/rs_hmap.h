@@ -82,7 +82,7 @@ int rs_hmap_lookup(struct rs_hmap *map, const char *key, void **data);
  * @param data Piece of data to associate with the key. Can be NULL
  * @return Negative errno-compatible value on error, 0 on success
  */
-int rs_hmap_insert(struct rs_hmap *map, const char* key, void *data);
+int rs_hmap_insert(struct rs_hmap *map, const char *key, void *data);
 
 /**
  * Remove an entry from hash map and retrieve associated data. If the data has
