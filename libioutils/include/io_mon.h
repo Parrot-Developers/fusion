@@ -32,7 +32,8 @@ struct io_mon {
 	struct rs_node source;
 	/** file descriptor for monitoring all the sources */
 	int epollfd;
-	/** number of sources currently registered */
+	/** source for simplifying the integration with another io_mon */
+	struct io_src src;
 };
 
 /**
@@ -48,6 +49,17 @@ int io_mon_init(struct io_mon *mon);
  * @return file descriptor, negative errno-compatible value on error
  */
 int io_mon_get_fd(struct io_mon *mon);
+
+/**
+ * If a user of a library using libioutils internally, want to monitor it in
+ * another libioutils monitor, the library can export it's monitor's source in
+ * order to "nest" the corresponding monitor without having to create manually
+ * a source for it. This source uses the file descriptor
+ * @param mon Monitor to retrieve the source of
+ * @return Source whose file descriptor is the one returned by io_mon_get_fd()
+ * and whose callback calls io_mon_process_events()
+ */
+struct io_src *io_mon_get_source(struct io_mon *mon);
 
 /**
  * Add a source to the pool of sources we monitor. The monitoring is activated

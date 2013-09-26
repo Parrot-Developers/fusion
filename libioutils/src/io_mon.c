@@ -260,6 +260,17 @@ static int activate_source(struct io_mon *mon, struct io_src *src,
 	return alter_source(mon->epollfd, src, EPOLL_CTL_MOD);
 }
 
+/**
+ * Source callback for integrating a libioutils monitor into another one
+ * @param src Underlying source of the monitor
+ */
+static void mon_cb(struct io_src *src)
+{
+	struct io_mon *mon = rs_container_of(src, struct io_mon, src);
+
+	io_mon_process_events(mon);
+}
+
 int io_mon_init(struct io_mon *mon)
 {
 	if (NULL == mon)
@@ -270,7 +281,7 @@ int io_mon_init(struct io_mon *mon)
 	if (-1 == mon->epollfd)
 		return -errno;
 
-	return 0;
+	return io_src_init(&mon->src, io_mon_get_fd(mon), IO_IN, mon_cb);
 }
 
 int io_mon_get_fd(struct io_mon *mon)
@@ -279,6 +290,14 @@ int io_mon_get_fd(struct io_mon *mon)
 		return -EINVAL;
 
 	return mon->epollfd;
+}
+
+struct io_src *io_mon_get_source(struct io_mon *mon)
+{
+	if (NULL == mon)
+		return NULL;
+
+	return &mon->src;
 }
 
 int io_mon_add_source(struct io_mon *mon, struct io_src *src)
