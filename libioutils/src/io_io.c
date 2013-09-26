@@ -28,6 +28,10 @@
 
 #include "io_io.h"
 
+/*
+ * TODO these functions should be replaced by a hook for the client, in order to
+ * allow him to be notified for RX/TX data transfers
+ */
 #define at_log_raw(...) do {} while (0)
 #define at_log_level(...) 0
 #define ATLOG_DEBUG 0

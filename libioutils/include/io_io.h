@@ -40,21 +40,21 @@ typedef int (*io_io_read_cb_t) (struct io_io *io, struct rs_rb *rb,
 
 /* io read context */
 struct io_io_read_ctx {
-	struct io_src src;	/* io read source */
-	enum io_io_state state;	/* io read ctx state */
-	struct rs_rb rb;	/* io read ring buffer */
-	char rb_buffer[IO_IO_RB_BUFFER_SIZE];	/* ring buffer buffer */
-	size_t newbytes;	/* number of new bytes added in buffer */
-	io_io_read_cb_t cb;	/* io read callback */
-	void *data;		/* io read callback user data */
-	int ign_eof;		/* ignore end of file */
+	struct io_src src;	/**< io read source */
+	enum io_io_state state;	/**< io read ctx state */
+	struct rs_rb rb;	/**< io read ring buffer */
+	char rb_buffer[IO_IO_RB_BUFFER_SIZE];	/**< ring buffer buffer */
+	size_t newbytes;	/**< number of new bytes added in buffer */
+	io_io_read_cb_t cb;	/**< io read callback */
+	void *data;		/**< io read callback user data */
+	int ign_eof;		/**< ignore end of file */
 };
 
 enum io_io_write_status {
-	IO_IO_WRITE_OK,		/* write succeed */
-	IO_IO_WRITE_ERROR,	/* write failed */
-	IO_IO_WRITE_TIMEOUT,	/* write ready timeout */
-	IO_IO_WRITE_ABORTED,	/* write aborted */
+	IO_IO_WRITE_OK,		/**< write succeed */
+	IO_IO_WRITE_ERROR,	/**< write failed */
+	IO_IO_WRITE_TIMEOUT,	/**< write ready timeout */
+	IO_IO_WRITE_ABORTED,	/**< write aborted */
 };
 
 struct io_io_write_buffer;
@@ -63,33 +63,33 @@ typedef void (*io_io_write_cb_t) (struct io_io_write_buffer *buffer,
 
 /* io write buffer */
 struct io_io_write_buffer {
-	struct rs_node node;	/* node */
-	io_io_write_cb_t cb;	/* user callback */
-	void *data;		/* user data */
-	size_t length;		/* write buffer length */
-	void *address;		/* write buffer data address*/
+	struct rs_node node;	/**< node for chaining */
+	io_io_write_cb_t cb;	/**< user callback */
+	void *data;		/**< user data */
+	size_t length;		/**< write buffer length */
+	void *address;		/**< write buffer data address*/
 };
 
 /* io write context */
 struct io_io_write_ctx {
-	struct io_src src;		/* io write source */
-	enum io_io_state state;		/* io write state */
-	int timeout;			/* io write ready timeout in ms */
-	struct io_src_tmr timer;		/* io write timer */
-	struct rs_dll buffers;		/* io write buffers */
-	struct io_io_write_buffer *current;	/* io write current buffer */
-	size_t nbwritten;		/* current buffer bytes written */
-	size_t nbeagain;		/* number of eagain received */
+	struct io_src src;		/**< io write source */
+	enum io_io_state state;		/**< io write state */
+	int timeout;			/**< io write ready timeout in ms */
+	struct io_src_tmr timer;	/**< io write timer */
+	struct rs_dll buffers;		/**< io write buffers */
+	struct io_io_write_buffer *current;	/**< io write current buffer */
+	size_t nbwritten;		/**< current buffer bytes written */
+	size_t nbeagain;		/**< number of eagain received */
 };
 
 struct io_io {
-	char *name;			/* io name */
-	int fds[IO_IO_BOTH];		/* io fds */
-	int dupped;
-	int log[IO_IO_BOTH];		/* io log */
-	struct io_mon *mon;		/* io monitor */
-	struct io_io_read_ctx readctx;	/* io read context */
-	struct io_io_write_ctx writectx;/* io write context */
+	char *name;			/**< io name */
+	int fds[IO_IO_BOTH];		/**< io fds */
+	int dupped;			/**< non-zero if the fd in == fd out */
+	int log[IO_IO_BOTH];		/**< io log */
+	struct io_mon *mon;		/**< io monitor */
+	struct io_io_read_ctx readctx;	/**< io read context */
+	struct io_io_write_ctx writectx;/**< io write context */
 };
 
 /* create an io
