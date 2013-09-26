@@ -32,8 +32,19 @@
 #define at_log_level(...) 0
 #define ATLOG_DEBUG 0
 
-static int at_io_read(int fd, int ign_eof, int log, const char *name,
-		void *buffer, size_t size, size_t *length)
+/**
+ *
+ * @param fd
+ * @param ign_eof
+ * @param log
+ * @param name
+ * @param buffer
+ * @param size
+ * @param length
+ * @return
+ */
+static int read_io(int fd, int ign_eof, int log, const char *name, void *buffer,
+		size_t size, size_t *length)
 {
 	ssize_t nbytes;
 
@@ -58,11 +69,15 @@ static int at_io_read(int fd, int ign_eof, int log, const char *name,
 	return 0;
 }
 
-static void at_io_read_events(struct io_src *read_src)
+/**
+ *
+ * @param read_src
+ */
+static void read_src_cb(struct io_src *read_src)
 {
-	struct at_io_read_ctx *readctx = rs_container_of(read_src,
-			struct at_io_read_ctx, src);
-	struct at_io *io = rs_container_of(readctx, struct at_io, readctx);
+	struct io_io_read_ctx *readctx = rs_container_of(read_src,
+			struct io_io_read_ctx, src);
+	struct io_io *io = rs_container_of(readctx, struct io_io, readctx);
 	size_t length = 0;
 	void *buffer;
 	size_t size;
@@ -88,7 +103,7 @@ static void at_io_read_events(struct io_src *read_src)
 		buffer = rs_rb_get_write_ptr(&readctx->rb);
 		size = rs_rb_get_write_length_no_wrap(&readctx->rb);
 		assert(size > 0);
-		ret = at_io_read(fd, io->readctx.ign_eof, io->log[AT_IO_RX],
+		ret = read_io(fd, io->readctx.ign_eof, io->log[IO_IO_RX],
 				io->name, buffer, size, &length);
 		/* check if first part of ring buffer is full-filled */
 		if (ret == 0 && length > 0) {
@@ -128,38 +143,38 @@ static void at_io_read_events(struct io_src *read_src)
 		io_mon_remove_source(io->mon, &readctx->src);
 		io_src_clean(&readctx->src);
 		/* update state and notify client */
-		readctx->state = AT_IO_ERROR;
+		readctx->state = IO_IO_ERROR;
 		(*readctx->cb) (io, &readctx->rb, readctx->newbytes, readctx->data);
 	}
 }
 
 /* enable/disable rx traffic log */
-int at_io_log_rx(struct at_io *io, int enable)
+int io_io_log_rx(struct io_io *io, int enable)
 {
 	if (!io)
 		return -EINVAL;
 
-	io->log[AT_IO_RX] = enable;
+	io->log[IO_IO_RX] = enable;
 	return 0;
 }
 
 /* enable/disable tx traffic log */
-int at_io_log_tx(struct at_io *io, int enable)
+int io_io_log_tx(struct io_io *io, int enable)
 {
 	if (!io)
 		return -EINVAL;
 
-	io->log[AT_IO_TX] = enable;
+	io->log[IO_IO_TX] = enable;
 	return 0;
 }
 
 /* get read state */
-int at_io_read_state(struct at_io *io)
+int io_io_read_state(struct io_io *io)
 {
 	return io->readctx.state;
 }
 
-int at_io_read_start(struct at_io *io, at_io_read_cb_t cb, void *data,
+int io_io_read_start(struct io_io *io, io_io_read_cb_t cb, void *data,
 		int clear)
 {
 	int ret;
@@ -167,12 +182,12 @@ int at_io_read_start(struct at_io *io, at_io_read_cb_t cb, void *data,
 	if (!io || !cb)
 		return -EINVAL;
 
-	if (io->readctx.state != AT_IO_STOPPED)
+	if (io->readctx.state != IO_IO_STOPPED)
 		return -EBUSY;
 
 	/*
 	 * activate out source, useless at init, but needed after calls to
-	 * at_io_read_stop()
+	 * io_io_read_stop()
 	 */
 	ret = io_mon_activate_in_source(io->mon, &io->readctx.src, 1);
 	if (ret < 0)
@@ -187,16 +202,16 @@ int at_io_read_start(struct at_io *io, at_io_read_cb_t cb, void *data,
 		rs_rb_empty(&io->readctx.rb);
 
 	/* update read state */
-	io->readctx.state = AT_IO_STARTED;
+	io->readctx.state = IO_IO_STARTED;
 	return 0;
 }
 
-int at_io_read_stop(struct at_io *io)
+int io_io_read_stop(struct io_io *io)
 {
 	if (NULL == io)
 		return -EINVAL;
 
-	if (io->readctx.state != AT_IO_STARTED)
+	if (io->readctx.state != IO_IO_STARTED)
 		return -EBUSY;
 
 	/* reset callback info */
@@ -204,13 +219,23 @@ int at_io_read_stop(struct at_io *io)
 	io->readctx.data = NULL;
 
 	/* update state */
-	io->readctx.state = AT_IO_STOPPED;
+	io->readctx.state = IO_IO_STOPPED;
 
 	/* unregister read source in loop */
 	return io_mon_remove_source(io->mon, &io->readctx.src);
 }
 
-static int at_io_write(int fd, int log, const char *name, const void *buffer,
+/**
+ *
+ * @param fd
+ * @param log
+ * @param name
+ * @param buffer
+ * @param size
+ * @param length
+ * @return
+ */
+static int write_io(int fd, int log, const char *name, const void *buffer,
 		size_t size, size_t *length)
 {
 	int ret = 0;
@@ -234,10 +259,14 @@ static int at_io_write(int fd, int log, const char *name, const void *buffer,
 	return ret;
 }
 
-static void at_io_write_process_next(struct at_io *io)
+/**
+ *
+ * @param io
+ */
+static void process_next_write(struct io_io *io)
 {
 	struct rs_node *first;
-	struct at_io_write_ctx *ctx = &io->writectx;
+	struct io_io_write_ctx *ctx = &io->writectx;
 
 	/* reset current buffer info */
 	ctx->current = NULL;
@@ -247,7 +276,7 @@ static void at_io_write_process_next(struct at_io *io)
 	first = rs_dll_pop(&ctx->buffers);
 	if (first) {
 		/* get next write buffer */
-		ctx->current = rs_container_of(first, struct at_io_write_buffer,
+		ctx->current = rs_container_of(first, struct io_io_write_buffer,
 				node);
 		/* add fd object in loop if not already done */
 		io_mon_activate_out_source(io->mon, &ctx->src, 1);
@@ -262,12 +291,12 @@ static void at_io_write_process_next(struct at_io *io)
 	}
 }
 
-static void at_io_write_timer(struct io_src_tmr *timer, uint64_t *nbexpired)
+static void write_timer_cb(struct io_src_tmr *timer, uint64_t *nbexpired)
 {
-	struct at_io_write_ctx *ctx = rs_container_of(timer,
-			struct at_io_write_ctx, timer);
-	struct at_io *io = rs_container_of(ctx, struct at_io, writectx);
-	struct at_io_write_buffer *buffer;
+	struct io_io_write_ctx *ctx = rs_container_of(timer,
+			struct io_io_write_ctx, timer);
+	struct io_io *io = rs_container_of(ctx, struct io_io, writectx);
+	struct io_io_write_buffer *buffer;
 
 	/* get current write buffer */
 	buffer = ctx->current;
@@ -277,19 +306,19 @@ static void at_io_write_timer(struct io_src_tmr *timer, uint64_t *nbexpired)
 	}
 
 	/* process next buffer */
-	at_io_write_process_next(io);
+	process_next_write(io);
 
 	/* notify buffer cb */
-	(*buffer->cb)(buffer, AT_IO_WRITE_TIMEOUT);
+	(*buffer->cb)(buffer, IO_IO_WRITE_TIMEOUT);
 }
 
-static void at_io_write_events(struct io_src *write_src)
+static void write_src_cb(struct io_src *write_src)
 {
-	struct at_io_write_ctx *writectx = rs_container_of(write_src,
-			struct at_io_write_ctx, src);
-	struct at_io *io = rs_container_of(writectx, struct at_io, writectx);
-	struct at_io_write_buffer *buffer;
-	enum at_io_write_status status;
+	struct io_io_write_ctx *writectx = rs_container_of(write_src,
+			struct io_io_write_ctx, src);
+	struct io_io *io = rs_container_of(writectx, struct io_io, writectx);
+	struct io_io_write_buffer *buffer;
+	enum io_io_write_status status;
 	size_t length = 0;
 	int ret = 0;
 
@@ -313,7 +342,7 @@ static void at_io_write_events(struct io_src *write_src)
 
 	/* write current buffer */
 	while (ret == 0 && writectx->nbwritten < buffer->length) {
-		ret = at_io_write(write_src->fd, io->log[AT_IO_TX], io->name,
+		ret = write_io(write_src->fd, io->log[IO_IO_TX], io->name,
 				(uint8_t *)buffer->address + writectx->nbwritten,
 				buffer->length - writectx->nbwritten, &length);
 		if (ret == 0) {
@@ -333,70 +362,70 @@ static void at_io_write_events(struct io_src *write_src)
 	/* wait for a next write ready if needed else buffer process completed*/
 	if (ret != -EAGAIN) {
 
-		at_io_write_process_next(io);
+		process_next_write(io);
 
 		/* notify buffer cb */
-		status = ret == 0 ? AT_IO_WRITE_OK : AT_IO_WRITE_ERROR;
+		status = ret == 0 ? IO_IO_WRITE_OK : IO_IO_WRITE_ERROR;
 		(*buffer->cb)(buffer, status);
 	}
 }
 
-static void at_io_write_default_cb(struct at_io_write_buffer *buffer,
-	enum at_io_write_status status)
+static void default_write_cb(struct io_io_write_buffer *buffer,
+	enum io_io_write_status status)
 {
 
 }
 
 
 /*  add write buffer in queue */
-int at_io_write_add(struct at_io *io, struct at_io_write_buffer *buffer)
+int io_io_write_add(struct io_io *io, struct io_io_write_buffer *buffer)
 {
 	int ret = 0;
-	struct at_io_write_ctx *ctx = &io->writectx;
+	struct io_io_write_ctx *ctx = &io->writectx;
 
 	if (!buffer->address || buffer->length == 0)
 		return -EINVAL;
 
 	if (!buffer->cb) {
-		buffer->cb = &at_io_write_default_cb;
+		buffer->cb = &default_write_cb;
 		buffer->data = io;
 	}
 
 	rs_dll_enqueue(&ctx->buffers, &buffer->node);
 	if (ctx->current == NULL)
-		at_io_write_process_next(io);
+		process_next_write(io);
 
 	return ret;
 }
 
 /* abort all write buffers in io write queue
- * (buffer cb invoked with status AT_IO_WRITE_ABORTED) */
-int at_io_write_abort(struct at_io *io)
+ * (buffer cb invoked with status IO_IO_WRITE_ABORTED) */
+int io_io_write_abort(struct io_io *io)
 {
-	struct at_io_write_ctx *ctx = &io->writectx;
-	struct at_io_write_buffer *buffer = NULL;
-	struct at_io_write_buffer *tmp;
+	struct io_io_write_ctx *ctx = &io->writectx;
+	struct io_io_write_buffer *buffer = NULL;
+	struct io_io_write_buffer *tmp;
 	struct rs_node *node;
 
 	buffer = ctx->current;
 
 	/* TODO: how to be safe on io destroy call in write cb here ? */
 	if (buffer) {
-		(*buffer->cb) (buffer, AT_IO_WRITE_ABORTED);
+		(*buffer->cb) (buffer, IO_IO_WRITE_ABORTED);
 		ctx->current = NULL;
 		ctx->nbwritten = 0;
 	}
 
 	while ((node = rs_dll_pop(&ctx->buffers))) {
-		tmp = rs_container_of(node, struct at_io_write_buffer, node);
-		(*buffer->cb) (buffer, AT_IO_WRITE_ABORTED);
+		tmp = rs_container_of(node, struct io_io_write_buffer, node);
+		(*buffer->cb) (buffer, IO_IO_WRITE_ABORTED);
 	}
 
-	at_io_write_process_next(io);
+	process_next_write(io);
 	return 0;
 }
 
-int at_io_create(struct at_io *io, struct io_mon *mon, const char *name,
+int io_io_create(struct io_io *io, struct io_mon *mon, const char *name,
 		int fd_in, int fd_out, int ign_eof)
 {
 	int ret;
@@ -409,40 +438,40 @@ int at_io_create(struct at_io *io, struct io_mon *mon, const char *name,
 
 	memset(io, 0, sizeof(*io));
 
-	io->fds[AT_IO_RX] = fd_in;
+	io->fds[IO_IO_RX] = fd_in;
 	/* TODO crappy way to support full duplex file descriptors */
 	if (fd_out == fd_in) {
-		io->fds[AT_IO_TX] = dup(fd_out);
+		io->fds[IO_IO_TX] = dup(fd_out);
 		io->dupped = 1;
 	} else {
-		io->fds[AT_IO_TX] = fd_out;
+		io->fds[IO_IO_TX] = fd_out;
 		io->dupped = 0;
 	}
 
 	/* disable io log by default */
-	io->log[AT_IO_RX] = 0;
-	io->log[AT_IO_TX] = 0;
+	io->log[IO_IO_RX] = 0;
+	io->log[IO_IO_TX] = 0;
 
 	/* create 2KB ring buffer for read */
 	ret = rs_rb_init(&io->readctx.rb, io->readctx.rb_buffer,
-			AT_IO_RB_BUFFER_SIZE);
+			IO_IO_RB_BUFFER_SIZE);
 	if (ret < 0)
 		return ret;
 
 	/* TODO split out creation/initialization of read and write contexts */
 
 	/* add read fd object */
-	io_src_init(&io->readctx.src, io->fds[AT_IO_RX], IO_IN,
-			&at_io_read_events);
+	io_src_init(&io->readctx.src, io->fds[IO_IO_RX], IO_IN,
+			&read_src_cb);
 
 	/* set read state to disable */
-	io->readctx.state = AT_IO_STOPPED;
+	io->readctx.state = IO_IO_STOPPED;
 	io->readctx.cb = NULL;
 	io->readctx.data = NULL;
 	io->readctx.ign_eof = ign_eof;
 
 	/* create write timer */
-	ret = io_src_tmr_init(&io->writectx.timer, &at_io_write_timer);
+	ret = io_src_tmr_init(&io->writectx.timer, &write_timer_cb);
 	if (ret < 0)
 		goto free_rb;
 
@@ -454,12 +483,12 @@ int at_io_create(struct at_io *io, struct io_mon *mon, const char *name,
 	rs_dll_init(&io->writectx.buffers, NULL);
 
 	/* create a write source with fd_out */
-	io_src_init(&io->writectx.src, io->fds[AT_IO_TX], IO_OUT,
-			&at_io_write_events);
+	io_src_init(&io->writectx.src, io->fds[IO_IO_TX], IO_OUT,
+			&write_src_cb);
 
 	/* set default write ready timeout to 10s */
 	io->writectx.timeout = 10000;
-	io->writectx.state = AT_IO_STARTED;
+	io->writectx.state = IO_IO_STARTED;
 	io->name = strdup(name);
 
 	ret = io_mon_add_sources(mon,
@@ -480,11 +509,11 @@ free_rb:
 	return ret;
 }
 
-int at_io_destroy(struct at_io *io)
+int io_io_destroy(struct io_io *io)
 {
 	/* stop read if started */
-	if (io->readctx.state == AT_IO_STARTED)
-		at_io_read_stop(io);
+	if (io->readctx.state == IO_IO_STARTED)
+		io_io_read_stop(io);
 
 	io_mon_remove_source(io->mon, &io->writectx.timer.src);
 	io_mon_remove_source(io->mon, &io->writectx.src);
@@ -492,13 +521,13 @@ int at_io_destroy(struct at_io *io)
 	io_src_clean(&io->readctx.src);
 
 	/* destroy write */
-	at_io_write_abort(io);
+	io_io_write_abort(io);
 
 	/* TODO io_mon_remove_source(&io->loop->mon, &io->writectx.timer.src) */
 	io_src_tmr_clean(&io->writectx.timer);
 	free(io->name);
 	if (io->dupped)
-		io_close(io->fds + AT_IO_TX);
+		io_close(io->fds + IO_IO_TX);
 	memset(io, 0, sizeof(*io));
 
 	return 0;
