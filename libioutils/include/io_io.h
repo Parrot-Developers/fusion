@@ -1,14 +1,14 @@
 /**
- * @file at_io.h
- * @brief mambo io
+ * @file io_io.h
+ * @brief Duplex io source with managed reads and writes
  *
  * @date May 2011
  * @author Jean-Baptiste Dubois
  * @copyright Copyright (C) 2011 Parrot S.A.
  */
 
-#ifndef AT_IO_H_
-#define AT_IO_H_
+#ifndef IO_IO_H_
+#define IO_IO_H_
 
 #include <rs_rb.h>
 #include <rs_dll.h>
@@ -123,5 +123,5 @@ int at_io_write_add(struct at_io *io, struct at_io_write_buffer *buffer);
  * (buffer cb invoked with status AT_IO_WRITE_ABORTED) */
 int at_io_write_abort(struct at_io *io);
 
-#endif /* _AT_IO_H_ */
+#endif /* IO_IO_H_ */
 

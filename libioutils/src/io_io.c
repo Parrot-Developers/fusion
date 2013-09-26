@@ -1,6 +1,6 @@
 /**
- * @file at_io.c
- * @brief mambo io
+ * @file io_io.c
+ * @brief Duplex io source with managed reads and writes
  *
  * @date May 2011
  * @author Jean-Baptiste Dubois
@@ -26,14 +26,7 @@
 #include <io_src_tmr.h>
 #include <io_utils.h>
 
-#include "at_io.h"
-
-/* #define AT_IO_DBG */
-#ifdef AT_IO_DBG
-#define dbg(fmt, ...) at_log_dbg((fmt), __VA_ARGS__)
-#else
-#define dbg(fmt, ...)
-#endif
+#include "io_io.h"
 
 #define at_log_raw(...) do {} while (0)
 #define at_log_level(...) 0
@@ -228,9 +221,6 @@ static int at_io_write(int fd, int log, const char *name, const void *buffer,
 	do {
 		nbytes = write(fd, buffer, size);
 	} while (nbytes == -1 && errno == EINTR);
-
-	dbg("write(%d, %p, %d) ret:%d %s", fd, buffer, size, nbytes,
-		nbytes == -1 ? strerror(errno) : "");
 
 	if (nbytes == -1)
 		return -errno;
