@@ -67,6 +67,7 @@ int io_src_tmr_init(struct io_src_tmr *tmr, io_tmr_cb_t cb);
  * timer is one shot. Use io_src_tmr_set_periodic() to make it periodic.
  * @param tmr Timer source to arm
  * @param timeout Timeout of the timer IO_SRC_TMR_DISARM for timeout to disarm
+ * in ms
  * @return errno compatible negative value on error, 0 on success
  */
 int io_src_tmr_set(struct io_src_tmr *tmr, int timeout);
