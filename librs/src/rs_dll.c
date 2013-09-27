@@ -216,7 +216,7 @@ struct rs_node *rs_dll_remove(struct rs_dll *dll, struct rs_node *node)
 	int match(struct rs_node *n, const void *data)
 	{
 		return dll->vtable.equals(n, data);
-	};
+	}
 
 	return rs_dll_remove_match(dll, match, node);
 }
