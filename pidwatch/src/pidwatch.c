@@ -62,7 +62,7 @@
 #define SOCK_NONBLOCK O_NONBLOCK
 #endif
 
-#define MSG_BUF_SIZE 4096
+#define MSG_BUF_SIZE 1024
 
 static int subscription_message(int pidfd)
 {
