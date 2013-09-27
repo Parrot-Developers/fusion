@@ -69,7 +69,6 @@ static void my_dummy_callback(__attribute__((unused)) struct io_src *src)
 
 static void testMON_GET_SOURCE(void)
 {
-	int fd;
 	struct io_mon mon;
 	struct io_src *src;
 	int ret;
