@@ -10,6 +10,7 @@
 #ifndef IO_FAUTES_H_
 #define IO_FAUTES_H_
 
+extern struct suite_t io_suite;
 extern struct suite_t mon_suite;
 extern struct suite_t src_msg_suite;
 extern struct suite_t src_msg_uad_suite;

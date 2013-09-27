@@ -15,6 +15,7 @@
 const char const *fautes_lib_name = "libioutils";
 
 struct suite_t *libioutils_test_suites[] = {
+		&io_suite,
 		&mon_suite,
 		&src_msg_suite,
 		&src_msg_uad_suite,
@@ -30,6 +31,7 @@ struct suite_t *libioutils_test_suites[] = {
 
 void libioutils_init_test_suites(void)
 {
+	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(io_suite);
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(mon_suite);
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(src_msg_suite);
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(src_msg_uad_suite);
