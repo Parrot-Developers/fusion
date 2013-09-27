@@ -410,24 +410,24 @@ int io_io_write_abort(struct io_io *io)
 {
 	struct io_io_write_ctx *ctx = &io->writectx;
 	struct io_io_write_buffer *buffer = NULL;
-	struct io_io_write_buffer *tmp;
 	struct rs_node *node;
 
 	buffer = ctx->current;
 
 	/* TODO: how to be safe on io destroy call in write cb here ? */
 	if (buffer) {
-		(*buffer->cb) (buffer, IO_IO_WRITE_ABORTED);
+		(*buffer->cb)(buffer, IO_IO_WRITE_ABORTED);
 		ctx->current = NULL;
 		ctx->nbwritten = 0;
 	}
 
 	while ((node = rs_dll_pop(&ctx->buffers))) {
-		tmp = rs_container_of(node, struct io_io_write_buffer, node);
+		buffer = rs_container_of(node, struct io_io_write_buffer, node);
 		(*buffer->cb)(buffer, IO_IO_WRITE_ABORTED);
 	}
 
 	process_next_write(io);
+
 	return 0;
 }
 
