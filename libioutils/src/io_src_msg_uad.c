@@ -81,6 +81,7 @@ static int process_out_event(struct io_src_msg_uad *uad)
 static int process_event(struct io_src_msg_uad *uad, enum io_src_event evt)
 {
 	/* here evt is either IO_IN or IO_OUT, not both */
+	/* coverity[mixed_enums] */
 	return IO_IN == evt ? process_in_event(uad) : process_out_event(uad);
 }
 
@@ -94,6 +95,7 @@ static void uad_cb(struct io_src_msg *src, enum io_src_event evt)
 {
 	struct io_src_msg_uad *uad = to_src_msg_uad(src);
 
+	/* coverity[mixed_enums] */
 	if (IO_IN != evt && IO_OUT != evt)
 		return;
 
