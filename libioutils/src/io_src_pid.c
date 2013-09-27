@@ -12,6 +12,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <string.h>
 
 #include <pidwatch.h>
 
@@ -57,6 +58,8 @@ int io_src_pid_init(struct io_src_pid *pid_src, io_pid_cb_t *cb)
 	if (NULL == pid_src || NULL == cb)
 		return -EINVAL;
 
+	memset(pid_src, 0, sizeof(*pid_src));
+	io_src_clean(&(pid_src->src));
 	pidfd = pidwatch_create(SOCK_CLOEXEC | SOCK_NONBLOCK);
 	if (0 > pidfd)
 		goto out;
