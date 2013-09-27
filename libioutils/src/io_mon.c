@@ -322,7 +322,7 @@ int io_mon_add_sources(struct io_mon *mon, ...)
 {
 	struct io_src *src;
 	va_list args;
-	int ret;
+	int ret = 0;
 
 	if (NULL == mon)
 		return -EINVAL;
@@ -334,11 +334,11 @@ int io_mon_add_sources(struct io_mon *mon, ...)
 			break;
 		ret = io_mon_add_source(mon, src);
 		if (0 != ret)
-			return ret;
+			break;
 	} while (1);
 	va_end(args);
 
-	return 0;
+	return ret;
 }
 
 int io_mon_remove_source(struct io_mon *mon, struct io_src *src)
