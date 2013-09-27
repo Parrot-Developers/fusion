@@ -124,8 +124,8 @@ static void read_src_cb(struct io_src *read_src)
 
 		/* notify client if new bytes available */
 		if (readctx->newbytes > 0) {
-			cbret = (*readctx->cb) (io, &readctx->rb, readctx->newbytes,
-					readctx->data);
+			cbret = (*readctx->cb)(io, &readctx->rb,
+					readctx->newbytes, readctx->data);
 			/* continue only if client need more data */
 			if (cbret != 0)
 				return;
@@ -135,8 +135,8 @@ static void read_src_cb(struct io_src *read_src)
 	/* log something if read buffer is full */
 	if (rs_rb_get_write_length(&readctx->rb) == 0) {
 		/* TODO replace with a client notification */
-//		at_log_warn("%s fd=%d, io read buffer(%dB) full, data lost!",
-//				io->name, fd, rs_rb_get_size(&readctx->rb));
+/*		at_log_warn("%s fd=%d, io read buffer(%dB) full, data lost!",
+				io->name, fd, rs_rb_get_size(&readctx->rb)); */
 		rs_rb_empty(&readctx->rb);
 	}
 
@@ -148,7 +148,8 @@ static void read_src_cb(struct io_src *read_src)
 		io_src_clean(&readctx->src);
 		/* update state and notify client */
 		readctx->state = IO_IO_ERROR;
-		(*readctx->cb) (io, &readctx->rb, readctx->newbytes, readctx->data);
+		(*readctx->cb)(io, &readctx->rb, readctx->newbytes,
+				readctx->data);
 	}
 }
 
@@ -347,7 +348,8 @@ static void write_src_cb(struct io_src *write_src)
 	/* write current buffer */
 	while (ret == 0 && writectx->nbwritten < buffer->length) {
 		ret = write_io(write_src->fd, io->log[IO_IO_TX], io->name,
-				(uint8_t *)buffer->address + writectx->nbwritten,
+				(uint8_t *) buffer->address
+						+ writectx->nbwritten,
 				buffer->length - writectx->nbwritten, &length);
 		if (ret == 0) {
 			/* clear eagain flags */
@@ -422,7 +424,7 @@ int io_io_write_abort(struct io_io *io)
 
 	while ((node = rs_dll_pop(&ctx->buffers))) {
 		tmp = rs_container_of(node, struct io_io_write_buffer, node);
-		(*buffer->cb) (buffer, IO_IO_WRITE_ABORTED);
+		(*buffer->cb)(buffer, IO_IO_WRITE_ABORTED);
 	}
 
 	process_next_write(io);

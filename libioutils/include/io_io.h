@@ -94,8 +94,8 @@ struct io_io {
 
 /* create an io
  * set 0 to stop read on end of file, 1 to continue read */
-int io_io_create(struct io_io *io, struct io_mon * mon, const char *name,
-		 int fd_in, int fd_out, int ign_eof);
+int io_io_create(struct io_io *io, struct io_mon *mon, const char *name,
+		int fd_in, int fd_out, int ign_eof);
 
 /* destroy an io */
 int io_io_destroy(struct io_io *io);
