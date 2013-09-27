@@ -292,10 +292,21 @@ static const struct test_t tests[] = {
 		{.fn = NULL, .name = NULL},
 };
 
+static int init_src_pid_suite(void)
+{
+	if (getuid() !=0) {
+		fprintf(stderr, "\nsrc_pid_suite tes suite can't run without "
+				"root privileges\n");
+		return -1;
+	}
+
+	return 0;
+}
+
 struct suite_t src_pid_suite = {
 		 /* name of the module, corresponds to the functions prefix */
 		.name = "io_src_pid",
-		.init = NULL,
+		.init = init_src_pid_suite,
 		.clean = NULL,
 		.tests = tests,
 };
