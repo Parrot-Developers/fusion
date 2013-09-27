@@ -67,6 +67,31 @@ static void my_dummy_callback(__attribute__((unused)) struct io_src *src)
 	/* do nothing */
 }
 
+static void testMON_GET_SOURCE(void)
+{
+	int fd;
+	struct io_mon mon;
+	struct io_src *src;
+	int ret;
+
+	/* initialisation */
+	ret = io_mon_init(&mon);
+	CU_ASSERT_EQUAL(ret, 0);
+
+	/* normal use cases */
+	src = io_mon_get_source(&mon);
+	CU_ASSERT_PTR_NOT_NULL(src);
+	CU_ASSERT_EQUAL(io_src_get_fd(src), io_mon_get_fd(&mon));
+	CU_ASSERT(io_src_is_active(src, IO_NONE));
+
+	/* error use cases */
+	src = io_mon_get_source(NULL);
+	CU_ASSERT_PTR_NULL(src);
+
+	/* cleanup */
+	io_mon_clean(&mon);
+}
+
 static void testMON_ADD_SOURCE(void)
 {
 	int pipefd[2] = {-1, -1};
@@ -489,6 +514,10 @@ static const struct test_t tests[] = {
 		{
 				.fn = testMON_GET_FD,
 				.name = "io_mon_get_fd"
+		},
+		{
+				.fn = testMON_GET_SOURCE,
+				.name = "io_mon_get_source"
 		},
 		{
 				.fn = testMON_ADD_SOURCE,

@@ -414,6 +414,7 @@ int io_mon_clean(struct io_mon *mon)
 	if (-1 != mon->epollfd)
 		io_close(&mon->epollfd);
 	memset(mon, 0, sizeof(*mon));
+	io_src_clean(&mon->src);
 	mon->epollfd = -1;
 
 	return 0;
