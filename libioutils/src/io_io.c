@@ -176,7 +176,7 @@ int io_io_log_tx(struct io_io *io, int enable)
 /* get read state */
 int io_io_read_state(struct io_io *io)
 {
-	return io->readctx.state;
+	return NULL == io ? IO_IO_ERROR : io->readctx.state;
 }
 
 int io_io_read_start(struct io_io *io, io_io_read_cb_t cb, void *data,
@@ -517,6 +517,9 @@ free_rb:
 
 int io_io_destroy(struct io_io *io)
 {
+	if (NULL == io)
+		return -EINVAL;
+
 	/* stop read if started */
 	if (io->readctx.state == IO_IO_STARTED)
 		io_io_read_stop(io);
