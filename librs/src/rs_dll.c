@@ -67,7 +67,7 @@ void rs_dll_dump(struct rs_dll *dll)
 		print(node);
 
 		return 0;
-	};
+	}
 
 	rs_node_foreach(dll->head, display, dll->vtable.print);
 }
@@ -135,7 +135,7 @@ struct rs_node *rs_dll_find(struct rs_dll *dll, struct rs_node *node)
 	int match(struct rs_node *n, const void *data)
 	{
 		return dll->vtable.equals(n, data);
-	};
+	}
 
 	return rs_dll_find_match(dll, match, node);
 }
