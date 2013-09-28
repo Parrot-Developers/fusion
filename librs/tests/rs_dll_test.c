@@ -35,7 +35,7 @@ static int dll_test_equals(struct rs_node *a, const struct rs_node *b)
 	return 0 == (int_node_a->val - int_node_b->val);
 }
 
-void dll_test_print(struct rs_node *node)
+static void dll_test_print(struct rs_node *node)
 {
 	struct int_node *int_node = to_int_node(node);
 

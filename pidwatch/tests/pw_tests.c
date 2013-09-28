@@ -87,14 +87,14 @@ out:
 	fclose(pmf);
 }
 
-void dump_args(int argc, char *argv[])
+static void dump_args(int argc, char *argv[])
 {
 	do {
 		fprintf(stderr, "%s ", *argv);
 	} while (*(++argv));
 }
 
-pid_t __attribute__((sentinel)) launch(char *prog, ...)
+static pid_t __attribute__((sentinel)) launch(char *prog, ...)
 {
 	int ret;
 	int child_argc = 0;
@@ -152,7 +152,7 @@ pid_t __attribute__((sentinel)) launch(char *prog, ...)
 	_return;\
 })\
 
-void testPIDWATCH_CREATE(void)
+static void testPIDWATCH_CREATE(void)
 {
 	int pidfd;
 	int invalid_flag;
@@ -169,7 +169,7 @@ void testPIDWATCH_CREATE(void)
 	CU_ASSERT_EQUAL(pidfd, -1);
 }
 
-void testPIDWATCH_WAIT(void)
+static void testPIDWATCH_WAIT(void)
 {
 	pid_t pid;
 	pid_t pid_ret;

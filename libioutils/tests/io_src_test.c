@@ -142,7 +142,7 @@ static void testSRC_IS_ACTIVE(void)
 	io_close(&pipefd[1]);
 }
 
-void testSRC_GET_FD(void)
+static void testSRC_GET_FD(void)
 {
 	int ret;
 	struct io_src src;

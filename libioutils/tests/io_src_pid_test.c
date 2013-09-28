@@ -24,14 +24,14 @@
 #include <io_mon.h>
 #include <io_src_pid.h>
 
-void dump_args(int argc, char *argv[])
+static void dump_args(int argc, char *argv[])
 {
 	do {
 		fprintf(stderr, "%s ", *argv);
 	} while (*(++argv));
 }
 
-pid_t __attribute__((sentinel)) launch(char *prog, ...)
+static pid_t __attribute__((sentinel)) launch(char *prog, ...)
 {
 	int ret;
 	int child_argc = 0;
