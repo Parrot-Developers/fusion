@@ -515,7 +515,7 @@ free_rb:
 	return ret;
 }
 
-int io_io_destroy(struct io_io *io)
+int io_io_clean(struct io_io *io)
 {
 	if (NULL == io)
 		return -EINVAL;

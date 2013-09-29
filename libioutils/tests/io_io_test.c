@@ -19,7 +19,7 @@
 
 #define SUITE_NAME "io_suite"
 
-static void testIO_CREATE(void)
+static void testIO_INIT(void)
 {
 	int ret;
 	int sockets[2];
@@ -52,13 +52,13 @@ static void testIO_CREATE(void)
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	/* cleanup */
-	io_io_destroy(&io);
+	io_io_clean(&io);
 	io_close(sockets + 0);
 	io_close(sockets + 1);
 	io_mon_clean(&mon);
 }
 
-static void testIO_DESTROY(void)
+static void testIO_CLEAN(void)
 {
 	int ret;
 	int sockets[2];
@@ -75,11 +75,11 @@ static void testIO_DESTROY(void)
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
 
 	/* normal use cases */
-	ret = io_io_destroy(&io);
+	ret = io_io_clean(&io);
 	CU_ASSERT_EQUAL(ret, 0);
 
 	/* error use cases */
-	ret = io_io_destroy(NULL);
+	ret = io_io_clean(NULL);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	/* cleanup */
@@ -121,7 +121,7 @@ static void testIO_READ_START(void)
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	/* cleanup */
-	io_io_destroy(&io);
+	io_io_clean(&io);
 	io_mon_clean(&mon);
 	io_close(sockets + 0);
 	io_close(sockets + 1);
@@ -184,7 +184,7 @@ static void testIO_READ_STOP(void)
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	/* cleanup */
-	io_io_destroy(&io);
+	io_io_clean(&io);
 	io_mon_clean(&mon);
 	io_close(sockets + 0);
 	io_close(sockets + 1);
@@ -227,7 +227,7 @@ static void testIO_READ_STATE(void)
 	CU_ASSERT_EQUAL(state, IO_IO_ERROR);
 
 	/* cleanup */
-	io_io_destroy(&io);
+	io_io_clean(&io);
 	io_mon_clean(&mon);
 	io_close(sockets + 0);
 	io_close(sockets + 1);
@@ -408,7 +408,7 @@ out:
 	io_io_read_stop(&io);
 	io_mon_remove_source(&mon, &sock_src);
 	io_src_clean(&sock_src);
-	io_io_destroy(&io);
+	io_io_clean(&io);
 	io_mon_clean(&mon);
 	io_close(sockets + 0);
 	io_close(sockets + 1);
@@ -416,12 +416,12 @@ out:
 
 static const struct test_t tests[] = {
 		{
-				.fn = testIO_CREATE,
-				.name = "io_io_create"
+				.fn = testIO_INIT,
+				.name = "io_io_init"
 		},
 		{
-				.fn = testIO_DESTROY,
-				.name = "io_io_destroy"
+				.fn = testIO_CLEAN,
+				.name = "io_io_clean"
 		},
 		{
 				.fn = testIO_READ_START,

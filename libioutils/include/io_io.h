@@ -105,8 +105,13 @@ struct io_io {
 int io_io_init(struct io_io *io, struct io_mon *mon, const char *name,
 		int fd_in, int fd_out, int ign_eof);
 
-/* destroy an io */
-int io_io_destroy(struct io_io *io);
+/**
+ * Cleans up all the resources associated to an io and make it ready for a new
+ * call to io_io_init()
+ * @param io IO context to cleanup
+ * @return Negative errno-compatible value on error, 0 on success
+ */
+int io_io_clean(struct io_io *io);
 
 /* start reading io */
 int io_io_read_start(struct io_io *io, io_io_read_cb_t cb, void *data,
