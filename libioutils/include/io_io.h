@@ -92,9 +92,17 @@ struct io_io {
 	struct io_io_write_ctx writectx;/**< io write context */
 };
 
-/* create an io
- * set 0 to stop read on end of file, 1 to continue read */
-int io_io_create(struct io_io *io, struct io_mon *mon, const char *name,
+/**
+ * Initializes an io
+ * @param io IO context to initialize
+ * @param mon Monitor
+ * @param name Name of the IO, used for logging purpose only
+ * @param fd_in File descriptor for reading
+ * @param fd_out File descriptor for writing, can be the same as fd_in
+ * @param ign_eof set 0 to stop read on end of file, 1 to continue read
+ * @return
+ */
+int io_io_init(struct io_io *io, struct io_mon *mon, const char *name,
 		int fd_in, int fd_out, int ign_eof);
 
 /* destroy an io */

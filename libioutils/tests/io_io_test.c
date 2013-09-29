@@ -34,21 +34,21 @@ static void testIO_CREATE(void)
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
 
 	/* normal use cases */
-	ret = io_io_create(&io, &mon, SUITE_NAME, sockets[0], sockets[0], 0);
+	ret = io_io_init(&io, &mon, SUITE_NAME, sockets[0], sockets[0], 0);
 	CU_ASSERT_EQUAL(ret, 0);
 
 	/* error use cases */
-	ret = io_io_create(NULL, &mon, SUITE_NAME, sockets[0], sockets[0], 0);
+	ret = io_io_init(NULL, &mon, SUITE_NAME, sockets[0], sockets[0], 0);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_io_create(&io, NULL, SUITE_NAME, sockets[0], sockets[0], 0);
+	ret = io_io_init(&io, NULL, SUITE_NAME, sockets[0], sockets[0], 0);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_io_create(&io, &mon, NULL, sockets[0], sockets[0], 0);
+	ret = io_io_init(&io, &mon, NULL, sockets[0], sockets[0], 0);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_io_create(&io, NULL, "", sockets[0], sockets[0], 0);
+	ret = io_io_init(&io, NULL, "", sockets[0], sockets[0], 0);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_io_create(&io, &mon, SUITE_NAME, -1, sockets[0], 0);
+	ret = io_io_init(&io, &mon, SUITE_NAME, -1, sockets[0], 0);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_io_create(&io, &mon, SUITE_NAME, sockets[0], -1, 0);
+	ret = io_io_init(&io, &mon, SUITE_NAME, sockets[0], -1, 0);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	/* cleanup */
@@ -71,7 +71,7 @@ static void testIO_DESTROY(void)
 	ret = socketpair(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0,
 			sockets);
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
-	ret = io_io_create(&io, &mon, SUITE_NAME, sockets[0], sockets[0], 1);
+	ret = io_io_init(&io, &mon, SUITE_NAME, sockets[0], sockets[0], 1);
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
 
 	/* normal use cases */
@@ -106,7 +106,7 @@ static void testIO_READ_START(void)
 	ret = socketpair(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0,
 			sockets);
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
-	ret = io_io_create(&io, &mon, SUITE_NAME, sockets[0], sockets[0], 0);
+	ret = io_io_init(&io, &mon, SUITE_NAME, sockets[0], sockets[0], 0);
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
 
 	/* normal use cases */
@@ -169,7 +169,7 @@ static void testIO_READ_STOP(void)
 	ret = socketpair(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0,
 			sockets);
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
-	ret = io_io_create(&io, &mon, SUITE_NAME, sockets[0], sockets[0], 1);
+	ret = io_io_init(&io, &mon, SUITE_NAME, sockets[0], sockets[0], 1);
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
 	ret = io_io_read_start(&io, io_cb, (void *)42, 0);
 	CU_ASSERT_EQUAL(ret, 0);
@@ -209,7 +209,7 @@ static void testIO_READ_STATE(void)
 	ret = socketpair(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0,
 			sockets);
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
-	ret = io_io_create(&io, &mon, SUITE_NAME, sockets[0], sockets[0], 1);
+	ret = io_io_init(&io, &mon, SUITE_NAME, sockets[0], sockets[0], 1);
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
 	ret = io_io_read_start(&io, io_cb, (void *)42, 0);
 	CU_ASSERT_EQUAL(ret, 0);
@@ -362,7 +362,7 @@ static void testIO_SIMPLE_USE_CASE(void)
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
 	ret = io_mon_add_source(&mon, &sock_src);
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
-	ret = io_io_create(&io, &mon, SUITE_NAME, sockets[0], sockets[0], 1);
+	ret = io_io_init(&io, &mon, SUITE_NAME, sockets[0], sockets[0], 1);
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
 	ret = io_io_read_start(&io, io_cb, (void *)42, 0);
 	CU_ASSERT_EQUAL(ret, 0);

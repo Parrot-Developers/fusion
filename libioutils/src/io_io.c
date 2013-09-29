@@ -431,7 +431,7 @@ int io_io_write_abort(struct io_io *io)
 	return 0;
 }
 
-int io_io_create(struct io_io *io, struct io_mon *mon, const char *name,
+int io_io_init(struct io_io *io, struct io_mon *mon, const char *name,
 		int fd_in, int fd_out, int ign_eof)
 {
 	int ret;
