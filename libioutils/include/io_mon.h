@@ -93,6 +93,8 @@ int io_mon_add_sources(struct io_mon *mon, ...)
  */
 int io_mon_remove_source(struct io_mon *mon, struct io_src *src);
 
+/* TODO implement io_mon_remove_sources */
+
 /**
  * Dumps the events in an epoll event flag set
  * @param events Epoll events set

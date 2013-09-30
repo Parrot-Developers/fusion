@@ -41,6 +41,8 @@ enum io_src_event {
  */
 #define IO_EPOLL_ERROR_EVENTS (EPOLLERR | EPOLLHUP | EPOLLRDHUP)
 
+/* TODO replace these macros by a io_src_has_XXX(src) */
+
 /**
  * @def io_src_has_error
  * @brief Returns 1 if the epoll event set contains at least one error event
