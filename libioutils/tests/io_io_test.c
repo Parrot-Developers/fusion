@@ -94,8 +94,7 @@ static void testIO_READ_START(void)
 	int sockets[2];
 	struct io_mon mon;
 	struct io_io io;
-	int io_cb(struct io_io *io, struct rs_rb *rb, size_t newbytes,
-			void *data)
+	int io_cb(struct io_io *io, struct rs_rb *rb, void *data)
 	{
 
 		return 0;
@@ -157,8 +156,7 @@ static void testIO_READ_STOP(void)
 	int sockets[2];
 	struct io_mon mon;
 	struct io_io io;
-	int io_cb(struct io_io *io, struct rs_rb *rb, size_t newbytes,
-			void *data)
+	int io_cb(struct io_io *io, struct rs_rb *rb, void *data)
 	{
 
 		return 0;
@@ -197,8 +195,7 @@ static void testIO_READ_STATE(void)
 	struct io_mon mon;
 	struct io_io io;
 	enum io_io_state state;
-	int io_cb(struct io_io *io, struct rs_rb *rb, size_t newbytes,
-			void *data)
+	int io_cb(struct io_io *io, struct rs_rb *rb, void *data)
 	{
 
 		return 0;
@@ -308,9 +305,10 @@ static void testIO_SIMPLE_USE_CASE(void)
 				.address = MSG2,
 			},
 	};
-	int io_cb(struct io_io *io, struct rs_rb *rb, size_t newbytes,
-			void *data)
+	int io_cb(struct io_io *io, struct rs_rb *rb, void *data)
 	{
+		size_t newbytes = rs_rb_get_read_length(rb);
+
 		if (strncmp(rs_rb_get_read_ptr(rb), ANS1, sizeof(ANS1)) == 0) {
 			CU_ASSERT_EQUAL(newbytes, sizeof(ANS1));
 			CU_ASSERT(!(STATE_ANS1_RECEIVED & state));
@@ -395,6 +393,8 @@ static void testIO_SIMPLE_USE_CASE(void)
 		if (0 != ret)
 			goto out;
 	}
+
+	/* TODO add test for write_abort */
 
 out:
 	CU_ASSERT(STATE_MSG1_RECEIVED & state);

@@ -102,16 +102,15 @@ static void read_src_cb(struct io_src *read_src)
 		return;
 
 	/* read until no more space in ring buffer or read error */
-	readctx->newbytes = 0;
 	while (ret == 0 && !eof && rs_rb_get_write_length(&readctx->rb) > 0) {
 		buffer = rs_rb_get_write_ptr(&readctx->rb);
 		size = rs_rb_get_write_length_no_wrap(&readctx->rb);
 		assert(size > 0);
 		ret = read_io(fd, io->readctx.ign_eof, io->log[IO_IO_RX],
 				io->name, buffer, size, &length);
+
 		/* check if first part of ring buffer is full-filled */
 		if (ret == 0 && length > 0) {
-			readctx->newbytes += length;
 			rs_rb_write_incr(&readctx->rb, length);
 			/* if free space available in ring buffer read again */
 			if (rs_rb_get_write_length(&readctx->rb) > 0)
@@ -123,9 +122,9 @@ static void read_src_cb(struct io_src *read_src)
 		}
 
 		/* notify client if new bytes available */
-		if (readctx->newbytes > 0) {
-			cbret = (*readctx->cb)(io, &readctx->rb,
-					readctx->newbytes, readctx->data);
+		/* TODO move this out of the loop for notifying only once ? */
+		if (rs_rb_get_read_length(&readctx->rb) > 0) {
+			cbret = (*readctx->cb)(io, &readctx->rb, readctx->data);
 			/* continue only if client need more data */
 			if (cbret != 0)
 				return;
@@ -148,8 +147,7 @@ static void read_src_cb(struct io_src *read_src)
 		io_src_clean(&readctx->src);
 		/* update state and notify client */
 		readctx->state = IO_IO_ERROR;
-		(*readctx->cb)(io, &readctx->rb, readctx->newbytes,
-				readctx->data);
+		(*readctx->cb)(io, &readctx->rb, readctx->data);
 	}
 }
 

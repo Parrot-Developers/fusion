@@ -33,8 +33,7 @@ struct io_io;
  * io read callback,
  * return 0 if more data is needed on read
  */
-typedef int (*io_io_read_cb_t) (struct io_io *io, struct rs_rb *rb,
-		size_t newbytes, void *data);
+typedef int (*io_io_read_cb_t) (struct io_io *io, struct rs_rb *rb, void *data);
 
 #define IO_IO_RB_BUFFER_SIZE 2048
 
@@ -44,7 +43,6 @@ struct io_io_read_ctx {
 	enum io_io_state state;	/**< io read ctx state */
 	struct rs_rb rb;	/**< io read ring buffer */
 	char rb_buffer[IO_IO_RB_BUFFER_SIZE];	/**< ring buffer buffer */
-	size_t newbytes;	/**< number of new bytes added in buffer */
 	io_io_read_cb_t cb;	/**< io read callback */
 	void *data;		/**< io read callback user data */
 	int ign_eof;		/**< ignore end of file */
