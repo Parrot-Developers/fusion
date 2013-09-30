@@ -139,9 +139,8 @@ static int read_io(int fd, int ign_eof, void (*log_cb)(const char *),
  */
 static void read_src_cb(struct io_src *read_src)
 {
-	struct io_io_read_ctx *readctx = rs_container_of(read_src,
-			struct io_io_read_ctx, src);
-	struct io_io *io = rs_container_of(readctx, struct io_io, readctx);
+	struct io_io *io = rs_container_of(read_src, struct io_io, src);
+	struct io_io_read_ctx *readctx = &io->readctx;
 	size_t length = 0;
 	void *buffer;
 	size_t size;
@@ -203,8 +202,8 @@ static void read_src_cb(struct io_src *read_src)
 	 * (other than no more data!)
 	 */
 	if ((eof && !io->readctx.ign_eof) || (ret < 0 && ret != -EAGAIN)) {
-		io_mon_remove_source(io->mon, &readctx->src);
-		io_src_clean(&readctx->src);
+		io_mon_remove_source(io->mon, read_src);
+		io_src_clean(read_src);
 		/* update state and notify client */
 		readctx->state = IO_IO_ERROR;
 		(*readctx->cb)(io, &readctx->rb, readctx->data);
@@ -252,7 +251,7 @@ int io_io_read_start(struct io_io *io, io_io_read_cb_t cb, void *data,
 	 * activate out source, useless at init, but needed after calls to
 	 * io_io_read_stop()
 	 */
-	ret = io_mon_activate_in_source(io->mon, &io->readctx.src, 1);
+	ret = io_mon_activate_in_source(io->mon, &io->src, 1);
 	if (ret < 0)
 		return ret;
 
@@ -284,8 +283,7 @@ int io_io_read_stop(struct io_io *io)
 	/* update state */
 	io->readctx.state = IO_IO_STOPPED;
 
-	/* unregister read source in loop */
-	return io_mon_remove_source(io->mon, &io->readctx.src);
+	return io_mon_activate_in_source(io->mon, &io->src, 0);
 }
 
 /**
@@ -343,7 +341,7 @@ static void process_next_write(struct io_io *io)
 		ctx->current = rs_container_of(first, struct io_io_write_buffer,
 				node);
 		/* add fd object in loop if not already done */
-		io_mon_activate_out_source(io->mon, &ctx->src, 1);
+		io_mon_activate_out_source(io->mon, io->write_src, 1);
 
 		/* set write timer */
 		io_src_tmr_set(&ctx->timer, ctx->timeout);
@@ -351,7 +349,7 @@ static void process_next_write(struct io_io *io)
 		/* no more buffer, clear timer */
 		io_src_tmr_set(&ctx->timer, IO_SRC_TMR_DISARM);
 		/* remove fd object if added */
-		io_mon_activate_out_source(io->mon, &ctx->src, 0);
+		io_mon_activate_out_source(io->mon, io->write_src, 0);
 	}
 }
 
@@ -376,20 +374,21 @@ static void write_timer_cb(struct io_src_tmr *timer, uint64_t *nbexpired)
 	(*buffer->cb)(buffer, IO_IO_WRITE_TIMEOUT);
 }
 
-static void write_src_cb(struct io_src *write_src)
+static void write_src_cb(struct io_src *src)
 {
-	struct io_io_write_ctx *writectx = rs_container_of(write_src,
+	struct io_io_write_ctx *writectx = rs_container_of(src,
 			struct io_io_write_ctx, src);
 	struct io_io *io = rs_container_of(writectx, struct io_io, writectx);
 	struct io_io_write_buffer *buffer;
 	enum io_io_write_status status;
 	size_t length = 0;
 	int ret = 0;
+	struct io_src *write_src = io->write_src;
 
 	/* remove source from loop on error */
 	if (io_src_has_error(write_src->events)) {
-		io_mon_remove_source(io->mon, &writectx->src);
-		io_src_clean(&writectx->src);
+		io_mon_remove_source(io->mon, write_src);
+		io_src_clean(write_src);
 		return;
 	}
 
@@ -400,7 +399,7 @@ static void write_src_cb(struct io_src *write_src)
 	/* get current write buffer */
 	buffer = writectx->current;
 	if (!buffer) { /* TODO can this really happen ? replace by an assert? */
-		io_mon_activate_out_source(io->mon, &writectx->src, 0);
+		io_mon_activate_out_source(io->mon, write_src, 0);
 		return;
 	}
 
@@ -490,10 +489,25 @@ int io_io_write_abort(struct io_io *io)
 	return 0;
 }
 
+static void duplex_src_cb(struct io_src *src)
+{
+	struct io_io *io = rs_container_of(src, struct io_io, src);
+
+	/* TODO errors ? */
+
+	if (io_src_has_in(src->events))
+		read_src_cb(src);
+
+	if (io_src_has_out(src->events))
+		write_src_cb(&io->writectx.src);
+}
+
 int io_io_init(struct io_io *io, struct io_mon *mon, const char *name,
 		int fd_in, int fd_out, int ign_eof)
 {
 	int ret;
+	int duplex = fd_in == fd_out;
+	enum io_src_event source_type = duplex ? IO_DUPLEX : IO_IN;
 
 	if (NULL == io || NULL == mon || rs_str_is_invalid(name))
 		return -EINVAL;
@@ -502,16 +516,6 @@ int io_io_init(struct io_io *io, struct io_mon *mon, const char *name,
 		return -EINVAL;
 
 	memset(io, 0, sizeof(*io));
-
-	io->fds[IO_IO_RX] = fd_in;
-	/* TODO crappy way to support full duplex file descriptors */
-	if (fd_out == fd_in) {
-		io->fds[IO_IO_TX] = dup(fd_out);
-		io->dupped = 1;
-	} else {
-		io->fds[IO_IO_TX] = fd_out;
-		io->dupped = 0;
-	}
 
 	/* disable io log by default */
 	io->log_rx = NULL;
@@ -526,8 +530,7 @@ int io_io_init(struct io_io *io, struct io_mon *mon, const char *name,
 	/* TODO split out creation/initialization of read and write contexts */
 
 	/* add read fd object */
-	io_src_init(&io->readctx.src, io->fds[IO_IO_RX], IO_IN,
-			&read_src_cb);
+	io_src_init(&io->src, fd_in, source_type, &duplex_src_cb);
 
 	/* set read state to disable */
 	io->readctx.state = IO_IO_STOPPED;
@@ -547,10 +550,6 @@ int io_io_init(struct io_io *io, struct io_mon *mon, const char *name,
 	/* init write buffer queue */
 	rs_dll_init(&io->writectx.buffers, NULL);
 
-	/* create a write source with fd_out */
-	io_src_init(&io->writectx.src, io->fds[IO_IO_TX], IO_OUT,
-			&write_src_cb);
-
 	/* set default write ready timeout to 10s */
 	io->writectx.timeout = 10000;
 	io->writectx.state = IO_IO_STARTED;
@@ -558,12 +557,22 @@ int io_io_init(struct io_io *io, struct io_mon *mon, const char *name,
 
 	ret = io_mon_add_sources(mon,
 			&io->writectx.timer.src,
-			&io->readctx.src,
-			&io->writectx.src,
+			&io->src,
 			NULL /* NULL guard */
 			);
 	if (0 != ret)
 		goto free_rb;
+
+	if (duplex) {
+		io->write_src = &io->src;
+	} else {
+		/* create a separate write source with fd_out, only if needed */
+		io_src_init(&io->writectx.src, fd_out, IO_OUT, &write_src_cb);
+		ret = io_mon_add_source(mon, &io->writectx.src);
+		if (0 != ret)
+			goto free_rb;
+		io->write_src = &io->writectx.src;
+	}
 
 	return 0;
 
@@ -585,17 +594,18 @@ int io_io_clean(struct io_io *io)
 
 	io_mon_remove_source(io->mon, &io->writectx.timer.src);
 	io_mon_remove_source(io->mon, &io->writectx.src);
+	io_mon_remove_source(io->mon, &io->src);
+
 	rs_rb_clean(&io->readctx.rb);
-	io_src_clean(&io->readctx.src);
 
 	/* destroy write */
 	io_io_write_abort(io);
 
-	/* TODO io_mon_remove_source(&io->loop->mon, &io->writectx.timer.src) */
+	io_src_clean(&io->writectx.src);
+	io_src_clean(&io->src);
 	io_src_tmr_clean(&io->writectx.timer);
+
 	free(io->name);
-	if (io->dupped)
-		io_close(io->fds + IO_IO_TX);
 	memset(io, 0, sizeof(*io));
 
 	return 0;

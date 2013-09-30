@@ -16,12 +16,6 @@
 #include <io_mon.h>
 #include <io_src_tmr.h>
 
-enum io_io_dir {
-	IO_IO_RX = 0,
-	IO_IO_TX,
-	IO_IO_BOTH,
-};
-
 enum io_io_state {
 	IO_IO_STOPPED,
 	IO_IO_STARTED,
@@ -39,7 +33,6 @@ typedef int (*io_io_read_cb_t) (struct io_io *io, struct rs_rb *rb, void *data);
 
 /* io read context */
 struct io_io_read_ctx {
-	struct io_src src;	/**< io read source */
 	enum io_io_state state;	/**< io read ctx state */
 	struct rs_rb rb;	/**< io read ring buffer */
 	char rb_buffer[IO_IO_RB_BUFFER_SIZE];	/**< ring buffer buffer */
@@ -70,7 +63,7 @@ struct io_io_write_buffer {
 
 /* io write context */
 struct io_io_write_ctx {
-	struct io_src src;		/**< io write source */
+	struct io_src src;		/**< io write source, used if needed */
 	enum io_io_state state;		/**< io write state */
 	int timeout;			/**< io write ready timeout in ms */
 	struct io_src_tmr timer;	/**< io write timer */
@@ -81,9 +74,11 @@ struct io_io_write_ctx {
 };
 
 struct io_io {
-	char *name;			/**< io name */
-	int fds[IO_IO_BOTH];		/**< io fds */
-	int dupped;			/**< non-zero if the fd in == fd out */
+	/** io duplex source if fd_in == fd_out, read source otherwise */
+	struct io_src src;
+	/** equals &src if duplex, writectx.src otherwise */
+	struct io_src *write_src;
+	char *name;			/**< io name, for logging purpose */
 	void (*log_rx)(const char *);	/**< io log in input */
 	void (*log_tx)(const char *);	/**< io log in output */
 	struct io_mon *mon;		/**< io monitor */
