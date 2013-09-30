@@ -7,6 +7,8 @@
  * @copyright Copyright (C) 2011 Parrot S.A.
  */
 
+/* TODO get rid of user data */
+
 #ifndef IO_IO_H_
 #define IO_IO_H_
 
@@ -16,43 +18,73 @@
 #include <io_mon.h>
 #include <io_src_tmr.h>
 
+/**
+ * @enum io_io_state
+ * @brief current state of the read or write contexts, for internal use only
+ */
 enum io_io_state {
-	IO_IO_STOPPED,
-	IO_IO_STARTED,
-	IO_IO_ERROR,
+	IO_IO_STOPPED,/**< read or write is stopped */
+	IO_IO_STARTED,/**< read or write is started */
+	IO_IO_ERROR,  /**< read or write encountered an error */
 };
 
+/* forward reference for io_io_read_cb_t definition */
 struct io_io;
-/*
- * io read callback,
- * return 0 if more data is needed on read
+
+/**
+ * Callback called when some data is ready to be consumed
+ * @param io IO context
+ * @param rb ring buffer containing the data just read
+ * @param data user data as was passed in io_io_read_start()
+ * @return 0 if and only if more data is needed on read
  */
 typedef int (*io_io_read_cb_t) (struct io_io *io, struct rs_rb *rb, void *data);
 
+/**
+ * @def IO_IO_RB_BUFFER_SIZE
+ * @brief size of the ring buffer's buffer
+ */
 #define IO_IO_RB_BUFFER_SIZE 2048
 
-/* io read context */
+/**
+ * @struct io_io_read_ctx
+ * @brief context for reading data from the IO
+ */
 struct io_io_read_ctx {
-	enum io_io_state state;	/**< io read ctx state */
-	struct rs_rb rb;	/**< io read ring buffer */
+	enum io_io_state state;			/**< io read ctx state */
+	struct rs_rb rb;			/**< io read ring buffer */
 	char rb_buffer[IO_IO_RB_BUFFER_SIZE];	/**< ring buffer buffer */
-	io_io_read_cb_t cb;	/**< io read callback */
-	void *data;		/**< io read callback user data */
-	int ign_eof;		/**< ignore end of file */
+	io_io_read_cb_t cb;			/**< io read callback */
+	void *data;				/**< callback user data */
+	int ign_eof;				/**< ignore end of file */
 };
 
+/**
+ * @enum io_io_write_status
+ * @brief status of the io's write context
+ */
 enum io_io_write_status {
-	IO_IO_WRITE_OK,		/**< write succeed */
+	IO_IO_WRITE_OK,		/**< write succeeded */
 	IO_IO_WRITE_ERROR,	/**< write failed */
 	IO_IO_WRITE_TIMEOUT,	/**< write ready timeout */
 	IO_IO_WRITE_ABORTED,	/**< write aborted */
 };
 
+/* forward reference for io_io_write_cb_t definition */
 struct io_io_write_buffer;
+
+/**
+ * Type of the callbacks notified when a buffer has been written or on error
+ * @param buffer buffer written or on which an error occurred
+ * @param status Status of the IO context concerning this buffer
+ */
 typedef void (*io_io_write_cb_t) (struct io_io_write_buffer *buffer,
 		enum io_io_write_status status);
 
-/* io write buffer */
+/**
+ * @struct io_io_write_buffer
+ * @brief Buffer for feeding to an IO's write context
+ */
 struct io_io_write_buffer {
 	struct rs_node node;	/**< node for chaining */
 	io_io_write_cb_t cb;	/**< user callback */
@@ -61,7 +93,10 @@ struct io_io_write_buffer {
 	void *address;		/**< write buffer data address*/
 };
 
-/* io write context */
+/**
+ * @struct io_io_write_ctx
+ * @brief context for writing data to the IO
+ */
 struct io_io_write_ctx {
 	struct io_src src;		/**< io write source, used if needed */
 	enum io_io_state state;		/**< io write state */
@@ -73,6 +108,11 @@ struct io_io_write_ctx {
 	size_t nbeagain;		/**< number of eagain received */
 };
 
+/**
+ * @struct io_io
+ * @brief Main context, represents a duplex IO source, with one duplex or two
+ * half-duplex file descriptor(s)
+ */
 struct io_io {
 	/** io duplex source if fd_in == fd_out, read source otherwise */
 	struct io_src src;
@@ -94,7 +134,7 @@ struct io_io {
  * @param fd_in File descriptor for reading
  * @param fd_out File descriptor for writing, can be the same as fd_in
  * @param ign_eof set 0 to stop read on end of file, 1 to continue read
- * @return
+ * @return Negative errno-compatible value on error, 0 on success
  */
 int io_io_init(struct io_io *io, struct io_mon *mon, const char *name,
 		int fd_in, int fd_out, int ign_eof);
@@ -107,7 +147,14 @@ int io_io_init(struct io_io *io, struct io_mon *mon, const char *name,
  */
 int io_io_clean(struct io_io *io);
 
-/* start reading io */
+/**
+ * Start reading io
+ * @param io IO context
+ * @param cb Callback called when some data is ready to be consumed
+ * @param data User data which will be passed back to cb on each calls
+ * @param clear
+ * @return Negative errno-compatible value on error, 0 on success
+ */
 int io_io_read_start(struct io_io *io, io_io_read_cb_t cb, void *data,
 		int clear);
 
@@ -127,7 +174,11 @@ int io_io_log_rx(struct io_io *io, void (*log_rx)(const char *));
  */
 int io_io_log_tx(struct io_io *io, void (*log_tx)(const char *));
 
-/* stop reading io */
+/**
+ * Stops reading io
+ * @param io IO context
+ * @return Negative errno-compatible value on error, 0 on success
+ */
 int io_io_read_stop(struct io_io *io);
 
 /**
@@ -144,11 +195,21 @@ int io_io_is_read_started(struct io_io *io);
  */
 int io_io_has_read_error(struct io_io *io);
 
-/* write buffer in io (append it in a buffer queue) */
+/**
+ * Adds a buffer in the write queue. Order is preserve across writes
+ * @param io IO context
+ * @param buffer Buffer to append.
+ * @return Negative errno-compatible value on error, 0 on success
+ */
 int io_io_write_add(struct io_io *io, struct io_io_write_buffer *buffer);
 
 /* abort all write buffers in io write queue
  * (buffer cb invoked with status IO_IO_WRITE_ABORTED) */
+/**
+ * Aborts all the buffers currently pending in the write queue
+ * @param io IO context
+ * @return Negative errno-compatible value on error, 0 on success
+ */
 int io_io_write_abort(struct io_io *io);
 
 #endif /* IO_IO_H_ */

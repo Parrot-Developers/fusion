@@ -7,6 +7,9 @@
  * @copyright Copyright (C) 2011 Parrot S.A.
  */
 
+/* TODO update doc of static functions and other private symbols */
+/* TODO reorganize */
+
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
