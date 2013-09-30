@@ -166,11 +166,17 @@ char *get_tun_path(void)
 	if (NULL == tmp)
 		return NULL;
 
-	ret = read_from_output(tmp, PATH_MAX, "udevadm info --root");
+	ret = read_from_output(tmp, PATH_MAX,
+			"udevadm info --root 2> /dev/null");
 	if (-1 == ret) {
 		perror("read_from_output");
 		return NULL;
 	}
+
+	/* it the previous command failed, try a reasonable default value */
+	if (strlen(tmp) == 0)
+		strcpy(tmp, "/dev/");
+
 	tmp[strlen(tmp) - 1] = '/';
 	ret = asprintf(&tun_path, "%snet/tun", tmp);
 	if (-1 == ret) {
