@@ -78,7 +78,7 @@ void *rs_rb_get_read_ptr(struct rs_rb *rb);
  * Get the ring buffer read length, i.e. bytes stored in the ring buffer,
  * available to read from it
  * @param rb Ring buffer
- * @return Data available to read from the buffer, 0 if non, or error
+ * @return Data available to read from the buffer, 0 if none, or error
  */
 size_t rs_rb_get_read_length(struct rs_rb *rb);
 
@@ -121,13 +121,15 @@ void *rs_rb_get_write_ptr(struct rs_rb *rb);
 /**
  * get ring buffer write room left
  * @param rb Ring buffer
- * @return Number of bytes which can't still be stored into the ring buffer. 0
+ * @return Number of bytes which can still be stored into the ring buffer. 0
  * on error
  */
 size_t rs_rb_get_write_length(struct rs_rb *rb);
 
+/* TODO add a rs_rb_is_full */
+
 /**
- * get ring buffer write length with out wrapping i.e., the number of bytes that
+ * get ring buffer write length without wrapping i.e., the number of bytes that
  * can be written to the buffer without wrapping
  * @param rb Ring buffer
  * @return Amount of data which can be written linearly in one chunk. 0 on error
@@ -135,7 +137,7 @@ size_t rs_rb_get_write_length(struct rs_rb *rb);
 size_t rs_rb_get_write_length_no_wrap(struct rs_rb *rb);
 
 /**
- * increment write pointer, i.e., data have been written th the write buffer
+ * increment write pointer, i.e., data have been written to the write buffer
  * @param rb Ring buffer
  * @param length Amount of data written
  * @return non-zero negative errno-compatible value on error, 0 otherwise
