@@ -84,7 +84,8 @@ struct io_io {
 	char *name;			/**< io name */
 	int fds[IO_IO_BOTH];		/**< io fds */
 	int dupped;			/**< non-zero if the fd in == fd out */
-	int log[IO_IO_BOTH];		/**< io log */
+	void (*log_rx)(const char *);	/**< io log in input */
+	void (*log_tx)(const char *);	/**< io log in output */
 	struct io_mon *mon;		/**< io monitor */
 	struct io_io_read_ctx readctx;	/**< io read context */
 	struct io_io_write_ctx writectx;/**< io write context */
@@ -115,11 +116,21 @@ int io_io_clean(struct io_io *io);
 int io_io_read_start(struct io_io *io, io_io_read_cb_t cb, void *data,
 		int clear);
 
-/* enable/disable rx traffic log */
-int io_io_log_rx(struct io_io *io, int enable);
+/**
+ * Sets the function used for logging input traffic
+ * @param io IO context
+ * @param log_rx Logging callback for input traffic, NULL for disabling logging
+ * @return Negative errno-compatible value on error, 0 on success
+ */
+int io_io_log_rx(struct io_io *io, void (*log_rx)(const char *));
 
-/* enable/disable tx traffic log */
-int io_io_log_tx(struct io_io *io, int enable);
+/**
+ * Sets the function used for logging output traffic
+ * @param io IO context
+ * @param log_tx Logging callback for output traffic, NULL for disabling logging
+ * @return Negative errno-compatible value on error, 0 on success
+ */
+int io_io_log_tx(struct io_io *io, void (*log_tx)(const char *));
 
 /* stop reading io */
 int io_io_read_stop(struct io_io *io);

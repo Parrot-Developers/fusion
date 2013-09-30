@@ -28,27 +28,87 @@
 
 #include "io_io.h"
 
-/*
- * TODO these functions should be replaced by a hook for the client, in order to
- * allow him to be notified for RX/TX data transfers
+/**
+ *
+ * @param log_cb
+ * @param func
+ * @param buffer
+ * @param length
+ * @param fmt
  */
-#define at_log_raw(...) do {} while (0)
-#define at_log_level(...) 0
-#define ATLOG_DEBUG 0
+static void io_log_raw(void (*log_cb)(const char *), const char *func,
+		const void *buffer, size_t length, const char *fmt, ...)
+{
+	static const char hexdigits[] = "0123456789ABCDEF";
+	static char log_buf[512];
+	va_list args;
+	uint8_t byte;
+	size_t n = 0, p = 0;
+	size_t i;
+
+	if (!log_cb)
+		return;
+
+	/* log "header" */
+	va_start(args, fmt);
+	vsnprintf(log_buf, 512, fmt, args);
+	va_end(args);
+	log_buf[511] = '\0';
+	(*log_cb)(log_buf);
+
+	/* log format */
+	/* xx xx xx xx xx xx xx xx xx xx xx xx xx xx xx xx
+	 * .................*/
+	for (i = 0; i < length; i++) {
+		byte = ((uint8_t *)buffer)[i] & 0xff;
+		log_buf[((n % 16) * 3)] = hexdigits[byte >> 4];
+		log_buf[((n % 16) * 3) + 1] = hexdigits[byte & 0xf];
+		log_buf[((n % 16) * 3) + 2] = ' ';
+		if (isprint(byte))
+			log_buf[(n % 16) + 51] = byte;
+		else
+			log_buf[(n % 16) + 51] = '.';
+
+		if ((n + 1) % 16 == 0) {
+			log_buf[48] = ' ';
+			log_buf[49] = '|';
+			log_buf[50] = ' ';
+			log_buf[67] = '\0';
+			log_cb(log_buf);
+		}
+		n++;
+	}
+
+	if (n % 16 > 0) {
+		p = (n % 16);
+		while (p < 16) {
+			log_buf[((p % 16) * 3)] = ' ';
+			log_buf[((p % 16) * 3) + 1] = ' ';
+			log_buf[((p % 16) * 3) + 2] = ' ';
+			log_buf[(p % 16) + 51] = ' ';
+			p++;
+		}
+		log_buf[48] = ' ';
+		log_buf[49] = '|';
+		log_buf[50] = ' ';
+		log_buf[67] = '\0';
+		log_cb(log_buf);
+	}
+}
 
 /**
  *
  * @param fd
  * @param ign_eof
- * @param log
+ * @param log_cb
  * @param name
  * @param buffer
  * @param size
  * @param length
  * @return
  */
-static int read_io(int fd, int ign_eof, int log, const char *name, void *buffer,
-		size_t size, size_t *length)
+static int read_io(int fd, int ign_eof, void (*log_cb)(const char *),
+		const char *name, void *buffer, size_t size, size_t *length)
 {
 	ssize_t nbytes;
 
@@ -64,10 +124,10 @@ static int read_io(int fd, int ign_eof, int log, const char *name, void *buffer,
 		*length = (size_t)(nbytes);
 
 		/* log data read */
-		if (log && (at_log_level() >= ATLOG_DEBUG))
-			at_log_raw(__func__, ATLOG_DEBUG, buffer, *length,
-				   "%s read fd=%d length=%d", name, fd,
-				   *length);
+		if (log_cb)
+			io_log_raw(log_cb, __func__, buffer, *length,
+					"%s read fd=%d length=%d", name, fd,
+					*length);
 	}
 
 	return 0;
@@ -106,8 +166,8 @@ static void read_src_cb(struct io_src *read_src)
 		buffer = rs_rb_get_write_ptr(&readctx->rb);
 		size = rs_rb_get_write_length_no_wrap(&readctx->rb);
 		assert(size > 0);
-		ret = read_io(fd, io->readctx.ign_eof, io->log[IO_IO_RX],
-				io->name, buffer, size, &length);
+		ret = read_io(fd, io->readctx.ign_eof, io->log_rx, io->name,
+				buffer, size, &length);
 
 		/* check if first part of ring buffer is full-filled */
 		if (ret == 0 && length > 0) {
@@ -151,23 +211,23 @@ static void read_src_cb(struct io_src *read_src)
 	}
 }
 
-/* enable/disable rx traffic log */
-int io_io_log_rx(struct io_io *io, int enable)
+int io_io_log_rx(struct io_io *io, void (*log_cb)(const char *))
 {
 	if (!io)
 		return -EINVAL;
 
-	io->log[IO_IO_RX] = enable;
+	io->log_rx = log_cb;
+
 	return 0;
 }
 
-/* enable/disable tx traffic log */
-int io_io_log_tx(struct io_io *io, int enable)
+int io_io_log_tx(struct io_io *io, void (*log_tx)(const char *))
 {
 	if (!io)
 		return -EINVAL;
 
-	io->log[IO_IO_TX] = enable;
+	io->log_tx = log_tx;
+
 	return 0;
 }
 
@@ -231,15 +291,15 @@ int io_io_read_stop(struct io_io *io)
 /**
  *
  * @param fd
- * @param log
+ * @param log_cb
  * @param name
  * @param buffer
  * @param size
  * @param length
  * @return
  */
-static int write_io(int fd, int log, const char *name, const void *buffer,
-		size_t size, size_t *length)
+static int write_io(int fd, void (*log_cb)(const char *), const char *name,
+		const void *buffer, size_t size, size_t *length)
 {
 	int ret = 0;
 	ssize_t nbytes;
@@ -255,9 +315,10 @@ static int write_io(int fd, int log, const char *name, const void *buffer,
 	*length = (size_t)(nbytes);
 
 	/* log data written */
-	if (log && (at_log_level() >= ATLOG_DEBUG))
-		at_log_raw(__func__, ATLOG_DEBUG, buffer, *length,
-		"%s write fd=%d length=%d", name, fd, *length);
+	if (NULL != log_cb)
+		io_log_raw(log_cb, __func__, buffer, *length,
+				"%s read fd=%d length=%d", name, fd, *length);
+
 
 	return ret;
 }
@@ -345,7 +406,7 @@ static void write_src_cb(struct io_src *write_src)
 
 	/* write current buffer */
 	while (ret == 0 && writectx->nbwritten < buffer->length) {
-		ret = write_io(write_src->fd, io->log[IO_IO_TX], io->name,
+		ret = write_io(write_src->fd, io->log_tx, io->name,
 				(uint8_t *) buffer->address
 						+ writectx->nbwritten,
 				buffer->length - writectx->nbwritten, &length);
@@ -453,8 +514,8 @@ int io_io_init(struct io_io *io, struct io_mon *mon, const char *name,
 	}
 
 	/* disable io log by default */
-	io->log[IO_IO_RX] = 0;
-	io->log[IO_IO_TX] = 0;
+	io->log_rx = NULL;
+	io->log_tx = NULL;
 
 	/* create 2KB ring buffer for read */
 	ret = rs_rb_init(&io->readctx.rb, io->readctx.rb_buffer,
