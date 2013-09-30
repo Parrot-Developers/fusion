@@ -230,12 +230,6 @@ int io_io_log_tx(struct io_io *io, void (*log_tx)(const char *))
 	return 0;
 }
 
-/* get read state */
-int io_io_read_state(struct io_io *io)
-{
-	return NULL == io ? IO_IO_ERROR : io->readctx.state;
-}
-
 int io_io_read_start(struct io_io *io, io_io_read_cb_t cb, void *data,
 		int clear)
 {
