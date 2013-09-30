@@ -130,8 +130,19 @@ int io_io_log_tx(struct io_io *io, void (*log_tx)(const char *));
 /* stop reading io */
 int io_io_read_stop(struct io_io *io);
 
-/* get read state */
-int io_io_read_state(struct io_io *io);
+/**
+ * Says if the IO has it's read started
+ * @param io IO context
+ * @return non-zero if read is started, 0 otherwise
+ */
+int io_io_is_read_started(struct io_io *io);
+
+/**
+ * Says if the IO has encountered an IO error
+ * @param io IO context
+ * @return non-zero if an error occurred, 0 otherwise
+ */
+int io_io_has_read_error(struct io_io *io);
 
 /* write buffer in io (append it in a buffer queue) */
 int io_io_write_add(struct io_io *io, struct io_io_write_buffer *buffer);

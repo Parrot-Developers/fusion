@@ -286,6 +286,16 @@ int io_io_read_stop(struct io_io *io)
 	return io_mon_activate_in_source(io->mon, &io->src, 0);
 }
 
+int io_io_is_read_started(struct io_io *io)
+{
+	return NULL != io ? io->readctx.state == IO_IO_STARTED : 0;
+}
+
+int io_io_has_read_error(struct io_io *io)
+{
+	return NULL != io ? io->readctx.state == IO_IO_ERROR : 0;
+}
+
 /**
  *
  * @param fd
