@@ -623,3 +623,33 @@ int io_io_clean(struct io_io *io)
 
 	return 0;
 }
+
+int io_io_write_buffer_init(struct io_io_write_buffer *buf, io_io_write_cb_t cb,
+		void *data, size_t length, void *address)
+{
+	int ret;
+
+	if (NULL == buf || 0 == length || NULL == address)
+		return -EINVAL;
+
+	ret = io_io_write_buffer_clean(buf);
+	if (0 != ret)
+		return ret;
+
+	buf->cb = cb;
+	buf->data = data;
+	buf->length = length;
+	buf->address = address;
+
+	return 0;
+}
+
+int io_io_write_buffer_clean(struct io_io_write_buffer *buf)
+{
+	if (NULL == buf)
+		return -EINVAL;
+
+	memset(buf, 0, sizeof(*buf));
+
+	return 0;
+}

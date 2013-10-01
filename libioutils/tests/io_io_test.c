@@ -604,6 +604,56 @@ out:
 	io_close(sockets + 1);
 }
 
+static void testIO_WRITE_BUFFER_INIT(void)
+{
+#define MSG "titi tata toto"
+	int ret;
+	struct io_io_write_buffer wb;
+	void cb(struct io_io_write_buffer *buffer,
+			enum io_io_write_status status)
+	{
+		/* dummy cb */
+	}
+
+	/* normal use cases */
+	ret = io_io_write_buffer_init(&wb, cb, (void *) 42, sizeof(MSG), MSG);
+	CU_ASSERT_EQUAL(ret, 0);
+
+	/* error use cases */
+	ret = io_io_write_buffer_init(NULL, cb, (void *) 42, sizeof(MSG), MSG);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+	ret = io_io_write_buffer_init(&wb, cb, (void *) 42, 0, MSG);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+	ret = io_io_write_buffer_init(&wb, cb, (void *) 42, sizeof(MSG), NULL);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+#undef MSG
+}
+
+static void testIO_WRITE_BUFFER_CLEAN(void)
+{
+#define MSG "titi tata toto"
+	int ret;
+	struct io_io_write_buffer buf;
+	void cb(struct io_io_write_buffer *buffer,
+			enum io_io_write_status status)
+	{
+		/* dummy cb */
+	}
+
+	/* initialization */
+	ret = io_io_write_buffer_init(&buf, cb, (void *) 42, sizeof(MSG), MSG);
+	CU_ASSERT_EQUAL(ret, 0);
+
+	/* normal use cases */
+	ret = io_io_write_buffer_clean(&buf);
+	CU_ASSERT_EQUAL(ret, 0);
+
+	/* error use cases */
+	ret = io_io_write_buffer_clean(NULL );
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+#undef MSG
+}
+
 static const struct test_t tests[] = {
 		{
 				.fn = testIO_INIT,
@@ -648,6 +698,14 @@ static const struct test_t tests[] = {
 		{
 				.fn = testIO_SIMPLE_USE_CASE,
 				.name = "io_simple_use_case"
+		},
+		{
+				.fn = testIO_WRITE_BUFFER_INIT,
+				.name = "io_io_write_buffer_init"
+		},
+		{
+				.fn = testIO_WRITE_BUFFER_CLEAN,
+				.name = "io_io_write_buffer_clean"
 		},
 
 		/* NULL guard */

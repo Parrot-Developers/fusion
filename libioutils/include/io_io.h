@@ -203,14 +203,33 @@ int io_io_has_read_error(struct io_io *io);
  */
 int io_io_write_add(struct io_io *io, struct io_io_write_buffer *buffer);
 
-/* abort all write buffers in io write queue
- * (buffer cb invoked with status IO_IO_WRITE_ABORTED) */
 /**
- * Aborts all the buffers currently pending in the write queue
+ * Aborts all the buffers currently pending in the write queue. The buffer's
+ * callbacks are invoked with status IO_IO_WRITE_ABORTED
  * @param io IO context
  * @return Negative errno-compatible value on error, 0 on success
  */
 int io_io_write_abort(struct io_io *io);
+
+/**
+ * Initializes a write buffer
+ * @param buf Write buffer to initialize
+ * @param cb Callback called when write succeeds or fails
+ * @param data User data passed back to cb when called
+ * @param length Length of the data to write
+ * @param address Address of the buffer containing the write_buffer's data
+ * @return Negative errno-compatible value on error, 0 on success
+ */
+int io_io_write_buffer_init(struct io_io_write_buffer *buf, io_io_write_cb_t cb,
+		void *data, size_t length, void *address);
+
+/**
+ * Cleans a write buffer. No memory liberation is performed, but this allows to
+ * put the buffer in a clean state for reuse
+ * @param buf Write buffer to cleanup
+ * @return Negative errno-compatible value on error, 0 on success
+ */
+int io_io_write_buffer_clean(struct io_io_write_buffer *buf);
 
 #endif /* IO_IO_H_ */
 
