@@ -283,6 +283,15 @@ static void testIO_SIMPLE_USE_CASE(void)
 		count++;
 		// stubbed !!! TODO
 	}
+	void rx_data_dump_cb(const char *msg)
+	{
+		fprintf(stderr, "*** RX  *** %s\n", msg);
+	}
+	void tx_data_dump_cb(const char *msg)
+	{
+		fprintf(stderr, "*** TX *** %s\n", msg);
+	}
+
 	struct io_io_write_buffer io_buffers[2] = {
 			[0] = {
 				.node = {
@@ -362,6 +371,10 @@ static void testIO_SIMPLE_USE_CASE(void)
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
 	ret = io_io_init(&io, &mon, SUITE_NAME, sockets[0], sockets[0], 1);
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = io_io_log_rx(&io, rx_data_dump_cb);
+	CU_ASSERT_EQUAL(ret, 0);
+	ret = io_io_log_tx(&io, tx_data_dump_cb);
+	CU_ASSERT_EQUAL(ret, 0);
 	ret = io_io_read_start(&io, io_cb, (void *)42, 0);
 	CU_ASSERT_EQUAL(ret, 0);
 
