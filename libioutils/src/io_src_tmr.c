@@ -70,7 +70,7 @@ static void tmr_cb(struct io_src *src)
 	if (NULL == src)
 		return;
 
-	if (io_src_has_in(src->events)) {
+	if (io_src_has_in(src)) {
 		/* read timer value */
 		tmr_read(tmr, &nbexpired);
 

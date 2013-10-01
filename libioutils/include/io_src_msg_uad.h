@@ -37,7 +37,8 @@ struct sockaddr_un sun_sizecheck;
  * If evt is IO_IN, the callback is called when a message has been read, stored
  * in the rcv_buf specified at io_src_msg_uad_init().
  * @param src UAD source
- * @param evt Event type, either IO or OUT not both
+ * @param evt Event type, either IO or OUT not both. The evt parameter must be
+ * used instead of io_src_has(in|out) in the callback.
  */
 typedef void (io_src_msg_uad_cb_t)(struct io_src_msg_uad *src,
 		enum io_src_event evt);

@@ -72,10 +72,10 @@ static void msg_cb(struct io_src *src)
 	struct io_src_msg *msg = to_src_msg(src);
 
 	/* TODO treat I/O THEN errors */
-	if (io_src_has_error(src->events))
+	if (io_src_has_error(src))
 		return;
 
-	if (io_src_has_in(src->events)) {
+	if (io_src_has_in(src)) {
 		in_msg(msg, src->fd);
 		return;
 	}

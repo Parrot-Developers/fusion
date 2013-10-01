@@ -118,7 +118,7 @@ static void testMON_ADD_SOURCE(void)
 	/* normal use cases */
 	ret = io_mon_add_source(&mon, &src_in);
 	CU_ASSERT_EQUAL(ret, 0);
-	CU_ASSERT(io_src_has_in(src_in.active));
+	CU_ASSERT(src_in.active & IO_IN);
 	flags = fcntl(src_in.fd, F_GETFL, 0);
 	CU_ASSERT_EQUAL(!!(flags & O_NONBLOCK), 1);
 
@@ -130,7 +130,7 @@ static void testMON_ADD_SOURCE(void)
 
 	ret = io_mon_add_source(&mon, &src_duplex);
 	CU_ASSERT_EQUAL(ret, 0);
-	CU_ASSERT(io_src_has_in(src_duplex.active));
+	CU_ASSERT(src_duplex.active & IO_IN);
 	flags = fcntl(src_duplex.fd, F_GETFL, 0);
 	CU_ASSERT_EQUAL(!!(flags & O_NONBLOCK), 1);
 
@@ -188,9 +188,9 @@ static void testMON_ADD_SOURCES(void)
 	CU_ASSERT_EQUAL(!!(flags & O_NONBLOCK), 1);
 	flags = fcntl(src_duplex.fd, F_GETFL, 0);
 	CU_ASSERT_EQUAL(!!(flags & O_NONBLOCK), 1);
-	CU_ASSERT(io_src_has_in(src_in.active));
+	CU_ASSERT(src_in.active & IO_IN);
 	CU_ASSERT_EQUAL(src_out.active, 0);
-	CU_ASSERT(io_src_has_in(src_duplex.active));
+	CU_ASSERT(src_duplex.active & IO_IN);
 
 	/* error use cases */
 	ret = io_mon_add_sources(NULL, &src_out, NULL);
@@ -413,7 +413,7 @@ static void testMON_PROCESS_EVENTS(void)
 		int r;
 
 		/* TODO treat I/O THEN errors */
-		if (io_src_has_error(src->events))
+		if (io_src_has_error(src))
 			return;
 
 		r = write(src->fd, msg2, strlen(msg2) + 1);

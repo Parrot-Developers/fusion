@@ -152,14 +152,14 @@ static void read_src_cb(struct io_src *read_src)
 	int fd = io_src_get_fd(read_src);
 
 	/* remove source from loop on error */
-	if (io_src_has_error(read_src->events))
+	if (io_src_has_error(read_src))
 		/*
 		 * TODO change for an explicit value other than EAGAIN, e.g EIO
 		 */
 		ret = -1;
 
 	/* do not treat event other than read available */
-	if (!io_src_has_in(read_src->events))
+	if (!io_src_has_in(read_src))
 		return;
 
 	/* read until no more space in ring buffer or read error */
@@ -321,14 +321,14 @@ static void write_src_cb(struct io_src *src)
 	struct io_src *write_src = io->write_src;
 
 	/* remove source from loop on error */
-	if (io_src_has_error(write_src->events)) {
+	if (io_src_has_error(write_src)) {
 		io_mon_remove_source(io->mon, write_src);
 		io_src_clean(write_src);
 		return;
 	}
 
 	/* do not treat event other than write ready */
-	if (!io_src_has_out(write_src->events))
+	if (!io_src_has_out(write_src))
 		return;
 
 	/* get current write buffer */
@@ -390,10 +390,10 @@ static void duplex_src_cb(struct io_src *src)
 
 	/* TODO errors ? */
 
-	if (io_src_has_in(src->events))
+	if (io_src_has_in(src))
 		read_src_cb(src);
 
-	if (io_src_has_out(src->events))
+	if (io_src_has_out(src))
 		write_src_cb(&io->writectx.src);
 }
 

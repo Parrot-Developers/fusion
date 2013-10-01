@@ -41,25 +41,23 @@ enum io_src_event {
  */
 #define IO_EPOLL_ERROR_EVENTS (EPOLLERR | EPOLLHUP | EPOLLRDHUP)
 
-/* TODO replace these macros by a io_src_has_XXX(src) */
-
 /**
  * @def io_src_has_error
  * @brief Returns 1 if the epoll event set contains at least one error event
  */
-#define io_src_has_error(events) (IO_EPOLL_ERROR_EVENTS & (events))
+#define io_src_has_error(src) (IO_EPOLL_ERROR_EVENTS & (src)->events)
 
 /**
  * @def io_src_has_in
  * @brief Returns 1 if the epoll event set contains the IN event flag
  */
-#define io_src_has_in(events) (!!((events) & IO_IN))
+#define io_src_has_in(src) (!!((src)->events & IO_IN))
 
 /**
  * @def io_src_has_out
  * @brief Returns 1 if the epoll event set contains the OUT event flag
  */
-#define io_src_has_out(events) (!!((events) & IO_OUT))
+#define io_src_has_out(src) (!!((src)->events & IO_OUT))
 
 /**
  * @struct io_src

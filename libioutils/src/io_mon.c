@@ -182,8 +182,8 @@ static int remove_source_by_fd(struct io_mon *mon, int fd)
  */
 static int process_event_sets(struct io_mon *mon, struct io_src *src)
 {
-	uint32_t events;
-	int fd;
+	/* backup in case the client cb destroys it */
+	struct io_src backup_src = *src;
 
 	/*
 	 * if during processing, sources are altered, some events may
@@ -191,12 +191,10 @@ static int process_event_sets(struct io_mon *mon, struct io_src *src)
 	 */
 	if (!has_events_pending(src))
 		return 0;
-	events = src->events;
-	fd = src->fd;
 	src->cb(src);
 
-	if (io_src_has_error(events))
-		remove_source_by_fd(mon, fd);
+	if (io_src_has_error(&backup_src))
+		remove_source_by_fd(mon, backup_src.fd);
 
 	return 0;
 }
