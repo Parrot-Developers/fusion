@@ -8,7 +8,6 @@
  */
 
 /* TODO update doc of static functions and other private symbols */
-/* TODO reorganize */
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -213,86 +212,6 @@ static void read_src_cb(struct io_src *read_src)
 	}
 }
 
-int io_io_log_rx(struct io_io *io, void (*log_cb)(const char *))
-{
-	if (!io)
-		return -EINVAL;
-
-	io->log_rx = log_cb;
-
-	return 0;
-}
-
-int io_io_log_tx(struct io_io *io, void (*log_tx)(const char *))
-{
-	if (!io)
-		return -EINVAL;
-
-	io->log_tx = log_tx;
-
-	return 0;
-}
-
-int io_io_read_start(struct io_io *io, io_io_read_cb_t cb, void *data,
-		int clear)
-{
-	int ret;
-
-	if (!io || !cb)
-		return -EINVAL;
-
-	if (io->readctx.state != IO_IO_STOPPED)
-		return -EBUSY;
-
-	/*
-	 * activate out source, useless at init, but needed after calls to
-	 * io_io_read_stop()
-	 */
-	ret = io_mon_activate_in_source(io->mon, &io->src, 1);
-	if (ret < 0)
-		return ret;
-
-	/* set callback info */
-	io->readctx.cb = cb;
-	io->readctx.data = data;
-
-	/* clear read buffer if needed */
-	if (clear)
-		rs_rb_empty(&io->readctx.rb);
-
-	/* update read state */
-	io->readctx.state = IO_IO_STARTED;
-	return 0;
-}
-
-int io_io_read_stop(struct io_io *io)
-{
-	if (NULL == io)
-		return -EINVAL;
-
-	if (io->readctx.state != IO_IO_STARTED)
-		return -EBUSY;
-
-	/* reset callback info */
-	io->readctx.cb = NULL;
-	io->readctx.data = NULL;
-
-	/* update state */
-	io->readctx.state = IO_IO_STOPPED;
-
-	return io_mon_activate_in_source(io->mon, &io->src, 0);
-}
-
-int io_io_is_read_started(struct io_io *io)
-{
-	return NULL != io ? io->readctx.state == IO_IO_STARTED : 0;
-}
-
-int io_io_has_read_error(struct io_io *io)
-{
-	return NULL != io ? io->readctx.state == IO_IO_ERROR : 0;
-}
-
 /**
  *
  * @param fd
@@ -360,6 +279,11 @@ static void process_next_write(struct io_io *io)
 	}
 }
 
+/**
+ *
+ * @param timer
+ * @param nbexpired
+ */
 static void write_timer_cb(struct io_src_tmr *timer, uint64_t *nbexpired)
 {
 	struct io_io_write_ctx *ctx = rs_container_of(timer,
@@ -381,6 +305,10 @@ static void write_timer_cb(struct io_src_tmr *timer, uint64_t *nbexpired)
 	(*buffer->cb)(buffer, IO_IO_WRITE_TIMEOUT);
 }
 
+/**
+ *
+ * @param src
+ */
 static void write_src_cb(struct io_src *src)
 {
 	struct io_io_write_ctx *writectx = rs_container_of(src,
@@ -441,67 +369,21 @@ static void write_src_cb(struct io_src *src)
 	}
 }
 
+/**
+ *
+ * @param buffer
+ * @param status
+ */
 static void default_write_cb(struct io_io_write_buffer *buffer,
 	enum io_io_write_status status)
 {
 
 }
 
-/*  add write buffer in queue */
-int io_io_write_add(struct io_io *io, struct io_io_write_buffer *buffer)
-{
-	int ret = 0;
-	struct io_io_write_ctx *ctx;
-
-	if (NULL == io || NULL == buffer)
-		return -EINVAL;
-	if (!buffer->address || buffer->length == 0)
-		return -EINVAL;
-
-	ctx = &io->writectx;
-
-	if (!buffer->cb) {
-		buffer->cb = &default_write_cb;
-		buffer->data = io;
-	}
-
-	rs_dll_enqueue(&ctx->buffers, &buffer->node);
-	if (ctx->current == NULL)
-		process_next_write(io);
-
-	return ret;
-}
-
-/* abort all write buffers in io write queue
- * (buffer cb invoked with status IO_IO_WRITE_ABORTED) */
-int io_io_write_abort(struct io_io *io)
-{
-	struct io_io_write_ctx *ctx;
-	struct io_io_write_buffer *buffer = NULL;
-	struct rs_node *node;
-
-	if (NULL == io)
-		return -EINVAL;
-	ctx = &io->writectx;
-	buffer = ctx->current;
-
-	/* TODO: how to be safe on io destroy call in write cb here ? */
-	if (buffer) {
-		(*buffer->cb)(buffer, IO_IO_WRITE_ABORTED);
-		ctx->current = NULL;
-		ctx->nbwritten = 0;
-	}
-
-	while ((node = rs_dll_pop(&ctx->buffers))) {
-		buffer = rs_container_of(node, struct io_io_write_buffer, node);
-		(*buffer->cb)(buffer, IO_IO_WRITE_ABORTED);
-	}
-
-	process_next_write(io);
-
-	return 0;
-}
-
+/**
+ *
+ * @param src
+ */
 static void duplex_src_cb(struct io_src *src)
 {
 	struct io_io *io = rs_container_of(src, struct io_io, src);
@@ -620,6 +502,138 @@ int io_io_clean(struct io_io *io)
 
 	free(io->name);
 	memset(io, 0, sizeof(*io));
+
+	return 0;
+}
+
+int io_io_read_start(struct io_io *io, io_io_read_cb_t cb, void *data,
+		int clear)
+{
+	int ret;
+
+	if (!io || !cb)
+		return -EINVAL;
+
+	if (io->readctx.state != IO_IO_STOPPED)
+		return -EBUSY;
+
+	/*
+	 * activate out source, useless at init, but needed after calls to
+	 * io_io_read_stop()
+	 */
+	ret = io_mon_activate_in_source(io->mon, &io->src, 1);
+	if (ret < 0)
+		return ret;
+
+	/* set callback info */
+	io->readctx.cb = cb;
+	io->readctx.data = data;
+
+	/* clear read buffer if needed */
+	if (clear)
+		rs_rb_empty(&io->readctx.rb);
+
+	/* update read state */
+	io->readctx.state = IO_IO_STARTED;
+	return 0;
+}
+
+int io_io_log_rx(struct io_io *io, void (*log_cb)(const char *))
+{
+	if (!io)
+		return -EINVAL;
+
+	io->log_rx = log_cb;
+
+	return 0;
+}
+
+int io_io_log_tx(struct io_io *io, void (*log_tx)(const char *))
+{
+	if (!io)
+		return -EINVAL;
+
+	io->log_tx = log_tx;
+
+	return 0;
+}
+
+int io_io_read_stop(struct io_io *io)
+{
+	if (NULL == io)
+		return -EINVAL;
+
+	if (io->readctx.state != IO_IO_STARTED)
+		return -EBUSY;
+
+	/* reset callback info */
+	io->readctx.cb = NULL;
+	io->readctx.data = NULL;
+
+	/* update state */
+	io->readctx.state = IO_IO_STOPPED;
+
+	return io_mon_activate_in_source(io->mon, &io->src, 0);
+}
+
+int io_io_is_read_started(struct io_io *io)
+{
+	return NULL != io ? io->readctx.state == IO_IO_STARTED : 0;
+}
+
+int io_io_has_read_error(struct io_io *io)
+{
+	return NULL != io ? io->readctx.state == IO_IO_ERROR : 0;
+}
+
+int io_io_write_add(struct io_io *io, struct io_io_write_buffer *buffer)
+{
+	int ret = 0;
+	struct io_io_write_ctx *ctx;
+
+	if (NULL == io || NULL == buffer)
+		return -EINVAL;
+	if (!buffer->address || buffer->length == 0)
+		return -EINVAL;
+
+	ctx = &io->writectx;
+
+	if (!buffer->cb) {
+		buffer->cb = &default_write_cb;
+		buffer->data = io;
+	}
+
+	rs_dll_enqueue(&ctx->buffers, &buffer->node);
+	if (ctx->current == NULL)
+		process_next_write(io);
+
+	return ret;
+}
+
+int io_io_write_abort(struct io_io *io)
+{
+	struct io_io_write_ctx *ctx;
+	struct io_io_write_buffer *buffer = NULL;
+	struct rs_node *node;
+
+	if (NULL == io)
+		return -EINVAL;
+	ctx = &io->writectx;
+	buffer = ctx->current;
+
+	/* TODO: how to be safe on io destroy call in write cb here ? */
+	if (buffer) {
+		(*buffer->cb)(buffer, IO_IO_WRITE_ABORTED);
+		ctx->current = NULL;
+		ctx->nbwritten = 0;
+	}
+
+	while ((node = rs_dll_pop(&ctx->buffers))) {
+		buffer = rs_container_of(node, struct io_io_write_buffer, node);
+		(*buffer->cb)(buffer, IO_IO_WRITE_ABORTED);
+	}
+
+	process_next_write(io);
 
 	return 0;
 }
