@@ -19,6 +19,16 @@
 
 #define SUITE_NAME "io_suite"
 
+static void rx_data_dump_cb(const char *msg)
+{
+	fprintf(stderr, "*** RX  *** %s\n", msg);
+}
+
+static void tx_data_dump_cb(const char *msg)
+{
+	fprintf(stderr, "*** TX *** %s\n", msg);
+}
+
 static void testIO_INIT(void)
 {
 	int ret;
@@ -128,26 +138,78 @@ static void testIO_READ_START(void)
 
 static void testIO_LOG_RX(void)
 {
+	int ret;
+	int sockets[2];
+	struct io_mon mon;
+	struct io_io io;
+	int io_cb(struct io_io *io, struct rs_rb *rb, void *data)
+	{
+
+		return 0;
+	}
+
 	/* initialization */
-	fprintf(stderr, "%s STUBBED !!!\n", __func__);
+	ret = io_mon_init(&mon);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = socketpair(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0,
+			sockets);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = io_io_init(&io, &mon, SUITE_NAME, sockets[0], sockets[0], 0);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
 
 	/* normal use cases */
+	ret = io_io_log_rx(&io, rx_data_dump_cb);
+	CU_ASSERT_EQUAL(ret, 0);
+	ret = io_io_log_rx(&io, NULL);
+	CU_ASSERT_EQUAL(ret, 0);
 
 	/* error use cases */
+	ret = io_io_log_rx(NULL, rx_data_dump_cb);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	/* cleanup */
+	io_io_clean(&io);
+	io_mon_clean(&mon);
+	io_close(sockets + 0);
+	io_close(sockets + 1);
 }
 
 static void testIO_LOG_TX(void)
 {
+	int ret;
+	int sockets[2];
+	struct io_mon mon;
+	struct io_io io;
+	int io_cb(struct io_io *io, struct rs_rb *rb, void *data)
+	{
+
+		return 0;
+	}
+
 	/* initialization */
-	fprintf(stderr, "%s STUBBED !!!\n", __func__);
+	ret = io_mon_init(&mon);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = socketpair(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0,
+			sockets);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = io_io_init(&io, &mon, SUITE_NAME, sockets[0], sockets[0], 0);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
 
 	/* normal use cases */
+	ret = io_io_log_tx(&io, tx_data_dump_cb);
+	CU_ASSERT_EQUAL(ret, 0);
+	ret = io_io_log_tx(&io, NULL);
+	CU_ASSERT_EQUAL(ret, 0);
 
 	/* error use cases */
+	ret = io_io_log_tx(NULL, tx_data_dump_cb);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	/* cleanup */
+	io_io_clean(&io);
+	io_mon_clean(&mon);
+	io_close(sockets + 0);
+	io_close(sockets + 1);
 }
 
 static void testIO_READ_STOP(void)
@@ -188,70 +250,194 @@ static void testIO_READ_STOP(void)
 	io_close(sockets + 1);
 }
 
-static void testIO_READ_STATE(void){} // TODO
-//{
-//	int ret;
-//	int sockets[2];
-//	struct io_mon mon;
-//	struct io_io io;
-//	enum io_io_state state;
-//	int io_cb(struct io_io *io, struct rs_rb *rb, void *data)
-//	{
-//
-//		return 0;
-//	}
-//	/* initialization */
-//	ret = io_mon_init(&mon);
-//	CU_ASSERT_EQUAL_FATAL(ret, 0);
-//	ret = socketpair(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0,
-//			sockets);
-//	CU_ASSERT_EQUAL_FATAL(ret, 0);
-//	ret = io_io_init(&io, &mon, SUITE_NAME, sockets[0], sockets[0], 1);
-//	CU_ASSERT_EQUAL_FATAL(ret, 0);
-//	ret = io_io_read_start(&io, io_cb, (void *)42, 0);
-//	CU_ASSERT_EQUAL(ret, 0);
-//
-//	/* normal use cases */
-//	state = io_io_read_state(&io);
-//	CU_ASSERT_EQUAL(state, IO_IO_STARTED);
-//	ret = io_io_read_stop(&io);
-//	CU_ASSERT_EQUAL(ret, 0);
-//	state = io_io_read_state(&io);
-//	CU_ASSERT_EQUAL(state, IO_IO_STOPPED);
-//
-//	/* error use cases */
-//	state = io_io_read_state(NULL);
-//	CU_ASSERT_EQUAL(state, IO_IO_ERROR);
-//
-//	/* cleanup */
-//	io_io_clean(&io);
-//	io_mon_clean(&mon);
-//	io_close(sockets + 0);
-//	io_close(sockets + 1);
-//}
+static void testIO_IS_READ_STARTED(void)
+{
+	int ret;
+	int sockets[2];
+	struct io_mon mon;
+	struct io_io io;
+	int io_cb(struct io_io *io, struct rs_rb *rb, void *data)
+	{
+
+		return 0;
+	}
+
+	/* initialization */
+	ret = io_mon_init(&mon);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = socketpair(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0,
+			sockets);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = io_io_init(&io, &mon, SUITE_NAME, sockets[0], sockets[0], 1);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+
+	/* normal use cases */
+	CU_ASSERT(!io_io_is_read_started(&io));
+	ret = io_io_read_start(&io, io_cb, (void *)42, 0);
+	CU_ASSERT_EQUAL(ret, 0);
+	CU_ASSERT(io_io_is_read_started(&io));
+	ret = io_io_read_stop(&io);
+	CU_ASSERT_EQUAL(ret, 0);
+	CU_ASSERT(!io_io_is_read_started(&io));
+	io_io_clean(&io);
+	CU_ASSERT(!io_io_is_read_started(NULL));
+
+	/* error use cases */
+	CU_ASSERT(!io_io_is_read_started(NULL));
+
+	/* cleanup */
+	io_mon_clean(&mon);
+	io_close(sockets + 0);
+	io_close(sockets + 1);
+}
+
+static void testIO_HAS_READ_ERROR(void)
+{
+	int ret;
+	int sockets[2];
+	struct io_mon mon;
+	struct io_io io;
+	int io_cb(struct io_io *io, struct rs_rb *rb, void *data)
+	{
+
+		return 0;
+	}
+
+	/* initialization */
+	ret = io_mon_init(&mon);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = socketpair(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0,
+			sockets);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = io_io_init(&io, &mon, SUITE_NAME, sockets[0], sockets[0], 1);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+
+	/* normal use cases */
+	CU_ASSERT(!io_io_has_read_error(&io));
+	io.readctx.state = IO_IO_ERROR;
+	CU_ASSERT(io_io_has_read_error(&io));
+
+	/* error use cases */
+	CU_ASSERT(!io_io_has_read_error(NULL));
+
+	/* cleanup */
+	io_io_clean(&io);
+	io_mon_clean(&mon);
+	io_close(sockets + 0);
+	io_close(sockets + 1);
+}
 
 static void testIO_WRITE_ADD(void)
 {
+#define MSG "titi tata toto"
+	int ret;
+	int sockets[2];
+	struct io_mon mon;
+	struct io_io io;
+	int io_cb(struct io_io *io, struct rs_rb *rb, void *data)
+	{
+
+		return 0;
+	}
+	void write_cb(struct io_io_write_buffer *buffer,
+		enum io_io_write_status status)
+	{
+
+	}
+	struct io_io_write_buffer wb = {
+			.node = {
+					.next = NULL,
+					.prev = NULL,
+			},
+			.cb = write_cb,
+			.data = (void *) 666,
+			.length = sizeof(MSG),
+			.address = MSG,
+	};
+
 	/* initialization */
-	fprintf(stderr, "%s STUBBED !!!\n", __func__);
+	ret = io_mon_init(&mon);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = socketpair(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0,
+			sockets);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = io_io_init(&io, &mon, SUITE_NAME, sockets[0], sockets[0], 1);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
 
 	/* normal use cases */
+	ret = io_io_write_add(&io, &wb);
+	CU_ASSERT_EQUAL(ret, 0);
 
 	/* error use cases */
+	ret = io_io_write_add(NULL, &wb);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+	ret = io_io_write_add(&io, NULL);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	/* cleanup */
+	io_io_clean(&io);
+	io_mon_clean(&mon);
+	io_close(sockets + 0);
+	io_close(sockets + 1);
+#undef MSG
 }
 
 static void testIO_ABORT(void)
 {
+#define MSG "titi tata toto"
+	int ret;
+	int sockets[2];
+	struct io_mon mon;
+	struct io_io io;
+	int io_cb(struct io_io *io, struct rs_rb *rb, void *data)
+	{
+
+		return 0;
+	}
+	void write_cb(struct io_io_write_buffer *buffer,
+		enum io_io_write_status status)
+	{
+
+	}
+	struct io_io_write_buffer wb = {
+			.node = {
+					.next = NULL,
+					.prev = NULL,
+			},
+			.cb = write_cb,
+			.data = (void *) 666,
+			.length = sizeof(MSG),
+			.address = MSG,
+	};
+
 	/* initialization */
-	fprintf(stderr, "%s STUBBED !!!\n", __func__);
+	ret = io_mon_init(&mon);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = socketpair(AF_UNIX, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0,
+			sockets);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = io_io_init(&io, &mon, SUITE_NAME, sockets[0], sockets[0], 1);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
 
 	/* normal use cases */
+	/* abort on io without buffer queued should not fail */
+	ret = io_io_write_abort(&io);
+	CU_ASSERT_EQUAL(ret, 0);
+	ret = io_io_write_add(&io, &wb);
+	CU_ASSERT_EQUAL(ret, 0);
+	ret = io_io_write_abort(&io);
+	CU_ASSERT_EQUAL(ret, 0);
 
 	/* error use cases */
+	ret = io_io_write_abort(NULL);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	/* cleanup */
+	io_io_clean(&io);
+	io_mon_clean(&mon);
+	io_close(sockets + 0);
+	io_close(sockets + 1);
+#undef MSG
 }
 
 static void testIO_SIMPLE_USE_CASE(void)
@@ -281,15 +467,6 @@ static void testIO_SIMPLE_USE_CASE(void)
 		enum io_io_write_status status)
 	{
 		count++;
-		// stubbed !!! TODO
-	}
-	void rx_data_dump_cb(const char *msg)
-	{
-		fprintf(stderr, "*** RX  *** %s\n", msg);
-	}
-	void tx_data_dump_cb(const char *msg)
-	{
-		fprintf(stderr, "*** TX *** %s\n", msg);
 	}
 
 	struct io_io_write_buffer io_buffers[2] = {
@@ -453,8 +630,12 @@ static const struct test_t tests[] = {
 				.name = "io_io_read_stop"
 		},
 		{
-				.fn = testIO_READ_STATE,
-				.name = "io_io_read_state"
+				.fn = testIO_IS_READ_STARTED,
+				.name = "io_io_is_read_started"
+		},
+		{
+				.fn = testIO_HAS_READ_ERROR,
+				.name = "io_io_has_read_error"
 		},
 		{
 				.fn = testIO_WRITE_ADD,
