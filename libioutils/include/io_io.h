@@ -90,7 +90,7 @@ struct io_io_write_buffer {
 	io_io_write_cb_t cb;	/**< user callback */
 	void *data;		/**< user data */
 	size_t length;		/**< write buffer length */
-	void *address;		/**< write buffer data address*/
+	const void *address;	/**< write buffer data address*/
 };
 
 /**
@@ -221,7 +221,7 @@ int io_io_write_abort(struct io_io *io);
  * @return Negative errno-compatible value on error, 0 on success
  */
 int io_io_write_buffer_init(struct io_io_write_buffer *buf, io_io_write_cb_t cb,
-		void *data, size_t length, void *address);
+		void *data, size_t length, const void *address);
 
 /**
  * Cleans a write buffer. No memory liberation is performed, but this allows to
