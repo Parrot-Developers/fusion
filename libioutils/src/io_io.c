@@ -447,15 +447,18 @@ static void default_write_cb(struct io_io_write_buffer *buffer,
 
 }
 
-
 /*  add write buffer in queue */
 int io_io_write_add(struct io_io *io, struct io_io_write_buffer *buffer)
 {
 	int ret = 0;
-	struct io_io_write_ctx *ctx = &io->writectx;
+	struct io_io_write_ctx *ctx;
 
+	if (NULL == io || NULL == buffer)
+		return -EINVAL;
 	if (!buffer->address || buffer->length == 0)
 		return -EINVAL;
+
+	ctx = &io->writectx;
 
 	if (!buffer->cb) {
 		buffer->cb = &default_write_cb;
@@ -473,10 +476,13 @@ int io_io_write_add(struct io_io *io, struct io_io_write_buffer *buffer)
  * (buffer cb invoked with status IO_IO_WRITE_ABORTED) */
 int io_io_write_abort(struct io_io *io)
 {
-	struct io_io_write_ctx *ctx = &io->writectx;
+	struct io_io_write_ctx *ctx;
 	struct io_io_write_buffer *buffer = NULL;
 	struct rs_node *node;
 
+	if (NULL == io)
+		return -EINVAL;
+	ctx = &io->writectx;
 	buffer = ctx->current;
 
 	/* TODO: how to be safe on io destroy call in write cb here ? */
