@@ -21,12 +21,12 @@
 
 static void rx_data_dump_cb(const char *msg)
 {
-	fprintf(stderr, "*** RX  *** %s\n", msg);
+	fprintf(stderr, "*** \e[1;31mRX <-\e[0m  *** %s\n", msg);
 }
 
 static void tx_data_dump_cb(const char *msg)
 {
-	fprintf(stderr, "*** TX *** %s\n", msg);
+	fprintf(stderr, "*** \e[1;32mTX  ->\e[0m *** %s\n", msg);
 }
 
 static void testIO_INIT(void)
