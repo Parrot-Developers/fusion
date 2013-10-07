@@ -475,7 +475,7 @@ static void testRS_NODE_REMOVE_ALL(void)
 	struct int_node int_node_b = {.val = 42,};
 	struct int_node int_node_c = {.val = 666,};
 	struct rs_node *list = NULL;
-	int cb(struct rs_node *node, void __attribute__((unused))*unused)
+	int cb(struct rs_node *node)
 	{
 		struct int_node *in = to_int_node(node);
 

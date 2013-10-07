@@ -60,7 +60,7 @@ int rs_dll_init(struct rs_dll *dll, const struct rs_dll_vtable *vtable)
 
 void rs_dll_dump(struct rs_dll *dll)
 {
-	int display(struct rs_node *node, __attribute__((unused)) void *unused)
+	int display(struct rs_node *node)
 	{
 		dll->vtable.print(node);
 
@@ -219,7 +219,7 @@ struct rs_node *rs_dll_remove(struct rs_dll *dll, struct rs_node *node)
 	return rs_dll_remove_match(dll, match, node);
 }
 
-int rs_dll_foreach(struct rs_dll *dll, rs_node_cb_t cb, void *data)
+int rs_dll_foreach(struct rs_dll *dll, rs_node_cb_t cb)
 {
 	struct rs_node *n;
 	int res = 0;
@@ -228,7 +228,7 @@ int rs_dll_foreach(struct rs_dll *dll, rs_node_cb_t cb, void *data)
 		return -EINVAL;
 
 	for (n = dll->head; n && 0 == res; n = rs_node_next(n))
-		res = cb(n, data);
+		res = cb(n);
 
 	return res;
 }

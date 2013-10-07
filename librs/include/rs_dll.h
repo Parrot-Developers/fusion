@@ -154,10 +154,9 @@ struct rs_node *rs_dll_remove_match(struct rs_dll *dll,
  * Applies a callback to each element of the list, in the list order
  * @param dll Doubly linked list
  * @param cb Callback to apply
- * @param data User data, passe to each callback's call
  * @return Negative errno compatible value on error otherwise zero
  */
-int rs_dll_foreach(struct rs_dll *dll, rs_node_cb_t cb, void *data);
+int rs_dll_foreach(struct rs_dll *dll, rs_node_cb_t cb);
 
 #ifdef __cplusplus
 }

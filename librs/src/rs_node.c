@@ -183,7 +183,7 @@ int rs_node_foreach(struct rs_node *list, rs_node_cb_t cb)
 		return -1;
 
 	for (; list; list = rs_node_next(list)) {
-		err = cb(list, NULL);
+		err = cb(list);
 		if (0 != err)
 			return err;
 	}
@@ -200,7 +200,7 @@ int rs_node_remove_all(struct rs_node **list, rs_node_cb_t cb)
 
 	while ((node = rs_node_pop(list)))
 		if (cb)
-			cb(node, NULL);
+			cb(node);
 
 	return 0;
 }

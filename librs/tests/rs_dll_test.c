@@ -78,11 +78,10 @@ static void testRS_DLL_PUSH(void)
 	struct int_node int_node_c = {.val = 666,};
 	struct rs_dll dll;
 	int ret = 0;
-	int two_times_cb(struct rs_node *node, void *data)
+	int two_times_cb(struct rs_node *node)
 	{
 		struct int_node *in = to_int_node(node);
 
-		CU_ASSERT_EQUAL_FATAL((uint32_t)data, 0xdeadbeef);
 		CU_ASSERT_PTR_NOT_NULL(node);
 
 		in->val *= 2;
@@ -100,7 +99,7 @@ static void testRS_DLL_PUSH(void)
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
 	ret = rs_dll_push(&dll, &(int_node_c.node));
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
-	ret = rs_dll_foreach(&dll, two_times_cb, (void *)0xdeadbeef);
+	ret = rs_dll_foreach(&dll, two_times_cb);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_EQUAL(int_node_a.val, 34);
 	CU_ASSERT_EQUAL(int_node_b.val, 84);
@@ -561,8 +560,7 @@ static void testRS_DLL_FOREACH(void)
 {
 	struct rs_dll dll;
 	int ret = 0;
-	int cb(struct rs_node __attribute__((unused))*node,
-			void __attribute__((unused))*data)
+	int cb(struct rs_node __attribute__((unused))*node)
 	{
 		/* do nothing */
 		return 0;
@@ -571,9 +569,9 @@ static void testRS_DLL_FOREACH(void)
 	/* normal use case is tested in testRS_DLL_PUSH */
 
 	/* error use cases */
-	ret = rs_dll_foreach(NULL, cb, (void *)0xB16B00B5);
+	ret = rs_dll_foreach(NULL, cb);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = rs_dll_foreach(&dll, NULL, (void *)0xB16B00B5);
+	ret = rs_dll_foreach(&dll, NULL);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 }
 

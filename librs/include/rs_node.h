@@ -42,10 +42,9 @@ typedef int (*rs_node_match_cb_t)(struct rs_node *node, const void *data);
 /**
  * @typedef rs_node_cb_t
  * @param node Node of the linked list the callback must apply to
- * @param data User defined data
  * @return 0 on success, non-zero on error
  */
-typedef int (*rs_node_cb_t)(struct rs_node *node, void *data);
+typedef int (*rs_node_cb_t)(struct rs_node *node);
 
 /**
  * @def RS_NODE_MATCH_MEMBER
