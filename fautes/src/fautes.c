@@ -29,7 +29,7 @@
  * @return Error code of the first error to happen in either CU_add_suite
  * or CU_add_test
  */
-CU_ErrorCode suite_register(struct suite_t *suite)
+static CU_ErrorCode suite_register(struct suite_t *suite)
 {
 	CU_pSuite pSuite = NULL;
 	CU_pTest pTest = NULL;
