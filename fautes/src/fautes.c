@@ -6,14 +6,16 @@
  *
  * Copyright (C) 2011 Parrot S.A.
  */
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif /* _GNU_SOURCE */
+
 #include <unistd.h>
 #include <signal.h>
 
-#define _GNU_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <libgen.h>
 #include <dlfcn.h>
 
 #include <CUnit/Automated.h>
