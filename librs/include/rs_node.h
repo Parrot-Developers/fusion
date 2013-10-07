@@ -199,11 +199,9 @@ struct rs_node *rs_node_remove_match(struct rs_node *list,
  * the firt callback's non zero return value
  * @param list Doubly linked list
  * @param cb Callback to apply
- * @param data User data, passe to each callback's call
  * @return 0 on success, or the first cb's call non-zero return value
  */
-// TODO remove the data parameter
-int rs_node_foreach(struct rs_node *list, rs_node_cb_t cb, void *data);
+int rs_node_foreach(struct rs_node *list, rs_node_cb_t cb);
 
 /**
  * Pops all the nodes of a linked list and allow user to perform a cleanup

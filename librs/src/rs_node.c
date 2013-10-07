@@ -175,7 +175,7 @@ struct rs_node *rs_node_remove_match(struct rs_node *list,
 	return needle;
 }
 
-int rs_node_foreach(struct rs_node *list, rs_node_cb_t cb, void *data)
+int rs_node_foreach(struct rs_node *list, rs_node_cb_t cb)
 {
 	int err = 0;
 
@@ -183,7 +183,7 @@ int rs_node_foreach(struct rs_node *list, rs_node_cb_t cb, void *data)
 		return -1;
 
 	for (; list; list = rs_node_next(list)) {
-		err = cb(list, data);
+		err = cb(list, NULL);
 		if (0 != err)
 			return err;
 	}

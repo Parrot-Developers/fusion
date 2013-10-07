@@ -445,13 +445,11 @@ static void testRS_NODE_FOREACH(void)
 	struct int_node int_node_b = {.val = 42,};
 	struct int_node int_node_c = {.val = 666,};
 	struct rs_node *list = NULL;
-	int cb(struct rs_node __attribute__((unused))*node,
-			void __attribute__((unused))*data)
+	int cb(struct rs_node *node)
 	{
-		int *v = data;
-
 		struct int_node *in = to_int_node(node);
-		in->val *= *v;
+
+		in->val *= val;
 
 		return 0;
 	};
@@ -461,7 +459,7 @@ static void testRS_NODE_FOREACH(void)
 	rs_node_push(&list, &(int_node_c.node));
 
 	/* normal use cases */
-	ret = rs_node_foreach(list, cb, &val);
+	ret = rs_node_foreach(list, cb);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_EQUAL(int_node_a.val, 34);
 	CU_ASSERT_EQUAL(int_node_b.val, 84);

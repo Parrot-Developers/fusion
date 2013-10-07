@@ -60,16 +60,14 @@ int rs_dll_init(struct rs_dll *dll, const struct rs_dll_vtable *vtable)
 
 void rs_dll_dump(struct rs_dll *dll)
 {
-	int display(struct rs_node *node, __attribute__((unused)) void *data)
+	int display(struct rs_node *node, __attribute__((unused)) void *unused)
 	{
-		void (*print)(struct rs_node *node) = data;
-
-		print(node);
+		dll->vtable.print(node);
 
 		return 0;
 	}
 
-	rs_node_foreach(dll->head, display, dll->vtable.print);
+	rs_node_foreach(dll->head, display);
 }
 
 int rs_dll_push(struct rs_dll *dll, struct rs_node *node)
