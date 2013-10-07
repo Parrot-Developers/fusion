@@ -202,7 +202,17 @@ struct rs_node *rs_node_remove_match(struct rs_node *list,
  * @param data User data, passe to each callback's call
  * @return 0 on success, or the first cb's call non-zero return value
  */
+// TODO remove the data parameter
 int rs_node_foreach(struct rs_node *list, rs_node_cb_t cb, void *data);
+
+/**
+ * Pops all the nodes of a linked list and allow user to perform a cleanup
+ * action on each node
+ * @param list Point to a list's head, NULL in output
+ * @param cb Callback called on each node
+ * @return -1 on error, 0 on success
+ */
+int rs_node_remove_all(struct rs_node **list, rs_node_cb_t cb);
 
 #ifdef __cplusplus
 }
@@ -214,5 +224,7 @@ int rs_node_foreach(struct rs_node *list, rs_node_cb_t cb, void *data);
  * which pops each elements and calls cb on each so that the client can perform
  * the cleanup action it wants
  */
+
+/* TODO modify all the API to return an errno instead of -1 */
 
 #endif /* RS_NODE_H_ */

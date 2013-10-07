@@ -470,6 +470,49 @@ static void testRS_NODE_FOREACH(void)
 	/* error use cases */
 }
 
+static void testRS_NODE_REMOVE_ALL(void)
+{
+	int ret;
+	struct int_node int_node_a = {.val = 17,};
+	struct int_node int_node_b = {.val = 42,};
+	struct int_node int_node_c = {.val = 666,};
+	struct rs_node *list = NULL;
+	int cb(struct rs_node *node, void __attribute__((unused))*unused)
+	{
+		struct int_node *in = to_int_node(node);
+
+		in->val =0;
+
+		return 0;
+	};
+
+	rs_node_push(&list, &(int_node_a.node));
+	rs_node_push(&list, &(int_node_b.node));
+	rs_node_push(&list, &(int_node_c.node));
+
+	/* normal use cases */
+	ret = rs_node_remove_all(&list, cb);
+	CU_ASSERT_EQUAL(ret, 0);
+	CU_ASSERT_EQUAL(int_node_a.val, 0);
+	CU_ASSERT_EQUAL(int_node_b.val, 0);
+	CU_ASSERT_EQUAL(int_node_c.val, 0);
+	CU_ASSERT_PTR_NULL(list);
+	CU_ASSERT_PTR_NULL(int_node_a.node.next);
+	CU_ASSERT_PTR_NULL(int_node_a.node.prev);
+	CU_ASSERT_PTR_NULL(int_node_b.node.next);
+	CU_ASSERT_PTR_NULL(int_node_b.node.prev);
+	CU_ASSERT_PTR_NULL(int_node_c.node.next);
+	CU_ASSERT_PTR_NULL(int_node_c.node.prev);
+	ret = rs_node_remove_all(&list, cb);
+	CU_ASSERT_EQUAL(ret, 0);
+
+	/* error use cases */
+	ret = rs_node_remove_all(NULL, cb);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+	ret = rs_node_remove_all(&list, NULL);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+}
+
 static const struct test_t tests[] = {
 		{
 				.fn = testRS_NODE_HEAD,
@@ -522,6 +565,10 @@ static const struct test_t tests[] = {
 		{
 				.fn = testRS_NODE_FOREACH,
 				.name = "rs_node_foreach"
+		},
+		{
+				.fn = testRS_NODE_REMOVE_ALL,
+				.name = "rs_node_remove_all"
 		},
 
 		/* NULL guard */
