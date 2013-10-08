@@ -538,19 +538,19 @@ int io_io_read_start(struct io_io *io, io_io_read_cb_t cb, void *data,
 	return 0;
 }
 
-int io_io_log_rx(struct io_io *io, void (*log_cb)(const char *))
+int io_io_log_rx(struct io_io *io, void (*log_rx)(const char *))
 {
-	if (!io)
+	if (NULL == io)
 		return -EINVAL;
 
-	io->log_rx = log_cb;
+	io->log_rx = log_rx;
 
 	return 0;
 }
 
 int io_io_log_tx(struct io_io *io, void (*log_tx)(const char *))
 {
-	if (!io)
+	if (NULL == io)
 		return -EINVAL;
 
 	io->log_tx = log_tx;
