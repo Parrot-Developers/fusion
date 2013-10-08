@@ -344,9 +344,7 @@ int io_mon_remove_source(struct io_mon *mon, struct io_src *src)
 	if (NULL == mon || NULL == src)
 		return -EINVAL;
 
-	rs_node_remove(&mon->source, &src->node);
-
-	return 0;
+	return remove_source(mon, src);
 }
 
 void io_mon_dump_epoll_event(uint32_t events)
