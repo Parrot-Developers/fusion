@@ -178,6 +178,7 @@ struct rs_node *rs_node_find_match(struct rs_node *node,
  * @note Beware that if the node removed is the "handle" of the list, this
  * handle must be modified after. E.g. if the node removed is the head, then one
  * must update the head reference, to point to the next element
+ * TODO should take a rs_node **list and update the head ?
  * @return Node removed if found, NULL otherwise or on error
  */
 struct rs_node *rs_node_remove(struct rs_node *list, struct rs_node *trash);
@@ -206,7 +207,7 @@ int rs_node_foreach(struct rs_node *list, rs_node_cb_t cb);
  * Pops all the nodes of a linked list and allow user to perform a cleanup
  * action on each node
  * @param list Point to a list's head, NULL in output
- * @param cb Callback called on each node
+ * @param cb Callback called on each node. Can be NULL
  * @return -1 on error, 0 on success
  */
 int rs_node_remove_all(struct rs_node **list, rs_node_cb_t cb);

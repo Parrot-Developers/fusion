@@ -195,7 +195,7 @@ int rs_node_remove_all(struct rs_node **list, rs_node_cb_t cb)
 {
 	struct rs_node *node;
 
-	if (NULL == list || NULL == cb)
+	if (NULL == list)
 		return -1;
 
 	while ((node = rs_node_pop(list)))

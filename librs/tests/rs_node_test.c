@@ -501,13 +501,18 @@ static void testRS_NODE_REMOVE_ALL(void)
 	CU_ASSERT_PTR_NULL(int_node_b.node.prev);
 	CU_ASSERT_PTR_NULL(int_node_c.node.next);
 	CU_ASSERT_PTR_NULL(int_node_c.node.prev);
+	/* it's ok to call remove_all on an empty list */
 	ret = rs_node_remove_all(&list, cb);
+	CU_ASSERT_EQUAL(ret, 0);
+	/*
+	 * it's ok to call remove_all with no callback, all elements will only
+	 * be unchained
+	 */
+	ret = rs_node_remove_all(&list, NULL);
 	CU_ASSERT_EQUAL(ret, 0);
 
 	/* error use cases */
 	ret = rs_node_remove_all(NULL, cb);
-	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = rs_node_remove_all(&list, NULL);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 }
 
