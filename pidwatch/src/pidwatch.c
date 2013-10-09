@@ -200,6 +200,7 @@ static int read_process_state(pid_t pid)
 		return -1;
 
 	/* first two pieces of information are dropped */
+	/* coverity[secure_coding] */
 	ret = fscanf(stat_file, "%*d %*s %c", &state);
 	if (EOF == ret) {
 		fclose(stat_file);
