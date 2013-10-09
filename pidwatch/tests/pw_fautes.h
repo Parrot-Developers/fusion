@@ -12,6 +12,4 @@
 
 extern struct suite_t pidwatch_suite;
 
-void libpidwatch_init_test_suites(void);
-
 #endif /* PW_FAUTES_H_ */

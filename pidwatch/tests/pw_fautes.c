@@ -10,15 +10,19 @@
 
 #include "pw_fautes.h"
 
-const char const *fautes_lib_name = "libpidwatch";
-
 struct suite_t *libpidwatch_test_suites[] = {
 		&pidwatch_suite,
 
 		NULL, /* NULL guard */
 };
 
-void libpidwatch_init_test_suites(void)
+void libpidwatch_pool_initializer(void)
 {
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(pidwatch_suite);
 }
+
+struct pool_t fautes_pool = {
+	.name = "libpidwatch",
+	.initializer = libpidwatch_pool_initializer,
+	.suites = libpidwatch_test_suites,
+};
