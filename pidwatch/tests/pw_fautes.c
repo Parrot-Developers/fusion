@@ -16,7 +16,7 @@ struct suite_t *libpidwatch_test_suites[] = {
 		NULL, /* NULL guard */
 };
 
-void libpidwatch_pool_initializer(void)
+static void libpidwatch_pool_initializer(void)
 {
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(pidwatch_suite);
 }
