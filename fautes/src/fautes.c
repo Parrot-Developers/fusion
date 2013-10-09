@@ -82,16 +82,11 @@ static int get_sym(void *lib_handle, const char *name, void **output)
 	return 0;
 }
 
-typedef void (*init_fun_t)(void);
-
-static struct suite_t **get_test_suite(const char *so_lib, void **lib_handle,
-		char **libname)
+static struct pool_t *get_test_pool(const char *so_lib, void **lib_handle)
 {
 	void *sym;
-	struct suite_t **res = NULL;
+	struct pool_t *res = NULL;
 	int ret;
-	char names_buf[512];
-	init_fun_t init_fun;
 
 	/* load the library to test */
 	*lib_handle = dlopen(so_lib, RTLD_NOW);
@@ -101,33 +96,15 @@ static struct suite_t **get_test_suite(const char *so_lib, void **lib_handle,
 	}
 
 	/* get it's name */
-	ret = get_sym(*lib_handle, "fautes_lib_name", &sym);
+	ret = get_sym(*lib_handle, "fautes_pool", &sym);
 	if (-1 == ret)
 		goto out;
-	*libname = *(char **)sym;
-	if (0 != strncmp(*libname, basename(so_lib), strlen(*libname))) {
-		fprintf(stderr, "so name '%s' mismatches with _lib_name '%s'\n",
-				basename(so_lib), *libname);
-		goto out;
-	}
+	res = (struct pool_t *)sym;
 
-	/* get it's test suite */
-	snprintf(names_buf, 512, "%s_test_suites", *libname);
-	ret = get_sym(*lib_handle, names_buf, &sym);
-	if (-1 == ret)
-		goto out;
-	res = (struct suite_t **)sym;
+	if ((*res).initializer)
+		(*res).initializer();
 
-	/* if there is a suites initialization function, call it */
-	snprintf(names_buf, 512, "%s_init_test_suites", *libname);
-	ret = get_sym(*lib_handle, names_buf, &sym);
-	if (-1 == ret)
-		goto out;
-	init_fun = (init_fun_t)sym;
-	if (NULL != init_fun)
-		init_fun();
-
-	printf("Found test suite for library %s\n", *libname);
+	printf("Found test suite %s for library %s\n", res->name, so_lib);
 out:
 	if (NULL == res)
 		dlclose(lib_handle);
@@ -142,9 +119,9 @@ int main(int argc, char *argv[])
 	struct suite_t **suite;
 	char **so_lib;
 	void *lib_handle;
-	char *libname;
 	unsigned tests_failed = 0;
 	int failure;
+	struct pool_t *pool;
 
 	if (argc <= 1) {
 		usage(argv[0]);
@@ -160,12 +137,13 @@ int main(int argc, char *argv[])
 	so_lib = argv + 1 + xml;
 
 	do {
-		suite = get_test_suite(*so_lib, &lib_handle, &libname);
-		if (NULL == suite) {
-			fprintf(stderr, "no valid Fautes test suite in %s\n",
+		pool = get_test_pool(*so_lib, &lib_handle);
+		if (NULL == pool) {
+			fprintf(stderr, "no valid Fautes test pool in %s\n",
 					*so_lib);
 			continue;
 		}
+		suite = pool->suites;
 
 		/* TODO extract / split what follows */
 		/* initialize the CUnit test registry */
@@ -197,7 +175,7 @@ int main(int argc, char *argv[])
 		if (xml) {
 			/* Run all tests using the automated interface */
 			/* generates an xml output */
-			CU_set_output_filename(libname);
+			CU_set_output_filename(pool->name);
 			CU_automated_run_tests();
 			CU_list_tests_to_file();
 		} else {
