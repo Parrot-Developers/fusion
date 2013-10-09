@@ -190,9 +190,6 @@ static int read_process_state(pid_t pid)
 	FILE *stat_file = NULL;
 	char state;
 	int ret;
-	/* both two following read values are dropped */
-	char read_comm[BUF_MAX];
-	int read_pid;
 
 	ret = snprintf(status_path, BUF_MAX, "/proc/%lld/stat", (long long)pid);
 	if (0 > ret || ret >= BUF_MAX)
@@ -202,7 +199,8 @@ static int read_process_state(pid_t pid)
 	if (NULL == stat_file)
 		return -1;
 
-	ret = fscanf(stat_file, "%d %s %c", &read_pid, read_comm, &state);
+	/* first two pieces of information are dropped */
+	ret = fscanf(stat_file, "%*d %*s %c", &state);
 	if (EOF == ret) {
 		fclose(stat_file);
 		return -1;
