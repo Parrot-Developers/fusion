@@ -1,35 +1,40 @@
+                                Fautes
 
 
 
+I   Description
+    Fautes stands for Framework for AUto TESts. It provides tools for
+automatic unit testing of software libraries and executables. It relies on
+libcunit and adds sugar around it.
 
-I Description
-Fautes stands for Framework for AUto TESts. It provides tools for
-automatic unit testing of software libraries. It relies on libcunit and adds
-sugar around it.
-
-II Content
-This project consists in two independent parts
- * the tests launcher responsible to launch tests embedded into a .so
- * a library with with tools to ease the process of actually writing test
+II  Content
+    This project consists in two independent parts
+ * the tests launcher fautes responsible to launch tests embedded into a .so,
+ which acts as a plugin of the fautes executable
+ * an optional library (libfautes) with with tools to ease the process of
+ actually writing test
 
 III Add Fautes support to a library
-A library supporting Fautes has to declare the following symbols :
- * the library name fautes_lib_name LIBNAME
- * a suites set named LIBNAME_test_suites, which is a nul-terminated array of 
-   test suites
- * optional, a LIBNAME_init_test_suites which is called before any test occur
-   and which can for example enable / disable individual suites
+    A library supporting Fautes has to declare (and fill in) only one symbol :
+	struct pool_t fautes_pool
+which will contain the information for initializing, running and cleaning the
+test suites.
 
-IV Usage
-Once the library supports fautes, to run the tests suites embedded into a .so,
-one need to run :
-     fautes SO_FILE [xml]
-to actually run the tests. The xml flag, if present leads to the generation of
-two xml files, CUnitAutomated-Listing.xml and CUnitAutomated-Results.xml.
-without this flag, the result of the tests is echoed to standard output.
+IV  Usage
+    Once the library supports fautes, to run the tests suites embedded into a
+.so, one need to run :
+     fautes [xml] SO_FILES
+to actually run the tests in all the .so files listed. The xml flag, if present
+leads to the generation of two xml files, TEST_POOL_NAME-Listing.xml and
+TEST_POOL_NAME-Results.xml, for each library tested.
+    Without this flag, the result of the tests is echoed to standard output.
 
-
-
+V   Tips
+ * Without the xml flag, fautes writes to standard output, so tests should write
+to standard error in order to ease filtering
+ * embedding unit tests in an executable is possible, with the following flags
+ passed to the linker at the program's linkage :
+	-pie  -rdynamic -Wl,--no-gc-sections
 
 
 
