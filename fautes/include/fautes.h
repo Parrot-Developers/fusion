@@ -57,7 +57,11 @@ typedef void (*fautes_pool_initializer_t)(void);
  * defined by a library or an executable for fautes support
  */
 struct pool_t {
-	/** test pool name (e.g. library name) (required and must be unique) */
+	/**
+	 * test pool name (e.g. library name), required and must be unique.
+	 * It must match the shared object basename, e.g. "libfautes" for
+	 * testing /usr/lib/libfautes.so
+	 */
 	const char *name;
 	/** initialization function of the pool (optional) */
 	fautes_pool_initializer_t initializer;

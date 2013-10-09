@@ -101,6 +101,13 @@ static struct pool_t *get_test_pool(const char *so_lib, void **lib_handle)
 		goto out;
 	res = (struct pool_t *)sym;
 
+	if (0 != strncmp(res->name, basename(so_lib), strlen(res->name))) {
+		fprintf(stderr, "so name '%s' mismatches with pool name '%s'\n",
+				so_lib, res->name);
+		res = NULL;
+		goto out;
+	}
+
 	if ((*res).initializer)
 		(*res).initializer();
 
@@ -139,7 +146,7 @@ int main(int argc, char *argv[])
 	do {
 		pool = get_test_pool(*so_lib, &lib_handle);
 		if (NULL == pool) {
-			fprintf(stderr, "no valid Fautes test pool in %s\n",
+			fprintf(stderr, "No valid Fautes test pool in %s\n",
 					*so_lib);
 			continue;
 		}
