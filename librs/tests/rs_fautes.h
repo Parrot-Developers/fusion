@@ -16,6 +16,4 @@ extern struct suite_t node_suite;
 extern struct suite_t rb_suite;
 extern struct suite_t utils_suite;
 
-void librs_init_test_suites(void);
-
 #endif /* RS_FAUTES_H_ */

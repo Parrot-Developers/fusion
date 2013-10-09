@@ -10,8 +10,6 @@
 
 #include "rs_fautes.h"
 
-const char const *fautes_lib_name = "librs";
-
 struct suite_t *librs_test_suites[] = {
 		&dll_suite,
 		&hmap_suite,
@@ -21,7 +19,7 @@ struct suite_t *librs_test_suites[] = {
 		NULL, /* NULL guard */
 };
 
-void librs_init_test_suites(void)
+static void librs_pool_initializer(void)
 {
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(dll_suite);
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(hmap_suite);
@@ -29,3 +27,9 @@ void librs_init_test_suites(void)
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(rb_suite);
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(utils_suite);
 }
+
+struct pool_t fautes_pool = {
+	.name = "librs",
+	.initializer = librs_pool_initializer,
+	.suites = librs_test_suites,
+};
