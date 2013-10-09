@@ -12,8 +12,6 @@
 
 #include "io_fautes.h"
 
-const char const *fautes_lib_name = "libioutils";
-
 struct suite_t *libioutils_test_suites[] = {
 		&io_suite,
 		&mon_suite,
@@ -29,7 +27,7 @@ struct suite_t *libioutils_test_suites[] = {
 		NULL, /* NULL guard */
 };
 
-void libioutils_init_test_suites(void)
+static void libioutils_pool_initializer(void)
 {
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(io_suite);
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(mon_suite);
@@ -42,3 +40,9 @@ void libioutils_init_test_suites(void)
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(src_tmr_suite);
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(utils_suite);
 }
+
+struct pool_t fautes_pool = {
+	.name = "libioutils",
+	.initializer = libioutils_pool_initializer,
+	.suites = libioutils_test_suites,
+};

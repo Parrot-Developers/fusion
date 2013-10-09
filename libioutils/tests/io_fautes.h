@@ -21,6 +21,4 @@ extern struct suite_t src_suite;
 extern struct suite_t src_tmr_suite;
 extern struct suite_t utils_suite;
 
-void libioutils_init_test_suites(void);
-
 #endif /* IO_FAUTES_H_ */
