@@ -32,7 +32,8 @@ int read_from_output(char *buf, size_t size, const char *cmd);
  * Same as above but variadic
  * @param buf Buffer where the output will be stored
  * @param size Maximum size of data to read
- * @param cmd Command to launch
+ * @param fmt A-la-printf format, matching the ellipsis parameters, to name the
+ * command to launch
  * @return -1 in case of error, otherwise number of bytes read
  */
 int vread_from_output(char *buf, size_t size, const char *fmt, ...)
@@ -105,9 +106,9 @@ int compare_string_to_file(char *path, char *buf, size_t size);
  * @param string String where the output is stored
  * @param len Size of the buffer, including the room for a trailing 0 which is
  * automatically added
- * @param output_function Function to test the output of
+ * @param out_func Function to test the output of, parameters from the ellipsis
+ * are passed to it
  * @param filedes File descriptor out_func writes to
- * @param ... Parameters passed to the function
  * @return 0 if everything went successful, 0 otherwise
  */
 #define store_function_output_to_string(string, len, out_func, filedes, ...) \
@@ -161,8 +162,8 @@ __old_out_fd = dup(filedes); \
  * @param string String where the output is stored
  * @param len Size of the buffer, including the room for a trailing 0 which is
  * automatically added
- * @param output_function Function to test the output of
- * @param ... Parameters passed to the function
+ * @param out_func Function to test the output of, parameters from the ellipsis
+ * are passed to it
  * @return 0 if everything went successful, 0 otherwise
  */
 #define store_function_stdoutput_to_string(string, len, out_func, ...) \

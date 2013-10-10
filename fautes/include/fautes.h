@@ -4,8 +4,10 @@
  * @author nicolas.carrier@parrot.com
  * @brief Header a library need to include in order to add Fautes support
  *
- * A library willing to add fautes support must define a variable
+ * <p>
+ *   A library willing to add fautes support must define a variable
  * struct pool_t fautes_pool with at least the optional parameters defined
+ * </p>
  *
  * Copyright (C) 2012 Parrot S.A.
  */
@@ -44,9 +46,9 @@ struct suite_t {
 };
 
 /**
- * @def fautes_pool_initializer_t
- * @brief Initialization function for a test pool. For example, read the active
- * state of test suites from environment with
+ * @typedef fautes_pool_initializer_t
+ * @brief Initialization function for a test pool. For example, can read the
+ * active state of test suites from environment with
  * FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT
  */
 typedef void (*fautes_pool_initializer_t)(void);
@@ -70,7 +72,7 @@ struct pool_t {
 };
 
 /**
- * @def GET_ACTIVE_STATE_FROM_ENVIRONMENT
+ * @def FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT
  * @param suite Name of the test suite to get the active state of
  * @brief Reads from environment variables, if a given test suite must be
  * activated or not. If FAUTES_SUITE_ACTIVE_STATE_my_suite_name is set to "0",
