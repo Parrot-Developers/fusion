@@ -83,7 +83,8 @@ int rs_dll_push(struct rs_dll *dll, struct rs_node *node)
 	err = rs_node_push(&(dll->head), node);
 
 	dll->count++;
-	dll->cur = dll->head;
+
+	rs_dll_rewind(dll);
 
 	return err ? -EINVAL : 0;
 }
@@ -102,6 +103,8 @@ int rs_dll_enqueue(struct rs_dll *dll, struct rs_node *node)
 		dll->tail = node;
 	}
 	dll->count++;
+
+	rs_dll_rewind(dll);
 
 	return 0;
 }
@@ -181,6 +184,8 @@ struct rs_node *rs_dll_pop(struct rs_dll *dll)
 	if (0 == dll->count)
 		dll->tail = NULL;
 
+	rs_dll_rewind(dll);
+
 	return ret;
 }
 
@@ -233,9 +238,10 @@ struct rs_node *rs_dll_remove_match(struct rs_dll *dll,
 			dll->head = head_next_bkp;
 		if (needle == dll->tail)
 			dll->tail = tail_prev_bkp;
-		dll->cur = dll->head;
 		dll->count--;
 	}
+
+	rs_dll_rewind(dll);
 
 	return needle;
 }
