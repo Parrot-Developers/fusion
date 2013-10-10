@@ -3,3 +3,4 @@
 lib/libfautes.so
 src/fautes
 *.o
+html
