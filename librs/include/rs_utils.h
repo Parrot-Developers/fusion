@@ -59,6 +59,7 @@ static inline void rs_file_close(FILE **file)
 		return;
 
 	fclose(*file);
+	*file = NULL;
 }
 
 /**
