@@ -233,3 +233,19 @@ int rs_dll_foreach(struct rs_dll *dll, rs_node_cb_t cb)
 	return res;
 }
 
+int rs_dll_remove_all(struct rs_dll *dll, rs_node_cb_t cb)
+{
+	struct rs_node *node;
+
+	if (NULL == dll)
+		return -EINVAL;
+
+	if (cb)
+		while ((node = rs_dll_pop(dll)))
+			cb(node);
+	else
+		while (rs_dll_pop(dll));
+
+	return 0;
+}
+

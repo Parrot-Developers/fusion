@@ -575,6 +575,61 @@ static void testRS_DLL_FOREACH(void)
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 }
 
+static void testRS_DLL_REMOVE_ALL(void)
+{
+	struct int_node int_node_a = {.val = 17,};
+	struct int_node int_node_b = {.val = 42,};
+	struct int_node int_node_c = {.val = 666,};
+	struct rs_dll dll;
+	int ret = 0;
+	int cleanup_cb(struct rs_node *n)
+	{
+		struct int_node *int_node = to_int_node(n);
+
+		int_node->val = -1;
+
+		return 0;
+	};
+
+	ret = rs_dll_init(&dll, &dll_test_vtable);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+
+	/* normal use cases */
+	/* on an empty list */
+	ret = rs_dll_remove_all(&dll, cleanup_cb);
+	CU_ASSERT_EQUAL(ret, 0);
+	/* on a list with one single element */
+	ret = rs_dll_push(&dll, &(int_node_a.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = rs_dll_remove_all(&dll, cleanup_cb);
+	CU_ASSERT_EQUAL(ret, 0);
+	CU_ASSERT_EQUAL(int_node_a.val, -1);
+	/* with the complete one */
+	int_node_a.val = 17;
+	ret = rs_dll_push(&dll, &(int_node_a.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = rs_dll_push(&dll, &(int_node_b.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = rs_dll_push(&dll, &(int_node_c.node));
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	ret = rs_dll_remove_all(&dll, cleanup_cb);
+	CU_ASSERT_EQUAL(ret, 0);
+	CU_ASSERT_EQUAL(int_node_a.val, -1);
+	CU_ASSERT_EQUAL(int_node_b.val, -1);
+	CU_ASSERT_EQUAL(int_node_c.val, -1);
+	CU_ASSERT_EQUAL(rs_dll_get_count(&dll), 0);
+	/* no problem when calling it twice */
+	ret = rs_dll_remove_all(&dll, cleanup_cb);
+	CU_ASSERT_EQUAL(ret, 0);
+	/* no problem with no cb */
+	ret = rs_dll_remove_all(&dll, NULL);
+	CU_ASSERT_EQUAL(ret, 0);
+
+	/* error use case */
+	ret = rs_dll_remove_all(NULL, cleanup_cb);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+}
+
 static const struct test_t tests[] = {
 		{
 				.fn = testRS_DLL_INIT,
@@ -627,6 +682,10 @@ static const struct test_t tests[] = {
 		{
 				.fn = testRS_DLL_FOREACH,
 				.name = "rs_dll_foreach"
+		},
+		{
+				.fn = testRS_DLL_REMOVE_ALL,
+				.name = "rs_dll_remove_all"
 		},
 
 		/* NULL guard */

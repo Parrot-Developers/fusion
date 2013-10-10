@@ -158,6 +158,15 @@ struct rs_node *rs_dll_remove_match(struct rs_dll *dll,
  */
 int rs_dll_foreach(struct rs_dll *dll, rs_node_cb_t cb);
 
+/**
+ * Pops all the nodes of a linked list and allow user to perform a cleanup
+ * action on each node
+ * @param dll Point to a list's head, NULL in output
+ * @param cb Callback called on each node. Can be NULL
+ * @return -1 on error, 0 on success
+ */
+int rs_dll_remove_all(struct rs_dll *dll, rs_node_cb_t cb);
+
 #ifdef __cplusplus
 }
 #endif
