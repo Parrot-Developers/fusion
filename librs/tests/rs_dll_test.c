@@ -510,7 +510,6 @@ static void testRS_DLL_REMOVE_MATCH(void)
 	struct int_node int_node_a = {.val = 17,};
 	struct int_node int_node_b = {.val = 42,};
 	struct int_node int_node_c = {.val = 666,};
-	struct int_node needle = {.val = 42,};
 	struct rs_node *node;
 	int odd;
 	struct rs_dll dll;
@@ -550,9 +549,9 @@ static void testRS_DLL_REMOVE_MATCH(void)
 	CU_ASSERT_EQUAL(to_int_node(node)->val, 17);
 
 	/* error use case */
-	node = rs_dll_remove_match(NULL, parity_cb, &(needle.node));
+	node = rs_dll_remove_match(NULL, parity_cb, &odd);
 	CU_ASSERT_PTR_NULL(node);
-	node = rs_dll_remove_match(&dll, NULL, &(needle.node));
+	node = rs_dll_remove_match(&dll, NULL, &odd);
 	CU_ASSERT_PTR_NULL(node);
 }
 

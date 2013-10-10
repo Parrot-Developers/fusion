@@ -167,6 +167,11 @@ int rs_dll_foreach(struct rs_dll *dll, rs_node_cb_t cb);
  */
 int rs_dll_remove_all(struct rs_dll *dll, rs_node_cb_t cb);
 
+/*
+ * TODO check that the list is rewinded before "walk through" actions and at
+ * least after each modification action (maybe before, think of it on each case
+ */
+
 #ifdef __cplusplus
 }
 #endif

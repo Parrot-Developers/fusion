@@ -216,13 +216,6 @@ int rs_node_remove_all(struct rs_node **list, rs_node_cb_t cb);
 }
 #endif
 
-/*
- * TODO add a destroy function e.g. :
- * int rs_node_destroy(struct rs_node **list, rs_node_cb_t cb, void *data);
- * which pops each elements and calls cb on each so that the client can perform
- * the cleanup action it wants
- */
-
 /* TODO modify all the API to return an errno instead of -1 */
 
 #endif /* RS_NODE_H_ */
