@@ -45,6 +45,21 @@ static void testRS_STR_FREE(void)
 	rs_str_free(NULL);
 }
 
+static void testRS_FILE_CLOSE(void)
+{
+	FILE *file = fopen("/dev/null", "rb");
+
+	CU_ASSERT_PTR_NOT_NULL_FATAL(file);
+
+	/* normal use case */
+	rs_file_close(&file);
+	CU_ASSERT_PTR_NULL(file);
+	rs_file_close(&file);
+
+	/* error use cases */
+	rs_file_close(NULL);
+}
+
 static const struct test_t tests[] = {
 		{
 				.fn = testRS_STR_IS_INVALID,
@@ -53,6 +68,10 @@ static const struct test_t tests[] = {
 		{
 				.fn = testRS_STR_FREE,
 				.name = "rs_str_free"
+		},
+		{
+				.fn = testRS_FILE_CLOSE,
+				.name = "rs_file_close"
 		},
 		/* NULL guard */
 		{.fn = NULL, .name = NULL},
