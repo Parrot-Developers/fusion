@@ -106,6 +106,37 @@ int rs_dll_enqueue(struct rs_dll *dll, struct rs_node *node)
 	return 0;
 }
 
+int rs_dll_insert_sorted(struct rs_dll *dll, struct rs_node *node)
+{
+	struct rs_node *a = node;
+	struct rs_node *b; /* cursor for walkthrough */
+
+	if (NULL == dll || NULL == node)
+		return -EINVAL;
+	if (NULL == dll->vtable.compare)
+		return -ENOSYS;
+
+	/* when empty, order is obviously not a problem... */
+	if (rs_dll_is_empty(dll))
+		return rs_dll_push(dll, node);
+
+	while ((b = rs_dll_next(dll)))
+		if (dll->vtable.compare(a, b) < 0) { /* a < b */
+			/* insert as new head */
+			if (b == dll->head)
+				return rs_dll_push(dll, a);
+
+			rs_node_insert_after(a, b);
+			rs_dll_rewind(dll);
+			dll->count++;
+
+			return 0;
+		}
+
+	/* if the node wasn't inserted, it must be the last */
+	return rs_dll_enqueue(dll, node);
+}
+
 unsigned rs_dll_get_count(struct rs_dll *dll)
 {
 	return NULL == dll ? UINT_MAX : dll->count;

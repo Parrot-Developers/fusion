@@ -18,8 +18,8 @@
 #include <fautes_utils.h>
 
 struct int_node {
-	int val;
 	struct rs_node node;
+	int val;
 };
 
 #define to_int_node(p) rs_container_of(p, struct int_node, node)
@@ -35,6 +35,17 @@ static int dll_test_equals(struct rs_node *a, const struct rs_node *b)
 	return 0 == (int_node_a->val - int_node_b->val);
 }
 
+static int dll_test_compare(struct rs_node *a, const struct rs_node *b)
+{
+	struct int_node *int_node_a = to_int_node(a);
+	struct int_node *int_node_b = to_int_node(b);
+
+	if (NULL == a || NULL == b)
+		return 0;
+
+	return int_node_a->val - int_node_b->val;
+}
+
 static void dll_test_print(struct rs_node *node)
 {
 	struct int_node *int_node = to_int_node(node);
@@ -44,6 +55,7 @@ static void dll_test_print(struct rs_node *node)
 			node->prev, node->next);
 }
 static const struct rs_dll_vtable dll_test_vtable = {
+		.compare = dll_test_compare,
 		.equals = dll_test_equals,
 		.print = dll_test_print,
 };
@@ -175,6 +187,42 @@ static void testRS_DLL_ENQUEUE(void)
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = rs_dll_enqueue(&dll, NULL);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
+}
+
+static void testRS_DLL_INSERT_SORTED(void)
+{
+	struct int_node int_node_a = {.val = 17,};
+	struct int_node int_node_b = {.val = 42,};
+	struct int_node int_node_c = {.val = 66,};
+	struct int_node int_node_d = {.val = 666,};
+	struct int_node *a, *b;
+	struct rs_dll dll;
+	struct rs_node *node, *prev;
+	int ret = 0;
+
+	ret = rs_dll_init(&dll, &dll_test_vtable);
+	CU_ASSERT_EQUAL_FATAL(ret, 0);
+
+	/* normal use cases */
+	ret = rs_dll_insert_sorted(&dll, &(int_node_d.node));
+	CU_ASSERT_EQUAL(ret, 0);
+	ret = rs_dll_insert_sorted(&dll, &(int_node_b.node));
+	CU_ASSERT_EQUAL(ret, 0);
+	ret = rs_dll_insert_sorted(&dll, &(int_node_c.node));
+	CU_ASSERT_EQUAL(ret, 0);
+	ret = rs_dll_insert_sorted(&dll, &(int_node_a.node));
+	CU_ASSERT_EQUAL(ret, 0);
+
+	prev = rs_dll_next(&dll);
+	for (prev = rs_dll_next(&dll), prev = rs_dll_next(&dll);
+			NULL != node && NULL != prev;
+			prev = node, node = rs_dll_next(&dll)) {
+		a = to_int_node(prev);
+		b = to_int_node(node);
+		CU_ASSERT(a->val < b->val);
+	}
+
+	/* error use case */
 }
 
 static void testRS_DLL_GET_COUNT(void)
@@ -641,6 +689,10 @@ static const struct test_t tests[] = {
 		{
 				.fn = testRS_DLL_ENQUEUE,
 				.name = "rs_dll_enqueue"
+		},
+		{
+				.fn = testRS_DLL_INSERT_SORTED,
+				.name = "rs_dll_insert_sorted"
 		},
 		{
 				.fn = testRS_DLL_GET_COUNT,

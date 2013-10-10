@@ -21,7 +21,17 @@ extern "C" {
  * @brief User defined operation on list nodes
  */
 struct rs_dll_vtable {
-	/** returns 0 if a equals b, non-zero otherwise */
+	/**
+	 * returns an integer less than, equal to, or greater than zero if a is
+	 * found, respectively, to be less than, to match, or be greater than b.
+	 */
+	int (*compare)(struct rs_node *a, const struct rs_node *b);
+	/**
+	 * returns 0 if a equals b, non-zero otherwise. Must be consistent with
+	 * compare (e.g. could be implemented as) :
+	 * 	return compare(a, b) == 0;
+	 * must return 0 if a or b is NULL
+	 */
 	int (*equals)(struct rs_node *a, const struct rs_node *b);
 	/** displays the data associated with node */
 	void (*print)(struct rs_node *node);
@@ -74,6 +84,18 @@ int rs_dll_push(struct rs_dll *dll, struct rs_node *node);
  * @return Negative errno compatible value on error otherwise zero
  */
 int rs_dll_enqueue(struct rs_dll *dll, struct rs_node *node);
+
+/**
+ * Adds an element to the list, respecting the ascendant order of the list as
+ * defined by the compare operation
+ * @param dll Doubly linked list
+ * @param node Node to insert
+ * @return Negative errno-compatible value on error otherwise zero. Returns an
+ * error if the compare operation isn't defined
+ * @note order is guaranteed if and only if nodes are inserted using only
+ * rs_dll_insert_sorted, not, for example, rs_dll_push or rs_dll_enqueue
+ */
+int rs_dll_insert_sorted(struct rs_dll *dll, struct rs_node *node);
 
 /**
  * @param dll Doubly linked list
