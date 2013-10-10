@@ -9,3 +9,4 @@ tests/io_test
 *.swp
 trash
 tags
+html
