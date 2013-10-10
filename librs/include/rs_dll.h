@@ -4,6 +4,24 @@
  * @author nicolas.carrier@parrot.com
  * @brief Doubly linked list implementation
  *
+ * <p>
+ *   Primitive containers this implementation allow to use are :
+ *   <ul>
+ *    <li>stack (rs_dll_push / rs_dll_pop)</li>
+ *    <li>queue (rs_dll_enqueue / rs_dll_pop)</li>
+ *    <li>ordered set (rs_dll_insert_ordered / rs_dll_remove[_match])</li>
+ *   </ul>
+ * </p>
+ * <p>
+ *   it is guaranteed that all functions which successfully modify the list,
+ *   do rewind it
+ * </p>
+ *
+ * <p>
+ *   all the XXX_foreach[_XXX] family of functions, isn't affected by the
+ *   rewinded state of the list
+ * </p>
+ *
  * Copyright (C) 2012 Parrot S.A.
  */
 
@@ -87,7 +105,9 @@ int rs_dll_enqueue(struct rs_dll *dll, struct rs_node *node);
 
 /**
  * Adds an element to the list, respecting the ascendant order of the list as
- * defined by the compare operation
+ * defined by the compare operation, so that either using a foreach function, or
+ * manually walking through the set with _next, will return elements in
+ * ascendant order
  * @param dll Doubly linked list
  * @param node Node to insert
  * @return Negative errno-compatible value on error otherwise zero. Returns an
@@ -104,7 +124,7 @@ int rs_dll_insert_sorted(struct rs_dll *dll, struct rs_node *node);
 unsigned rs_dll_get_count(struct rs_dll *dll);
 
 /**
- * Says whether or not th dll contains at least one element or not
+ * Says whether or not the dll contains at least one element or not
  * @param dll Doubly linked-list
  * @return non-zero if the dll is empty, 0 if it is
  */
@@ -188,11 +208,6 @@ int rs_dll_foreach(struct rs_dll *dll, rs_node_cb_t cb);
  * @return -1 on error, 0 on success
  */
 int rs_dll_remove_all(struct rs_dll *dll, rs_node_cb_t cb);
-
-/*
- * TODO check that the list is rewinded before "walk through" actions and at
- * least after each modification action (maybe before, think of it on each case
- */
 
 #ifdef __cplusplus
 }

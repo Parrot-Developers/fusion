@@ -105,7 +105,7 @@ struct rs_node *rs_node_insert_before(struct rs_node *next,
 
 /**
  * Inserts a node after another one
- * @param next Node after which the node will be inserted
+ * @param prev Node after which the node will be inserted
  * @param node Node to insert
  * @return node if not NULL, prev otherwise
  */
@@ -134,7 +134,7 @@ struct rs_node *rs_node_pop(struct rs_node **head);
  * Counting is performed forward
  * @param head Lists head. If it has previous elements, they won't be counted.
  */
-unsigned rs_node_count(struct rs_node *node);
+unsigned rs_node_count(struct rs_node *head);
 
 /**
  * Returns the next element of a given list

@@ -1,5 +1,5 @@
 /**
- * @file rs_utils.c
+ * @file rs_utils.h
  * @date 14 mai 2013
  * @author nicolas.carrier@parrot.com
  * @brief Common utility functions
