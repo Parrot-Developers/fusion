@@ -53,6 +53,11 @@ pid_t io_waitpid(pid_t pid, int *status, int options)
 	return TEMP_FAILURE_RETRY(waitpid(pid, status, options));
 }
 
+int io_poll(struct pollfd *fds, nfds_t nfds, int timeout)
+{
+	return TEMP_FAILURE_RETRY(poll(fds, nfds, timeout));
+}
+
 ssize_t io_send(int fd, const void *buf, size_t n, int flags)
 {
 	return TEMP_FAILURE_RETRY(send(fd, buf, n, flags));

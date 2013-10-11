@@ -10,6 +10,7 @@
 #ifndef IO_UTILS_H_
 #define IO_UTILS_H_
 #include <io_platform.h>
+#include <sys/poll.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,6 +54,12 @@ ssize_t io_sendto(int sockfd, const void *buf, size_t len, int flags,
  * @see waitpid
  */
 pid_t io_waitpid(pid_t pid, int *status, int options);
+
+/**
+ * Wrapper around poll, discarding EINTR errors
+ * @see poll
+ */
+int io_poll(struct pollfd *fds, nfds_t nfds, int timeout);
 
 /**
  * Wrapper around send, discarding EINTR errors
