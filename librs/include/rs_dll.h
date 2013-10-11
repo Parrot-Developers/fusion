@@ -48,7 +48,7 @@ struct rs_dll_vtable {
 	 * returns 0 if a equals b, non-zero otherwise. Must be consistent with
 	 * compare (e.g. could be implemented as) :
 	 * 	return compare(a, b) == 0;
-	 * must return 0 if a or b is NULL
+	 * must return 1 if a or b is NULL
 	 */
 	int (*equals)(struct rs_node *a, const struct rs_node *b);
 	/** displays the data associated with node */
