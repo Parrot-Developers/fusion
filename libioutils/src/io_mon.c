@@ -105,7 +105,7 @@ static int has_events_pending(struct io_src *src)
 	return src->events & (src->active | IO_EPOLL_ERROR_EVENTS);
 }
 
-static RS_NODE_MATCH_MEMBER(struct io_src, fd, node)
+static RS_NODE_MATCH_MEMBER(io_src, fd, node)
 
 /**
  * Retrieves a source in a monitor, knowing it's file descriptor
@@ -120,7 +120,7 @@ static struct io_src *find_source_by_fd(struct io_mon *mon, int fd)
 	if (NULL == mon || -1 == fd)
 		return NULL;
 
-	needle = rs_node_find_match(mon->source.next, match_fd, &fd);
+	needle = rs_node_find_match(mon->source.next, io_src_match_fd, &fd);
 	if (NULL == needle)
 		return NULL;
 
