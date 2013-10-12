@@ -46,10 +46,10 @@ static int int_node_test_equals(struct rs_node *node_a, void *int_node_b)
 static RS_NODE_MATCH_STR_MEMBER(str_node, val, node)
 
 /*
- * defines match_val function, beware ! waits for a char * as the second
- * argument
+ * defines int_node_match_val function, beware ! waits for a char * as the
+ * second argument
  */
-static RS_NODE_MATCH_MEMBER(struct int_node, val, node)
+static RS_NODE_MATCH_MEMBER(int_node, val, node)
 
 static void testRS_NODE_HEAD(void)
 {
@@ -295,26 +295,26 @@ static void testRS_NODE_FIND_MATCH(void)
 
 	/* normal use cases */
 	val = 17;
-	needle = rs_node_find_match(NULL, match_val, &val);
+	needle = rs_node_find_match(NULL, int_node_match_val, &val);
 	CU_ASSERT_PTR_NULL(needle);
 
 	val = 17;
-	needle = rs_node_find_match(haystack, match_val, &val);
+	needle = rs_node_find_match(haystack, int_node_match_val, &val);
 	CU_ASSERT(int_node_test_equals(needle, &int_node_a));
 	val = 42;
-	needle = rs_node_find_match(haystack, match_val, &val);
+	needle = rs_node_find_match(haystack, int_node_match_val, &val);
 	CU_ASSERT(int_node_test_equals(needle, &int_node_b));
 	val = 666;
-	needle = rs_node_find_match(haystack, match_val, &val);
+	needle = rs_node_find_match(haystack, int_node_match_val, &val);
 	CU_ASSERT(int_node_test_equals(needle, &int_node_c));
 
-	needle = rs_node_find_match(haystack, match_val, &val);
+	needle = rs_node_find_match(haystack, int_node_match_val, &val);
 	CU_ASSERT(int_node_test_equals(needle, &int_node_c));
 
 	needle = rs_node_find_match(haystack, NULL, &val);
 	CU_ASSERT_PTR_NULL(needle);
 
-	needle = rs_node_find_match(haystack, match_val, NULL);
+	needle = rs_node_find_match(haystack, int_node_match_val, NULL);
 	CU_ASSERT_PTR_NULL(needle);
 
 	/* NULL data is possible, useful for nested matching functions */
@@ -413,22 +413,22 @@ static void testRS_NODE_REMOVE_MATCH(void)
 
 	/* normal use cases */
 	val = 42;
-	node = rs_node_remove_match(list, match_val, &val);
+	node = rs_node_remove_match(list, int_node_match_val, &val);
 	CU_ASSERT(int_node_test_equals(node, &int_node_b));
 
 	val = 911;
-	node = rs_node_remove_match(list, match_val, &val);
+	node = rs_node_remove_match(list, int_node_match_val, &val);
 	CU_ASSERT_PTR_NULL(node);
 
 	val = 666;
-	node = rs_node_remove_match(list, match_val, &val);
+	node = rs_node_remove_match(list, int_node_match_val, &val);
 	CU_ASSERT(int_node_test_equals(node, &int_node_c));
 
 	val = 17;
-	node = rs_node_remove_match(NULL, match_val, &val);
+	node = rs_node_remove_match(NULL, int_node_match_val, &val);
 	CU_ASSERT_PTR_NULL(node);
 
-	node = rs_node_remove_match(list, match_val, NULL);
+	node = rs_node_remove_match(list, int_node_match_val, NULL);
 	CU_ASSERT_PTR_NULL(node);
 
 	node = rs_node_remove_match(list, NULL, &val);
