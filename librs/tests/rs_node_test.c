@@ -43,7 +43,7 @@ static int int_node_test_equals(struct rs_node *node_a, void *int_node_b)
  * defines match_str_val function, waits for a pointer to the comparison data
  * as the second argument
  */
-static RS_NODE_MATCH_STR_MEMBER(struct str_node, val, node)
+static RS_NODE_MATCH_STR_MEMBER(str_node, val, node)
 
 /*
  * defines match_val function, beware ! waits for a char * as the second
@@ -344,23 +344,23 @@ static void testRS_NODE_FIND_MATCH_str(void)
 
 	/* normal use cases */
 	val = "17";
-	needle = rs_node_find_match(NULL, match_str_val, &val);
+	needle = rs_node_find_match(NULL, str_node_match_str_val, &val);
 	CU_ASSERT_PTR_NULL(needle);
 
 	val = "17";
-	needle = rs_node_find_match(haystack, match_str_val, val);
+	needle = rs_node_find_match(haystack, str_node_match_str_val, val);
 	CU_ASSERT_PTR_EQUAL(needle, &str_node_a.node);
 	val = "42";
-	needle = rs_node_find_match(haystack, match_str_val, val);
+	needle = rs_node_find_match(haystack, str_node_match_str_val, val);
 	CU_ASSERT_PTR_EQUAL(needle, &str_node_b.node);
 	val = "666";
-	needle = rs_node_find_match(haystack, match_str_val, val);
+	needle = rs_node_find_match(haystack, str_node_match_str_val, val);
 	CU_ASSERT_PTR_EQUAL(needle, &str_node_c.node);
 
-	needle = rs_node_find_match(haystack, match_str_val, val);
+	needle = rs_node_find_match(haystack, str_node_match_str_val, val);
 	CU_ASSERT_PTR_EQUAL(needle, &str_node_c.node);
 
-	needle = rs_node_find_match(haystack, match_str_val, NULL);
+	needle = rs_node_find_match(haystack, str_node_match_str_val, NULL);
 	CU_ASSERT_PTR_NULL(needle);
 
 	/* error cases : none */

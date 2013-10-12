@@ -74,14 +74,14 @@ int match_##member(struct rs_node *__n, const void *__d) \
  * operator, applied to the member and the value pointed at by the user data
  * argument, casted to the same type as the member. If data is NULL, the
  * matching function returns 0;
- * @param type Base struct type
+ * @param type Base struct type name
  * @param member Member on which the matching will be performed
  * @param node_member Name of the member containing the node
  */
 #define RS_NODE_MATCH_STR_MEMBER(type, member, node_member) \
-int match_str_##member(struct rs_node *__n, const void *__d) \
+int type##_match_str_##member(struct rs_node *__n, const void *__d) \
 { \
-	type *__o = rs_container_of(__n, type, node_member); \
+	struct type *__o = rs_container_of(__n, struct type, node_member); \
 	if (NULL == __d) \
 		return 0; \
 	return 0 == strcmp(__o->member, (char *)__d); \
