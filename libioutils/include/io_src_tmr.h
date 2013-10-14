@@ -39,7 +39,7 @@ struct io_src_tmr;
  * @param tmr Timer source
  * @param nbexpired Number of expirations of the timer
  */
-typedef void (*io_tmr_cb_t) (struct io_src_tmr *tmr, uint64_t *nbexpired);
+typedef void (*io_tmr_cb_t)(struct io_src_tmr *tmr, uint64_t *nbexpired);
 
 /**
  * @struct io_src_tmr
@@ -64,13 +64,16 @@ int io_src_tmr_init(struct io_src_tmr *tmr, io_tmr_cb_t cb);
 
 /**
  * Arms (or disarms) the timer and sets it's relative timeout. By default, the
- * timer is one shot. Use io_src_tmr_set_periodic() to make it periodic.
+ * timer is one shot. Call io_src_tmr_set_periodic() before io_src_tmr_set(), to
+ * make it periodic.
  * @param tmr Timer source to arm
  * @param timeout Timeout of the timer IO_SRC_TMR_DISARM for timeout to disarm
  * in ms
  * @return errno compatible negative value on error, 0 on success
  */
 int io_src_tmr_set(struct io_src_tmr *tmr, int timeout);
+
+/* TODO implement get_source */
 
 /**
  * Allows to choose if the timer is periodic or one shot. This will be taken
