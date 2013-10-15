@@ -63,6 +63,15 @@ static inline void rs_file_close(FILE **file)
 }
 
 /**
+ * @def RS_STRINGIFY
+ * @brief transforms it's argument to a valid string
+ */
+#define RS_STRINGIFY(s) RS_STRINGIFY_HELPER(s)
+
+/* only used for RS_STRINGIFY implementation */
+#define RS_STRINGIFY_HELPER(s) #s
+
+/**
  * Says if a string is invalid, i.e. if it is NULL or empty
  * @param str String to check the validity of
  * @return non-zero if the string is NULL or empty, 0 otherwise
