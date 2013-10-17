@@ -11,6 +11,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,6 +54,10 @@ static inline void rs_str_free(char **str)
 	*str = NULL;
 }
 
+/**
+ * Closes a file and sets it to NULL
+ * @param file File to close
+ */
 static inline void rs_file_close(FILE **file)
 {
 	if (NULL == file || NULL == *file)
@@ -60,6 +65,20 @@ static inline void rs_file_close(FILE **file)
 
 	fclose(*file);
 	*file = NULL;
+}
+
+/**
+ * Says whether or not a string matches a given prefix
+ * @param str String to test
+ * @param prefix Prefix to match str with
+ * @return non-zero if the string does match
+ */
+static inline int rs_str_match_prefix(const char *str, const char *prefix)
+{
+	if (NULL == str || NULL == prefix)
+		return 0;
+
+	return strncmp(str, prefix, strlen(prefix)) == 0;
 }
 
 /**
