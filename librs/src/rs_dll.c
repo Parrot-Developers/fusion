@@ -217,7 +217,7 @@ int rs_dll_rewind(struct rs_dll *dll)
 }
 
 struct rs_node *rs_dll_remove_match(struct rs_dll *dll,
-		rs_node_match_cb_t match, void *data)
+		rs_node_match_cb_t match, const void *data)
 {
 	struct rs_node *head_next_bkp = NULL;
 	struct rs_node *tail_prev_bkp = NULL;
