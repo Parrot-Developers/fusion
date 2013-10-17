@@ -17,6 +17,15 @@
 extern "C" {
 #endif
 
+/* only used for RS_STRINGIFY implementation */
+#define RS_STRINGIFY_HELPER(s) #s
+
+/**
+ * @def RS_STRINGIFY
+ * @brief transforms it's argument to a valid string
+ */
+#define RS_STRINGIFY(s) RS_STRINGIFY_HELPER(s)
+
 /**
  * @def rs_container_of
  * @brief Retrieves the address of a structure knowing the address of one of
@@ -80,15 +89,6 @@ static inline int rs_str_match_prefix(const char *str, const char *prefix)
 
 	return strncmp(str, prefix, strlen(prefix)) == 0;
 }
-
-/**
- * @def RS_STRINGIFY
- * @brief transforms it's argument to a valid string
- */
-#define RS_STRINGIFY(s) RS_STRINGIFY_HELPER(s)
-
-/* only used for RS_STRINGIFY implementation */
-#define RS_STRINGIFY_HELPER(s) #s
 
 /**
  * Says if a string is invalid, i.e. if it is NULL or empty
