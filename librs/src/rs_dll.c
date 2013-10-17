@@ -146,7 +146,7 @@ unsigned rs_dll_get_count(struct rs_dll *dll)
 }
 
 struct rs_node *rs_dll_find_match(struct rs_dll *dll, rs_node_match_cb_t match,
-		void *data)
+		const void *data)
 {
 	if (NULL == dll || NULL == match)
 		return NULL;
