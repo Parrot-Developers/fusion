@@ -202,10 +202,10 @@ static void testRS_DLL_ENQUEUE(void)
 
 static void testRS_DLL_INSERT_SORTED(void)
 {
-	struct int_node int_node_a = {.val = 17,};
-	struct int_node int_node_b = {.val = 42,};
-	struct int_node int_node_c = {.val = 66,};
-	struct int_node int_node_d = {.val = 666,};
+	struct int_node int_node_a = {.val = 1,};
+	struct int_node int_node_b = {.val = 0,};
+	struct int_node int_node_c = {.val = 3,};
+	struct int_node int_node_d = {.val = 2,};
 	struct int_node *a, *b;
 	struct rs_dll dll;
 	struct rs_node *node, *prev;
@@ -215,23 +215,26 @@ static void testRS_DLL_INSERT_SORTED(void)
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
 
 	/* normal use cases */
-	ret = rs_dll_insert_sorted(&dll, &(int_node_d.node));
+	ret = rs_dll_insert_sorted(&dll, &(int_node_a.node));
 	CU_ASSERT_EQUAL(ret, 0);
 	ret = rs_dll_insert_sorted(&dll, &(int_node_b.node));
 	CU_ASSERT_EQUAL(ret, 0);
 	ret = rs_dll_insert_sorted(&dll, &(int_node_c.node));
 	CU_ASSERT_EQUAL(ret, 0);
-	ret = rs_dll_insert_sorted(&dll, &(int_node_a.node));
+	ret = rs_dll_insert_sorted(&dll, &(int_node_d.node));
 	CU_ASSERT_EQUAL(ret, 0);
 
-	prev = rs_dll_next(&dll);
-	for (prev = rs_dll_next(&dll), prev = rs_dll_next(&dll);
-			NULL != node && NULL != prev;
-			prev = node, node = rs_dll_next(&dll)) {
-		a = to_int_node(prev);
-		b = to_int_node(node);
-		CU_ASSERT(a->val < b->val);
-	}
+	CU_ASSERT_EQUAL(rs_dll_get_count(&dll), 4);
+
+	/* check the list is really well ordered */
+	node = rs_dll_next(&dll);
+	CU_ASSERT_EQUAL(to_int_node(node)->val, 0);
+	node = rs_dll_next(&dll);
+	CU_ASSERT_EQUAL(to_int_node(node)->val, 1);
+	node = rs_dll_next(&dll);
+	CU_ASSERT_EQUAL(to_int_node(node)->val, 2);
+	node = rs_dll_next(&dll);
+	CU_ASSERT_EQUAL(to_int_node(node)->val, 3);
 
 	/* error use case */
 }
