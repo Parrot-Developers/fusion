@@ -114,6 +114,52 @@ static void testRS_NODE_INSERT_BEFORE(void)
 	/* error cases : none */
 }
 
+static void testRS_NODE_INSERT_AFTER(void)
+{
+	struct int_node int_node_a = {.val = 1,};
+	struct int_node int_node_b = {.val = 2,};
+	struct int_node int_node_c = {.val = 3,};
+	struct int_node int_node_d = {.val = 4,};
+	struct int_node int_node_e = {.val = 5,};
+	struct rs_node *list = NULL;
+
+	/* normal use cases */
+	/* on empty list */
+	list = rs_node_insert_after(list, &(int_node_a.node));
+	CU_ASSERT_EQUAL(list, &(int_node_a.node));
+	CU_ASSERT_EQUAL(to_int_node(list)->val, 1);
+	CU_ASSERT_PTR_NULL(int_node_a.node.next);
+	CU_ASSERT_PTR_NULL(int_node_a.node.prev);
+
+	/* at the end of the list */
+	list = rs_node_insert_after(&(int_node_a.node), &(int_node_d.node));
+	CU_ASSERT_PTR_NOT_NULL(list);
+	CU_ASSERT_EQUAL(int_node_a.node.next, &int_node_d.node);
+	CU_ASSERT_PTR_NULL(int_node_a.node.prev);
+	CU_ASSERT_PTR_NULL(int_node_d.node.next);
+	CU_ASSERT_EQUAL(int_node_d.node.prev, &int_node_a.node);
+
+	/* in the middle of the list */
+	list = rs_node_insert_after(&(int_node_a.node), &(int_node_b.node));
+	CU_ASSERT_EQUAL(int_node_a.node.next, &int_node_b.node);
+	CU_ASSERT_PTR_NULL(int_node_a.node.prev);
+	CU_ASSERT_EQUAL(int_node_b.node.next, &int_node_d.node);
+	CU_ASSERT_EQUAL(int_node_b.node.prev, &int_node_a.node);
+	CU_ASSERT_PTR_NULL(int_node_d.node.next);
+	CU_ASSERT_EQUAL(int_node_d.node.prev, &int_node_b.node);
+
+	list = rs_node_insert_after(&(int_node_b.node), &(int_node_c.node));
+	CU_ASSERT_EQUAL(int_node_a.node.next, &int_node_b.node);
+	CU_ASSERT_PTR_NULL(int_node_a.node.prev);
+	CU_ASSERT_EQUAL(int_node_b.node.next, &int_node_c.node);
+	CU_ASSERT_EQUAL(int_node_b.node.prev, &int_node_a.node);
+	CU_ASSERT_EQUAL(int_node_c.node.next, &int_node_d.node);
+	CU_ASSERT_EQUAL(int_node_c.node.prev, &int_node_b.node);
+	CU_ASSERT_PTR_NULL(int_node_d.node.next);
+	CU_ASSERT_EQUAL(int_node_d.node.prev, &int_node_c.node);
+
+}
+
 static void testRS_NODE_PUSH(void)
 {
 	struct int_node int_node_a = {.val = 17,};
@@ -524,6 +570,10 @@ static const struct test_t tests[] = {
 		{
 				.fn = testRS_NODE_INSERT_BEFORE,
 				.name = "rs_node_insert"
+		},
+		{
+				.fn = testRS_NODE_INSERT_AFTER,
+				.name = "rs_node_insert_after"
 		},
 		{
 				.fn = testRS_NODE_PUSH,
