@@ -17,18 +17,17 @@
 #include <rs_rb.h>
 
 /**
- * Says whether a number is a power of two or not
- * @param x Number to test
- * @return non-zero if the number is a power of two
+ * @def is_power_of_two
+ * @brief Says whether a number is a power of two or not, evaluates it's
+ * argument only once
  */
-static int is_power_of_two(unsigned int x)
-{
-	return ((x != 0) && ((x & (~x + 1)) == x));
-}
+#define is_power_of_two(x) ({ \
+	typeof (x) _x = (x);\
+	((_x != 0) && ((_x & (~_x + 1)) == _x)); \
+	})
 
 int rs_rb_init(struct rs_rb *rb, void *buffer, size_t size)
 {
-	/* size must be power of two */
 	if (!is_power_of_two(size) || NULL == rb || NULL == buffer)
 		return -EINVAL;
 
