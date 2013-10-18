@@ -129,7 +129,7 @@ int rs_dll_insert_sorted(struct rs_dll *dll, struct rs_node *node)
 			if (b == dll->head)
 				return rs_dll_push(dll, a);
 
-			rs_node_insert_after(a, b);
+			rs_node_insert_before(b, a);
 			rs_dll_rewind(dll);
 			dll->count++;
 
