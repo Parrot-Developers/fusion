@@ -9,6 +9,7 @@
 #ifndef RS_UTILS_H_
 #define RS_UTILS_H_
 
+#include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -98,6 +99,22 @@ static inline int rs_str_match_prefix(const char *str, const char *prefix)
 static inline int rs_str_is_invalid(const char *str)
 {
 	return NULL == str || '\0' == *str;
+}
+
+/**
+ * Suppresses the white spaces from the right of a string
+ * @param str String to right strip
+ */
+static inline void rs_str_rstrip(char *str)
+{
+	size_t s;
+
+	if (rs_str_is_invalid(str))
+		return;
+
+	s = strlen(str);
+	while (s-- && isspace(str[s]))
+		str[s] = '\0';
 }
 
 #ifdef __cplusplus
