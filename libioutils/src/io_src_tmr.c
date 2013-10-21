@@ -107,7 +107,7 @@ void io_src_tmr_clean(struct io_src_tmr *tmr)
 	tmr->cb = NULL;
 	io_close(&tmr->src.fd);
 
-	io_src_clean(&(tmr->src));
+	io_src_clean(&tmr->src);
 }
 
 int io_src_tmr_set_periodic(struct io_src_tmr *tmr, int periodic)

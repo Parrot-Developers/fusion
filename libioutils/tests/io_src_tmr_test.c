@@ -60,7 +60,7 @@ static void testIO_SRC_TMR_SET(void)
 	ret = io_src_tmr_init(&tmr, tmr_cb);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_EQUAL(tmr.cb, tmr_cb);
-	ret = io_mon_add_source(&mon, &(tmr.src));
+	ret = io_mon_add_source(&mon, io_src_tmr_get_source(&tmr));
 	CU_ASSERT_EQUAL(ret, 0);
 
 	/* normal use cases */

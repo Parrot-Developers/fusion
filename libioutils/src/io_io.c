@@ -451,7 +451,7 @@ int io_io_init(struct io_io *io, struct io_mon *mon, const char *name,
 	io->name = strdup(name);
 
 	ret = io_mon_add_sources(mon,
-			&io->writectx.timer.src,
+			io_src_tmr_get_source(&io->writectx.timer),
 			&io->src,
 			NULL /* NULL guard */
 			);
@@ -487,7 +487,8 @@ int io_io_clean(struct io_io *io)
 	if (io->readctx.state == IO_IO_STARTED)
 		io_io_read_stop(io);
 
-	io_mon_remove_source(io->mon, &io->writectx.timer.src);
+	io_mon_remove_source(io->mon,
+			io_src_tmr_get_source(&io->writectx.timer));
 	io_mon_remove_source(io->mon, &io->writectx.src);
 	io_mon_remove_source(io->mon, &io->src);
 
