@@ -294,7 +294,7 @@ static const struct test_t tests[] = {
 
 static int init_src_pid_suite(void)
 {
-	if (getuid() !=0) {
+	if (getuid() != 0) {
 		fprintf(stderr, "\nsrc_pid_suite test suite can't run without "
 				"root privileges\n");
 		return -1;

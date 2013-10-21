@@ -649,7 +649,7 @@ static void testIO_WRITE_BUFFER_CLEAN(void)
 	CU_ASSERT_EQUAL(ret, 0);
 
 	/* error use cases */
-	ret = io_io_write_buffer_clean(NULL );
+	ret = io_io_write_buffer_clean(NULL);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 #undef MSG
 }
