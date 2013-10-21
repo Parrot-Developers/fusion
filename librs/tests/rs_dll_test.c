@@ -206,9 +206,8 @@ static void testRS_DLL_INSERT_SORTED(void)
 	struct int_node int_node_b = {.val = 0,};
 	struct int_node int_node_c = {.val = 3,};
 	struct int_node int_node_d = {.val = 2,};
-	struct int_node *a, *b;
 	struct rs_dll dll;
-	struct rs_node *node, *prev;
+	struct rs_node *node;
 	int ret = 0;
 
 	ret = rs_dll_init(&dll, &dll_test_vtable);

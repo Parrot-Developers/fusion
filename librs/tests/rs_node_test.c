@@ -120,7 +120,6 @@ static void testRS_NODE_INSERT_AFTER(void)
 	struct int_node int_node_b = {.val = 2,};
 	struct int_node int_node_c = {.val = 3,};
 	struct int_node int_node_d = {.val = 4,};
-	struct int_node int_node_e = {.val = 5,};
 	struct rs_node *list = NULL;
 
 	/* normal use cases */
