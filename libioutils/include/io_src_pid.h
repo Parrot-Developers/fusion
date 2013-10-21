@@ -79,7 +79,7 @@ int io_src_pid_set_pid(struct io_src_pid *pid_src, pid_t pid);
  */
 static inline struct io_src *io_src_pid_get_source(struct io_src_pid *pid)
 {
-	return NULL == pid ? NULL : &(pid->src);
+	return NULL == pid ? NULL : &pid->src;
 }
 
 /**

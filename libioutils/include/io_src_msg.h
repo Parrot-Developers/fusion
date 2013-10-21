@@ -116,7 +116,7 @@ int io_src_msg_init(struct io_src_msg *msg_src, int fd, enum io_src_event type,
  */
 static inline struct io_src *io_src_msg_get_source(struct io_src_msg *msg)
 {
-	return NULL == msg ? NULL : &(msg->src);
+	return NULL == msg ? NULL : &msg->src;
 }
 
 /**

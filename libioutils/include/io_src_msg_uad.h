@@ -97,7 +97,7 @@ __attribute__((format(printf, 5, 6)));
 static inline struct io_src *io_src_msg_uad_get_source(struct io_src_msg_uad
 		*uad)
 {
-	return NULL == uad ? NULL : io_src_msg_get_source(&(uad->src_msg));
+	return NULL == uad ? NULL : io_src_msg_get_source(&uad->src_msg);
 }
 
 /**

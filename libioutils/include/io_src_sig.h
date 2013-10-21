@@ -68,7 +68,7 @@ int io_src_sig_init(struct io_src_sig *sig, io_sig_cb_t *cb, ...)
  */
 static inline struct io_src *io_src_sig_get_source(struct io_src_sig *sig)
 {
-	return NULL == sig ? NULL : &(sig->src);
+	return NULL == sig ? NULL : &sig->src;
 }
 
 /**

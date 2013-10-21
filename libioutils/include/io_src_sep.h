@@ -113,7 +113,7 @@ int io_src_sep_init(struct io_src_sep *sep_src, int fd, io_src_sep_cb_t *cb,
  */
 static inline struct io_src *io_src_sep_get_source(struct io_src_sep *sep)
 {
-	return NULL == sep ? NULL : &(sep->src);
+	return NULL == sep ? NULL : &sep->src;
 }
 
 /**

@@ -85,6 +85,16 @@ int io_src_tmr_set(struct io_src_tmr *tmr, int timeout);
 int io_src_tmr_set_periodic(struct io_src_tmr *tmr, int periodic);
 
 /**
+ * Returns the underlying io_src of the timer source
+ * @param tmr Timer source
+ * @return io_src of the timer source
+ */
+static inline struct io_src *io_src_tmr_get_source(struct io_src_tmr *tmr)
+{
+	return NULL == tmr ? NULL : &tmr->src;
+}
+
+/**
  * Cleans up a timer source, by properly closing fd, zeroing fields etc...
  * @param tmr Timer source
  */
