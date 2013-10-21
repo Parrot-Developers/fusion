@@ -524,7 +524,7 @@ static void testRS_NODE_REMOVE_ALL(void)
 	{
 		struct int_node *in = to_int_node(node);
 
-		in->val =0;
+		in->val = 0;
 
 		return 0;
 	};

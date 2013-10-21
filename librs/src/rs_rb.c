@@ -22,7 +22,7 @@
  * argument only once
  */
 #define is_power_of_two(x) ({ \
-	typeof (x) _x = (x);\
+	typeof(x) _x = (x);\
 	((_x != 0) && ((_x & (~_x + 1)) == _x)); \
 	})
 

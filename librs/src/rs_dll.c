@@ -281,7 +281,8 @@ int rs_dll_remove_all_cb(struct rs_dll *dll, rs_node_cb_t cb)
 		while ((node = rs_dll_pop(dll)))
 			cb(node);
 	else
-		while (rs_dll_pop(dll));
+		while (rs_dll_pop(dll))
+			;
 
 	return 0;
 }
