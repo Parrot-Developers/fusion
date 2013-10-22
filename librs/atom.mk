@@ -14,7 +14,7 @@ LOCAL_EXPORT_C_INCLUDES  := $(LOCAL_PATH)/include
 
 LOCAL_SRC_FILES := $(call all-c-files-under,src)
 
-ifdef LIBRS_FAUTES_SUPPORT
+ifdef TARGET_TEST
 LOCAL_SRC_FILES += $(call all-c-files-under,tests)
 
 LOCAL_LIBRARIES := libfautes
@@ -22,3 +22,22 @@ endif
 
 include $(BUILD_SHARED_LIBRARY)
 
+###############################################################################
+# tst-librs
+###############################################################################
+
+ifdef TARGET_TEST
+include $(CLEAR_VARS)
+
+LOCAL_CATEGORY_PATH := tests
+
+LOCAL_MODULE := tst-librs
+
+LOCAL_REQUIRED_MODULES := fautes
+
+LOCAL_COPY_FILES := \
+	tests/tst-01.sh:tests/bin/librs/ \
+	tests/email_notification:tests/bin/librs/
+
+include $(BUILD_CUSTOM)
+endif # TARGET_TEST
