@@ -1,6 +1,6 @@
 #!/bin/sh
 
-result_dir=/tests/results/librs
+result_dir=${TEST_RESULT_DIR:-/tmp/librs/}
 
 mkdir -p ${result_dir}
 cd ${result_dir}
