@@ -82,8 +82,10 @@ int vread_from_output(char *buf, size_t size, const char *fmt, ...)
 	va_start(args, fmt);
 	ret = vasprintf(&cmd, fmt, args);
 	va_end(args);
-	if (-1 == ret)
+	if (-1 == ret) {
+		cmd = NULL;
 		return -1;
+	}
 
 	return read_from_output(buf, size, cmd);
 }
@@ -127,8 +129,10 @@ int vwrite_to_input(char *buf, size_t size, const char *fmt, ...)
 	va_start(args, fmt);
 	ret = vasprintf(&cmd, fmt, args);
 	va_end(args);
-	if (-1 == ret)
+	if (-1 == ret) {
+		cmd = NULL;
 		return -1;
+	}
 
 	return write_to_input(buf, size, cmd);
 }
@@ -142,8 +146,10 @@ int vsystem(const char *fmt, ...)
 	va_start(args, fmt);
 	ret = vasprintf(&cmd, fmt, args);
 	va_end(args);
-	if (-1 == ret)
+	if (-1 == ret) {
+		cmd = NULL;
 		return -1;
+	}
 
 	return system(cmd);
 }
@@ -180,6 +186,7 @@ char *get_tun_path(void)
 	tmp[strlen(tmp) - 1] = '/';
 	ret = asprintf(&tun_path, "%snet/tun", tmp);
 	if (-1 == ret) {
+		tmp = NULL;
 		fprintf(stderr, "memory allocation\n");
 		return NULL;
 	}
