@@ -33,7 +33,7 @@ LOCAL_CATEGORY_PATH := tests
 
 LOCAL_MODULE := tst-librs
 
-LOCAL_REQUIRED_MODULES := fautes
+LOCAL_REQUIRED_MODULES := fautes librs
 
 LOCAL_COPY_FILES := \
 	tests/tst-01.sh:tests/bin/librs/ \
