@@ -18,7 +18,7 @@ ifdef TARGET_TEST
 LOCAL_SRC_FILES += $(call all-c-files-under,tests)
 
 LOCAL_LIBRARIES := libfautes
-endif
+endif # TARGET_TEST
 
 include $(BUILD_SHARED_LIBRARY)
 
