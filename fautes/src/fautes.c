@@ -111,7 +111,7 @@ static struct pool_t *get_test_pool(const char *so_lib, void **lib_handle)
 	if ((*res).initializer)
 		(*res).initializer();
 
-	printf("Found test suite %s for library %s\n", res->name, so_lib);
+	printf("Found test suite %s for %s\n", res->name, so_lib);
 out:
 	if (NULL == res)
 		dlclose(lib_handle);
