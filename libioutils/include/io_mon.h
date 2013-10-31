@@ -86,14 +86,21 @@ int io_mon_add_sources(struct io_mon *mon, ...)
 	__attribute__ ((sentinel(0)));
 
 /**
- * de-registers a source from the monitor
+ * De-registers a source from the monitor
  * @param mon Monitor's context
  * @param src Source to de-register
  * @return negative errno value on error, 0 otherwise
  */
 int io_mon_remove_source(struct io_mon *mon, struct io_src *src);
 
-/* TODO implement io_mon_remove_sources */
+/**
+ * De-registers a list of source from the monitor
+ * @param mon Monitor's context
+ * @param src Source to de-register
+ * @return negative errno value on error, 0 otherwise
+ */
+int io_mon_remove_sources(struct io_mon *mon, ...)
+	__attribute__ ((sentinel(0)));
 
 /**
  * Dumps the events in an epoll event flag set

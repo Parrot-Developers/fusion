@@ -526,6 +526,7 @@ static const struct test_t tests[] = {
 				.fn = testMON_ADD_SOURCES,
 				.name = "io_mon_add_sources"
 		},
+		/* TODO add tests for remove_source[s] */
 		{
 				.fn = testMON_DUMP_EPOLL_EVENT,
 				.name = "io_mon_dump_epoll_event"

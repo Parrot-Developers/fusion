@@ -277,6 +277,35 @@ static void mon_cb(struct io_src *src)
 	io_mon_process_events(mon);
 }
 
+/**
+ * Adds or removes a list of sources from/to a monitor
+ * @param mon Monitor
+ * @param add_remove action to take on the source
+ * @param args NULL-terminated list of arguments
+ * @return negative errno value on error, 0 otherwise
+ */
+static int add_remove_sources(struct io_mon *mon,
+		int (*add_remove)(struct io_mon *mon, struct io_src *src),
+		va_list args)
+{
+	struct io_src *src;
+	int ret = 0;
+
+	if (NULL == mon)
+		return -EINVAL;
+
+	do {
+		src = va_arg(args, struct io_src *);
+		if (NULL == src)
+			break;
+		ret = add_remove(mon, src);
+		if (0 != ret)
+			break;
+	} while (1);
+
+	return ret;
+}
+
 int io_mon_init(struct io_mon *mon)
 {
 	if (NULL == mon)
@@ -326,22 +355,11 @@ int io_mon_add_source(struct io_mon *mon, struct io_src *src)
 
 int io_mon_add_sources(struct io_mon *mon, ...)
 {
-	struct io_src *src;
+	int ret;
 	va_list args;
-	int ret = 0;
-
-	if (NULL == mon)
-		return -EINVAL;
 
 	va_start(args, mon);
-	do {
-		src = va_arg(args, struct io_src *);
-		if (NULL == src)
-			break;
-		ret = io_mon_add_source(mon, src);
-		if (0 != ret)
-			break;
-	} while (1);
+	ret = add_remove_sources(mon, io_mon_add_source, args);
 	va_end(args);
 
 	return ret;
@@ -353,6 +371,18 @@ int io_mon_remove_source(struct io_mon *mon, struct io_src *src)
 		return -EINVAL;
 
 	return remove_source(mon, src);
+}
+
+int io_mon_remove_sources(struct io_mon *mon, ...)
+{
+	int ret;
+	va_list args;
+
+	va_start(args, mon);
+	ret = add_remove_sources(mon, io_mon_remove_source, args);
+	va_end(args);
+
+	return ret;
 }
 
 void io_mon_dump_epoll_event(uint32_t events)
