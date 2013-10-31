@@ -220,6 +220,14 @@ static int do_process_events_sets(struct io_mon *mon, int n,
 		assert(src != NULL);
 		if (NULL == src)
 			return -EINVAL;
+
+		/*
+		 * a source can have been removed by a previous source's
+		 * callback, in this case, we must skip it
+		 */
+		if (NULL == rs_node_find(mon->source.next, &src->node))
+			continue;
+
 		src->events = event->events;
 
 		process_event_sets(mon, src);
