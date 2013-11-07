@@ -11,5 +11,5 @@ result_dir=${TEST_RESULT_DIR:-/tmp/${module_name}/}
 mkdir -p ${result_dir}
 cd ${result_dir}
 fautes xml ${path}
-mv ${module_name}-Listing.xml CUnit-${module_name}-Listing.xml
-mv ${module_name}-Results.xml CUnit-${module_name}-Results.xml
+mv ${module_name}-Listing.xml CUnit-tst-01-Listing.xml
+mv ${module_name}-Results.xml CUnit-tst-01-Results.xml
