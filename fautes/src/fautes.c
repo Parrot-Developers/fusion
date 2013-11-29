@@ -185,6 +185,7 @@ int main(int argc, char *argv[])
 			CU_set_output_filename(pool->name);
 			CU_automated_run_tests();
 			CU_list_tests_to_file();
+			tests_failed += CU_get_number_of_tests_failed();
 		} else {
 			/* Run all tests using the CUnit Basic interface */
 			/* results are echoed to standard output */
