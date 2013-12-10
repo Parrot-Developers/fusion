@@ -379,15 +379,18 @@ static void testSRC_MSG_GET_SOURCE(void)
 	struct io_src_msg msg_src;
 	struct io_src *src;
 	char buf[22];
+	int dummy_pipe[2];
 
 	void dummy_cb(struct io_src_msg *src, enum io_src_event evt)
 	{
 
 	}
 
+	ret = pipe(dummy_pipe);
+	CU_ASSERT_EQUAL(ret, 0);
 	/* normal use cases */
 	ret = io_src_msg_init(&(msg_src),
-			STDOUT_FILENO,
+			dummy_pipe[1],
 			IO_OUT,
 			dummy_cb,
 			buf,
@@ -400,6 +403,10 @@ static void testSRC_MSG_GET_SOURCE(void)
 	/* error use cases */
 	src = io_src_msg_get_source(NULL);
 	CU_ASSERT_EQUAL(src, NULL);
+
+	/* cleanup */
+	close(dummy_pipe[0]);
+	close(dummy_pipe[1]);
 }
 
 static void testSRC_MSG_GET_MESSAGE(void)
