@@ -1,7 +1,32 @@
 #!/bin/sh
 
-set -e
 #set -x
+# creates an annotated tag with an increased minor number
+# the annotation is a release note suitable for a redmine new
+# the release_note.py script must be in the path or set in the RELEASE_NOTE
+# environment variable
+
+if [ -z "${RELEASE_NOTE}" ];
+then
+	release_note=$(which release_note.py)
+else
+	release_note=${RELEASE_NOTE}
+fi
+
+set -e
+
+if [ -z "${release_note}" ];
+then
+	release_note_location="http://mallard/gitweb/?p=release;a=blob_plain;f=release_note.py;hb=HEAD"
+	echo "The release_note.py script couldn't be found"
+	echo "You can download it with :"
+	echo "   wget -O release_note.py '${release_note_location}'"
+	echo "   chmod +x release_note.py"
+	echo "then put it in the path or use the RELEASE_NOTE variable like :"
+	echo "   RELEASE_NOTE=./release_note.py $0"
+
+	exit 1
+fi
 
 # update version numbers where necessary
 
