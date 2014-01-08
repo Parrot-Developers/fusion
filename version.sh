@@ -83,3 +83,5 @@ message="$(~/workspace/release/release_note.py ${project_path} ${new_tag} ${curr
 echo "${message}" | git tag --annotate --file - ${new_tag}
 
 echo "*** Created new annotated tag ${new_tag} with release note ***"
+echo "Once checked, you can push it with :"
+echo "   git push ${current_remote} ${new_tag}"
