@@ -27,7 +27,7 @@
 static int init_args_are_invalid(struct io_src *src, int fd,
 		enum io_src_event type, io_src_cb_t *cb)
 {
-	return NULL == src || -1 == fd || (type & ~IO_DUPLEX) ||
+	return NULL == src || fd < 0 || (type & ~IO_DUPLEX) ||
 			!(type & IO_DUPLEX) || NULL == cb;
 }
 
