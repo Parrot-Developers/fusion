@@ -206,6 +206,14 @@ struct rs_node *rs_dll_next(struct rs_dll *dll)
 	return next;
 }
 
+struct rs_node *rs_dll_next_from(const struct rs_dll *dll, struct rs_node *node)
+{
+	if (dll == NULL || node == dll->tail)
+		return NULL;
+
+	return node == NULL ? dll->head : node->next;
+}
+
 int rs_dll_rewind(struct rs_dll *dll)
 {
 	if (NULL == dll)

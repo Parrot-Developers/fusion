@@ -165,10 +165,30 @@ struct rs_node *rs_dll_pop(struct rs_dll *dll);
 /**
  * When NULL is returned, the internal cursor is rewinded so that the next call
  * will return the first element of the list
+ * @note one should rather use rs_dll_next_from() which doesn't relies on
+ * an inner state (the cursor). Among others, one benefit is that there is no
+ * need to rewind after a partial walk through
  * @param dll Doubly linked list
  * @return Next element of the list, NULL if none
  */
 struct rs_node *rs_dll_next(struct rs_dll *dll);
+
+/**
+ * @brief Function for iterating on a list.
+ *
+ * Can be used in that kind of construct : <br />
+ * struct rs_node = NULL; <br />
+ * while ((node = rs_dll_next_from(dll, node)) < /br >
+ *    ... do stuff ...
+ *
+ * @param dll Doubly linked list
+ * @param node Node to search the next element from, if NULL, then the list's
+ * head is returned, if the node
+ * @return first node if node is NULL, otherwise the next node if any and NULL
+ * if none. NULL on error.
+ */
+struct rs_node *rs_dll_next_from(const struct rs_dll *dll,
+		struct rs_node *node);
 
 /**
  * Rewinds the doubly linked list, so that the next call to rs_dll_next will
