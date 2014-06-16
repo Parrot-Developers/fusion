@@ -141,7 +141,7 @@ static int remove_source(struct io_mon *mon, struct io_src *src)
 
 	node = rs_node_remove(&mon->source, &(src->node));
 	if (NULL == node)
-		return -EINVAL;
+		return -ENOENT;
 
 	old_src = to_src(node);
 	if (IO_NONE != old_src->active) {
