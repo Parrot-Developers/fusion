@@ -205,6 +205,47 @@ static void testMON_ADD_SOURCES(void)
 	io_close(&fd);
 }
 
+static void testMON_REMOVE_SOURCE(void)
+{
+	int ret;
+	int fd;
+	struct io_mon mon;
+	struct io_src src;
+
+	ret = io_mon_init(&mon);
+	CU_ASSERT_EQUAL(ret, 0);
+	fd = open("/dev/random", O_RDWR | O_CLOEXEC);
+	CU_ASSERT_NOT_EQUAL_FATAL(fd, -1);
+	ret = io_src_init(&src, fd, IO_DUPLEX, my_dummy_callback);
+	CU_ASSERT_EQUAL(ret, 0);
+	ret = io_mon_add_source(&mon, &src);
+	CU_ASSERT_EQUAL(ret, 0);
+	CU_ASSERT_PTR_NOT_NULL(rs_node_find(&(src.node), mon.source.next));
+
+	/* normal use case */
+	ret = io_mon_remove_source(&mon, &src);
+	CU_ASSERT_EQUAL(ret, 0);
+	CU_ASSERT_PTR_NULL(rs_node_find(&(src.node), mon.source.next));
+
+	/* error use cases */
+	/* already removed source */
+	ret = io_mon_remove_source(&mon, &src);
+	CU_ASSERT_EQUAL(ret, -ENOENT);
+	ret = io_mon_remove_source(&mon, NULL);
+	CU_ASSERT_EQUAL(ret, -EINVAL);
+	ret = io_mon_remove_source(NULL, &src);
+	CU_ASSERT_EQUAL(ret, -EINVAL);
+
+	/* cleanup */
+	io_mon_clean(&mon);
+	io_close(&fd);
+}
+
+static void testMON_REMOVE_SOURCES(void)
+{
+	/* TODO implement */
+}
+
 static void testMON_DUMP_EPOLL_EVENT(void)
 {
 	char str[1024];
@@ -526,7 +567,14 @@ static const struct test_t tests[] = {
 				.fn = testMON_ADD_SOURCES,
 				.name = "io_mon_add_sources"
 		},
-		/* TODO add tests for remove_source[s] */
+		{
+				.fn = testMON_REMOVE_SOURCE,
+				.name = "io_mon_remove_source"
+		},
+		{
+				.fn = testMON_REMOVE_SOURCES,
+				.name = "io_mon_remove_sources"
+		},
 		{
 				.fn = testMON_DUMP_EPOLL_EVENT,
 				.name = "io_mon_dump_epoll_event"
