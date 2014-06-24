@@ -12,6 +12,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 #include <stddef.h>
 
@@ -95,9 +96,9 @@ static inline int rs_str_match_prefix(const char *str, const char *prefix)
 /**
  * Says if a string is invalid, i.e. if it is NULL or empty
  * @param str String to check the validity of
- * @return non-zero if the string is NULL or empty, 0 otherwise
+ * @return true if the string is NULL or empty, 0 otherwise
  */
-static inline int rs_str_is_invalid(const char *str)
+static inline bool rs_str_is_invalid(const char *str)
 {
 	return NULL == str || '\0' == *str;
 }
