@@ -2,7 +2,7 @@
  * @file test.c
  * @date Mar 21, 2012
  * @author nicolas.carrier@parrot.com
- * @brief Automated unit tests for netbox internal modules
+ * @brief Automated unit tests loader for suitably adapted libraries or binaries
  *
  * Copyright (C) 2011 Parrot S.A.
  */
