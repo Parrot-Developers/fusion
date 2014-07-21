@@ -49,6 +49,35 @@ static void testRS_HMAP_CLEAN(void)
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 }
 
+static void testRS_HMAP_CLEAN_FREE(void)
+{
+	int ret;
+	struct rs_hmap map;
+	int *data1 = calloc(1, sizeof(int));
+	int *data2 = calloc(1, sizeof(int));
+
+	*data1 = 88;
+	*data2 = 66;
+
+	/* init */
+	ret = rs_hmap_init(&map, 10);
+	CU_ASSERT_EQUAL(ret, 0);
+	ret = rs_hmap_insert(&map, "ursule", data1);
+	CU_ASSERT_EQUAL(ret, 0);
+	ret = rs_hmap_insert(&map, "gédéon", data2);
+	CU_ASSERT_EQUAL(ret, 0);
+
+	/* normal use cases */
+	ret = rs_hmap_clean_cb(&map, free);
+	CU_ASSERT_EQUAL(ret, 0);
+	ret = rs_hmap_clean_cb(&map, NULL);
+	CU_ASSERT_EQUAL(ret, 0);
+
+	/* error use cases */
+	ret = rs_hmap_clean_cb(NULL, free);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+}
+
 static void testRS_HMAP_LOOKUP(void)
 {
 	int ret;
@@ -169,6 +198,10 @@ static const struct test_t tests[] = {
 		{
 				.fn = testRS_HMAP_CLEAN,
 				.name = "rs_hmap_clean"
+		},
+		{
+				.fn = testRS_HMAP_CLEAN_FREE,
+				.name = "rs_hmap_clean_free"
 		},
 		{
 				.fn = testRS_HMAP_LOOKUP,
