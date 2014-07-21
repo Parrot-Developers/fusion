@@ -54,11 +54,23 @@ struct rs_hmap {
 int rs_hmap_init(struct rs_hmap *map, size_t size);
 
 /**
- * Reinitializes a hash map. Releases internally used ressources.
+ * Reinitializes a hash map. Releases internally used resources. Equivalent to
+ * rs_hmap_clean_cb(map, NULL);
  * @param map Hash map to clean
  * @return Negative errno-compatible value on error, 0 on success
  */
 int rs_hmap_clean(struct rs_hmap *map);
+
+/**
+ * Reinitializes a hash map. Releases internally used resources and allows the
+ * user to free the resources allocated, still referenced in the map, or to
+ * perform any operation needed on each node, via a callback.
+ * @param map Hash map to clean
+ * @param free_cb callback called on each value still stored in the map, so that
+ * the caller can free the corresponding ressources if any.
+ * @return Negative errno-compatible value on error, 0 on success
+ */
+int rs_hmap_clean_cb(struct rs_hmap *map, void (*free_cb)(void *));
 
 /**
  * Lookup an entry in hash map. If two pieces of data have been inserted for the

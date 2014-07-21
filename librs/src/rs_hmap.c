@@ -87,6 +87,11 @@ int rs_hmap_init(struct rs_hmap *map, size_t size)
 
 int rs_hmap_clean(struct rs_hmap *map)
 {
+	return rs_hmap_clean_cb(map, NULL);
+}
+
+int rs_hmap_clean_cb(struct rs_hmap *map, void (*free_cb)(void *))
+{
 	size_t i;
 	struct rs_hmap_entry *entry, *next;
 
@@ -97,6 +102,8 @@ int rs_hmap_clean(struct rs_hmap *map)
 		entry = map->buckets[i];
 		while (entry) {
 			next = entry->next;
+			if (free_cb)
+				free_cb(entry->data);
 			free(entry->key);
 			free(entry);
 			entry = next;
