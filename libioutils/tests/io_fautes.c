@@ -15,6 +15,7 @@
 struct suite_t *libioutils_test_suites[] = {
 		&io_suite,
 		&mon_suite,
+		&src_inot_suite,
 		&src_msg_suite,
 		&src_msg_uad_suite,
 		&src_pid_suite,
@@ -31,6 +32,7 @@ static void libioutils_pool_initializer(void)
 {
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(io_suite);
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(mon_suite);
+	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(src_inot_suite);
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(src_msg_suite);
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(src_msg_uad_suite);
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(src_pid_suite);

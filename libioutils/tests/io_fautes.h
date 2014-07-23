@@ -12,6 +12,7 @@
 
 extern struct suite_t io_suite;
 extern struct suite_t mon_suite;
+extern struct suite_t src_inot_suite;
 extern struct suite_t src_msg_suite;
 extern struct suite_t src_msg_uad_suite;
 extern struct suite_t src_pid_suite;
