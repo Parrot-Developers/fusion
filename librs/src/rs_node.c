@@ -9,6 +9,7 @@
  */
 
 #include <rs_node.h>
+#include <errno.h>
 
 /**
  * Matching callback based on the node adress
@@ -84,7 +85,7 @@ struct rs_node *rs_node_insert_after(struct rs_node *prev, struct rs_node *node)
 int rs_node_push(struct rs_node **head, struct rs_node *node)
 {
 	if (NULL == head)
-		return -1;
+		return -EINVAL;
 
 	if (NULL == node)
 		return 0;
@@ -180,7 +181,7 @@ int rs_node_foreach(struct rs_node *list, rs_node_cb_t cb)
 	int err = 0;
 
 	if (NULL == cb || NULL == list)
-		return -1;
+		return -EINVAL;
 
 	for (; list; list = rs_node_next(list)) {
 		err = cb(list);
@@ -196,7 +197,7 @@ int rs_node_remove_all(struct rs_node **list, rs_node_cb_t cb)
 	struct rs_node *node;
 
 	if (NULL == list)
-		return -1;
+		return -EINVAL;
 
 	while ((node = rs_node_pop(list)))
 		if (cb)

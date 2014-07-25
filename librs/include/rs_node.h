@@ -120,7 +120,7 @@ struct rs_node *rs_node_insert_after(struct rs_node *prev,
  * @param head Head of the list to push to, can point to NULL but can't be NULL.
  * If it has a previous element, an insertion is performed
  * @param node Node to push
- * @return -1 on error, 0 otherwise
+ * @return -EINVAL if an invalid argument is passed
  */
 int rs_node_push(struct rs_node **head, struct rs_node *node);
 
@@ -202,7 +202,8 @@ struct rs_node *rs_node_remove_match(struct rs_node *list,
  * the firt callback's non zero return value
  * @param list Doubly linked list
  * @param cb Callback to apply
- * @return 0 on success, or the first cb's call non-zero return value
+ * @return -EINVAL if an invalid argument is passed, 0 on success, or the first
+ * cb's call non-zero return value
  */
 int rs_node_foreach(struct rs_node *list, rs_node_cb_t cb);
 
@@ -211,14 +212,12 @@ int rs_node_foreach(struct rs_node *list, rs_node_cb_t cb);
  * action on each node
  * @param list Point to a list's head, NULL in output
  * @param cb Callback called on each node. Can be NULL
- * @return -1 on error, 0 on success
+ * @return -EINVAL if an invalid argument is passed
  */
 int rs_node_remove_all(struct rs_node **list, rs_node_cb_t cb);
 
 #ifdef __cplusplus
 }
 #endif
-
-/* TODO modify all the API to return an errno instead of -1 */
 
 #endif /* RS_NODE_H_ */
