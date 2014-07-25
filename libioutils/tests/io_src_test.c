@@ -96,7 +96,7 @@ static void testSRC_INIT(void)
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	io_close(&fd);
-	fd = open("/tmp/toto", O_RDWR | O_CREAT);
+	fd = open("/tmp/toto", O_RDWR | O_CREAT, S_IRUSR | S_IRUSR);
 	CU_ASSERT_NOT_EQUAL(fd, -1);
 	ret = io_src_init(&src, fd, IO_IN, my_dummy_cb);
 	CU_ASSERT_EQUAL(ret, -EBADF);
