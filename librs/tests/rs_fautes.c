@@ -6,6 +6,8 @@
  *
  * Copyright (C) 2012 Parrot S.A.
  */
+#include <stdlib.h>
+
 #include <fautes.h>
 
 #include "rs_fautes.h"
