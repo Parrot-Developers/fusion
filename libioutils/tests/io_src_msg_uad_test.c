@@ -197,17 +197,17 @@ out:
 	/* error use cases */
 }
 
+static void dummy_cb(struct io_src_msg_uad *src, enum io_src_event evt)
+{
+
+}
+
 static void testSRC_MSG_UAD_GET_SOURCE(void)
 {
 	int ret;
 	struct io_src_msg_uad uad_src;
 	struct io_src *src;
 	char buf[22];
-
-	void dummy_cb(struct io_src_msg_uad *src, enum io_src_event evt)
-	{
-
-	}
 
 	/* normal use cases */
 	ret = io_src_msg_uad_init(&(uad_src),

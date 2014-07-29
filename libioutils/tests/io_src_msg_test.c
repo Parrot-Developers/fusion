@@ -373,6 +373,11 @@ out:
 
 }
 
+static void dummy_cb(struct io_src_msg *src, enum io_src_event evt)
+{
+
+}
+
 static void testSRC_MSG_GET_SOURCE(void)
 {
 	int ret;
@@ -380,11 +385,6 @@ static void testSRC_MSG_GET_SOURCE(void)
 	struct io_src *src;
 	char buf[22];
 	int dummy_pipe[2];
-
-	void dummy_cb(struct io_src_msg *src, enum io_src_event evt)
-	{
-
-	}
 
 	ret = pipe(dummy_pipe);
 	CU_ASSERT_EQUAL(ret, 0);

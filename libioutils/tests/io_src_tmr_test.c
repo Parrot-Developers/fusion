@@ -13,14 +13,15 @@
 #include <io_mon.h>
 #include <io_src_tmr.h>
 
+static void dummy_tmr_cb(struct io_src_tmr *tmr, uint64_t *nbexpired)
+{
+	/* does nothing */
+};
+
 static void testIO_SRC_TMR_INIT(void)
 {
 	int ret;
 	struct io_src_tmr tmr;
-	void dummy_tmr_cb(struct io_src_tmr *tmr, uint64_t *nbexpired)
-	{
-		/* does nothing */
-	};
 
 	/* normal use cases */
 	ret = io_src_tmr_init(&tmr, dummy_tmr_cb);
@@ -49,7 +50,7 @@ static void testIO_SRC_TMR_SET(void)
 			.tv_sec = 1,
 			.tv_usec = 0,
 	};
-	void tmr_cb(struct io_src_tmr *tmr, uint64_t *nbexpired)
+	void tmr_cb(struct io_src_tmr *local_tmr, uint64_t *nbexpired)
 	{
 		expired = 1;
 	};
@@ -119,10 +120,6 @@ static void testIO_SRC_TMR_CLEAN(void)
 {
 	int ret;
 	struct io_src_tmr tmr;
-	void dummy_tmr_cb(struct io_src_tmr *tmr, uint64_t *nbexpired)
-	{
-		/* does nothing */
-	};
 
 	/* initialization */
 	ret = io_src_tmr_init(&tmr, dummy_tmr_cb);
@@ -140,10 +137,6 @@ static void testIO_SRC_SET_PERIODIC(void)
 {
 	int ret;
 	struct io_src_tmr tmr;
-	void dummy_tmr_cb(struct io_src_tmr *tmr, uint64_t *nbexpired)
-	{
-		/* does nothing */
-	};
 
 	/* initialization */
 	ret = io_src_tmr_init(&tmr, dummy_tmr_cb);

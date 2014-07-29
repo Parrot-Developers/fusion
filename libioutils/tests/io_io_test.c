@@ -98,17 +98,19 @@ static void testIO_CLEAN(void)
 	io_close(sockets + 1);
 }
 
+static int dummy_io_cb(struct io_io *io, struct rs_rb *rb, void *data)
+{
+
+	return 0;
+}
+
 static void testIO_READ_START(void)
 {
 	int ret;
 	int sockets[2];
 	struct io_mon mon;
 	struct io_io io;
-	int io_cb(struct io_io *io, struct rs_rb *rb, void *data)
-	{
 
-		return 0;
-	}
 	/* initialization */
 	ret = io_mon_init(&mon);
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
@@ -119,12 +121,12 @@ static void testIO_READ_START(void)
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
 
 	/* normal use cases */
-	ret = io_io_read_start(&io, io_cb, (void *)42, 0);
+	ret = io_io_read_start(&io, dummy_io_cb, (void *)42, 0);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT(io_io_is_read_started(&io));
 
 	/* error use cases */
-	ret = io_io_read_start(NULL, io_cb, (void *)42, 0);
+	ret = io_io_read_start(NULL, dummy_io_cb, (void *)42, 0);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_io_read_start(&io, NULL, (void *)42, 0);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
@@ -142,11 +144,6 @@ static void testIO_LOG_RX(void)
 	int sockets[2];
 	struct io_mon mon;
 	struct io_io io;
-	int io_cb(struct io_io *io, struct rs_rb *rb, void *data)
-	{
-
-		return 0;
-	}
 
 	/* initialization */
 	ret = io_mon_init(&mon);
@@ -180,11 +177,6 @@ static void testIO_LOG_TX(void)
 	int sockets[2];
 	struct io_mon mon;
 	struct io_io io;
-	int io_cb(struct io_io *io, struct rs_rb *rb, void *data)
-	{
-
-		return 0;
-	}
 
 	/* initialization */
 	ret = io_mon_init(&mon);
@@ -218,11 +210,7 @@ static void testIO_READ_STOP(void)
 	int sockets[2];
 	struct io_mon mon;
 	struct io_io io;
-	int io_cb(struct io_io *io, struct rs_rb *rb, void *data)
-	{
 
-		return 0;
-	}
 	/* initialization */
 	ret = io_mon_init(&mon);
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
@@ -231,7 +219,7 @@ static void testIO_READ_STOP(void)
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
 	ret = io_io_init(&io, &mon, SUITE_NAME, sockets[0], sockets[0], 1);
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
-	ret = io_io_read_start(&io, io_cb, (void *)42, 0);
+	ret = io_io_read_start(&io, dummy_io_cb, (void *)42, 0);
 	CU_ASSERT_EQUAL(ret, 0);
 
 	/* normal use cases */
@@ -256,11 +244,6 @@ static void testIO_IS_READ_STARTED(void)
 	int sockets[2];
 	struct io_mon mon;
 	struct io_io io;
-	int io_cb(struct io_io *io, struct rs_rb *rb, void *data)
-	{
-
-		return 0;
-	}
 
 	/* initialization */
 	ret = io_mon_init(&mon);
@@ -273,7 +256,7 @@ static void testIO_IS_READ_STARTED(void)
 
 	/* normal use cases */
 	CU_ASSERT(!io_io_is_read_started(&io));
-	ret = io_io_read_start(&io, io_cb, (void *)42, 0);
+	ret = io_io_read_start(&io, dummy_io_cb, (void *)42, 0);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT(io_io_is_read_started(&io));
 	ret = io_io_read_stop(&io);
@@ -297,11 +280,6 @@ static void testIO_HAS_READ_ERROR(void)
 	int sockets[2];
 	struct io_mon mon;
 	struct io_io io;
-	int io_cb(struct io_io *io, struct rs_rb *rb, void *data)
-	{
-
-		return 0;
-	}
 
 	/* initialization */
 	ret = io_mon_init(&mon);
@@ -334,11 +312,6 @@ static void testIO_WRITE_ADD(void)
 	int sockets[2];
 	struct io_mon mon;
 	struct io_io io;
-	int io_cb(struct io_io *io, struct rs_rb *rb, void *data)
-	{
-
-		return 0;
-	}
 	void write_cb(struct io_io_write_buffer *buffer,
 		enum io_io_write_status status)
 	{
@@ -389,11 +362,6 @@ static void testIO_ABORT(void)
 	int sockets[2];
 	struct io_mon mon;
 	struct io_io io;
-	int io_cb(struct io_io *io, struct rs_rb *rb, void *data)
-	{
-
-		return 0;
-	}
 	void write_cb(struct io_io_write_buffer *buffer,
 		enum io_io_write_status status)
 	{
@@ -491,7 +459,7 @@ static void testIO_SIMPLE_USE_CASE(void)
 				.address = MSG2,
 			},
 	};
-	int io_cb(struct io_io *io, struct rs_rb *rb, void *data)
+	int io_cb(struct io_io *local_io, struct rs_rb *rb, void *data)
 	{
 		size_t newbytes = rs_rb_get_read_length(rb);
 
@@ -634,6 +602,7 @@ static void testIO_WRITE_BUFFER_CLEAN(void)
 #define MSG "titi tata toto"
 	int ret;
 	struct io_io_write_buffer buf;
+	/* TODO factor out this dummy callback */
 	void cb(struct io_io_write_buffer *buffer,
 			enum io_io_write_status status)
 	{

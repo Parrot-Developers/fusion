@@ -141,16 +141,16 @@ out:
 	CU_ASSERT(sigsets_are_equals(&old_mask, &new_mask));
 }
 
+static void dummy_cb(struct io_src_sig *src, struct signalfd_siginfo *si)
+{
+
+}
+
 static void testSRC_SIG_GET_SOURCE(void)
 {
 	int ret;
 	struct io_src_sig sig_src;
 	struct io_src *src;
-
-	void dummy_cb(struct io_src_sig *src, struct signalfd_siginfo *si)
-	{
-
-	}
 
 	/* normal use cases */
 	ret = io_src_sig_init(&(sig_src),
