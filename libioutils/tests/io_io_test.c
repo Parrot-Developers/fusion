@@ -305,6 +305,12 @@ static void testIO_HAS_READ_ERROR(void)
 	io_close(sockets + 1);
 }
 
+static void dummy_write_cb(struct io_io_write_buffer *buffer,
+		enum io_io_write_status status)
+{
+	/* dummy cb */
+}
+
 static void testIO_WRITE_ADD(void)
 {
 #define MSG "titi tata toto"
@@ -312,17 +318,12 @@ static void testIO_WRITE_ADD(void)
 	int sockets[2];
 	struct io_mon mon;
 	struct io_io io;
-	void write_cb(struct io_io_write_buffer *buffer,
-		enum io_io_write_status status)
-	{
-
-	}
 	struct io_io_write_buffer wb = {
 			.node = {
 					.next = NULL,
 					.prev = NULL,
 			},
-			.cb = write_cb,
+			.cb = dummy_write_cb,
 			.data = (void *) 666,
 			.length = sizeof(MSG),
 			.address = MSG,
@@ -362,17 +363,12 @@ static void testIO_ABORT(void)
 	int sockets[2];
 	struct io_mon mon;
 	struct io_io io;
-	void write_cb(struct io_io_write_buffer *buffer,
-		enum io_io_write_status status)
-	{
-
-	}
 	struct io_io_write_buffer wb = {
 			.node = {
 					.next = NULL,
 					.prev = NULL,
 			},
-			.cb = write_cb,
+			.cb = dummy_write_cb,
 			.data = (void *) 666,
 			.length = sizeof(MSG),
 			.address = MSG,
@@ -577,22 +573,21 @@ static void testIO_WRITE_BUFFER_INIT(void)
 #define MSG "titi tata toto"
 	int ret;
 	struct io_io_write_buffer wb;
-	void cb(struct io_io_write_buffer *buffer,
-			enum io_io_write_status status)
-	{
-		/* dummy cb */
-	}
 
 	/* normal use cases */
-	ret = io_io_write_buffer_init(&wb, cb, (void *) 42, sizeof(MSG), MSG);
+	ret = io_io_write_buffer_init(&wb, dummy_write_cb, (void *) 42,
+			sizeof(MSG), MSG);
 	CU_ASSERT_EQUAL(ret, 0);
 
 	/* error use cases */
-	ret = io_io_write_buffer_init(NULL, cb, (void *) 42, sizeof(MSG), MSG);
+	ret = io_io_write_buffer_init(NULL, dummy_write_cb, (void *) 42,
+			sizeof(MSG), MSG);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_io_write_buffer_init(&wb, cb, (void *) 42, 0, MSG);
+	ret = io_io_write_buffer_init(&wb, dummy_write_cb, (void *) 42,
+			0, MSG);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = io_io_write_buffer_init(&wb, cb, (void *) 42, sizeof(MSG), NULL);
+	ret = io_io_write_buffer_init(&wb, dummy_write_cb, (void *) 42,
+			sizeof(MSG), NULL);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 #undef MSG
 }
@@ -602,15 +597,10 @@ static void testIO_WRITE_BUFFER_CLEAN(void)
 #define MSG "titi tata toto"
 	int ret;
 	struct io_io_write_buffer buf;
-	/* TODO factor out this dummy callback */
-	void cb(struct io_io_write_buffer *buffer,
-			enum io_io_write_status status)
-	{
-		/* dummy cb */
-	}
 
 	/* initialization */
-	ret = io_io_write_buffer_init(&buf, cb, (void *) 42, sizeof(MSG), MSG);
+	ret = io_io_write_buffer_init(&buf, dummy_write_cb, (void *) 42,
+			sizeof(MSG), MSG);
 	CU_ASSERT_EQUAL(ret, 0);
 
 	/* normal use cases */
