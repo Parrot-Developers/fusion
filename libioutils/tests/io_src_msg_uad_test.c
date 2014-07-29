@@ -101,7 +101,7 @@ static void uad_cb(struct io_src_msg_uad *src, enum io_src_event evt)
 static void testSRC_MSG_UAD_SET_NEXT_MESSAGE(void)
 {
 	int ret;
-	char msg[1024] = {0};
+	char msg[0x100] = {0};
 	struct io_src_msg_uad src;
 
 	ret = io_src_msg_uad_set_next_message(&src, msg, sizeof(msg));

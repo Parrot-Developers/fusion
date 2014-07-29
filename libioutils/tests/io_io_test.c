@@ -404,6 +404,15 @@ static void testIO_ABORT(void)
 #undef MSG
 }
 
+static void io_free(struct io_io **io)
+{
+	if (io == NULL || *io == NULL)
+		return;
+
+	free(*io);
+	*io = NULL;
+}
+
 static void testIO_SIMPLE_USE_CASE(void)
 {
 #define MSG1 "first message"
@@ -422,7 +431,8 @@ static void testIO_SIMPLE_USE_CASE(void)
 	struct timeval timeout;
 	int sockets[2];
 	struct io_mon mon;
-	struct io_io io;
+	/* here io is allocated because of the stack's size */
+	struct io_io __attribute__((cleanup(io_free)))*io = NULL;
 	struct io_src sock_src;
 	int monfd;
 	fd_set rfds;
@@ -432,7 +442,6 @@ static void testIO_SIMPLE_USE_CASE(void)
 	{
 		count++;
 	}
-
 	struct io_io_write_buffer io_buffers[2] = {
 			[0] = {
 				.node = {
@@ -476,10 +485,10 @@ static void testIO_SIMPLE_USE_CASE(void)
 	}
 	void sock_cb(struct io_src *src)
 	{
-		char buf[1024];
+		char buf[0x200];
 		ssize_t sret;
 
-		sret = read(io_src_get_fd(src), buf, 1024);
+		sret = read(io_src_get_fd(src), buf, 0x200);
 		CU_ASSERT(sret > 0);
 
 		if (STATE_START == state) {
@@ -489,7 +498,7 @@ static void testIO_SIMPLE_USE_CASE(void)
 			CU_ASSERT(!(STATE_MSG1_RECEIVED & state));
 			state |= STATE_MSG1_RECEIVED;
 			CU_ASSERT_EQUAL(count, 1);
-			ret = io_io_write_add(&io, io_buffers + 1);
+			ret = io_io_write_add(io, io_buffers + 1);
 			CU_ASSERT_EQUAL(ret, 0);
 		} else {
 			CU_ASSERT_STRING_EQUAL(buf, MSG2);
@@ -510,17 +519,19 @@ static void testIO_SIMPLE_USE_CASE(void)
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
 	ret = io_mon_add_source(&mon, &sock_src);
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
-	ret = io_io_init(&io, &mon, SUITE_NAME, sockets[0], sockets[0], 1);
+	io = calloc(1, sizeof(*io));
+	CU_ASSERT_PTR_NOT_NULL_FATAL(io);
+	ret = io_io_init(io, &mon, SUITE_NAME, sockets[0], sockets[0], 1);
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
-	ret = io_io_log_rx(&io, rx_data_dump_cb);
+	ret = io_io_log_rx(io, rx_data_dump_cb);
 	CU_ASSERT_EQUAL(ret, 0);
-	ret = io_io_log_tx(&io, tx_data_dump_cb);
+	ret = io_io_log_tx(io, tx_data_dump_cb);
 	CU_ASSERT_EQUAL(ret, 0);
-	ret = io_io_read_start(&io, io_cb, (void *)42, 0);
+	ret = io_io_read_start(io, io_cb, (void *)42, 0);
 	CU_ASSERT_EQUAL(ret, 0);
 
 	/* simple test case, send two messages and read two */
-	ret = io_io_write_add(&io, io_buffers + 0);
+	ret = io_io_write_add(io, io_buffers + 0);
 	CU_ASSERT_EQUAL(ret, 0);
 
 	monfd = io_mon_get_fd(&mon);
@@ -559,10 +570,10 @@ out:
 	CU_ASSERT_EQUAL(count, 2);
 
 	/* cleanup */
-	io_io_read_stop(&io);
+	io_io_read_stop(io);
 	io_mon_remove_source(&mon, &sock_src);
 	io_src_clean(&sock_src);
-	io_io_clean(&io);
+	io_io_clean(io);
 	io_mon_clean(&mon);
 	io_close(sockets + 0);
 	io_close(sockets + 1);

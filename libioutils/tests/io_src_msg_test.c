@@ -71,7 +71,7 @@ static int state;
 static void testSRC_MSG_SET_NEXT_MESSAGE(void)
 {
 	int ret;
-	char msg[1024];
+	char msg[0x100];
 	struct io_src_msg src;
 
 	ret = io_src_msg_set_next_message(&src, &msg, sizeof(msg));

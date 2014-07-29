@@ -248,7 +248,7 @@ static void testMON_REMOVE_SOURCES(void)
 
 static void testMON_DUMP_EPOLL_EVENT(void)
 {
-	char str[1024];
+	char str[0x200];
 	int ret;
 	const char *ref1 = "epoll events :\n"
 			"\tEPOLLOUT\n";
@@ -257,11 +257,11 @@ static void testMON_DUMP_EPOLL_EVENT(void)
 			"\tEPOLLHUP\n";
 
 	/* normal use cases */
-	ret = store_function_output_to_string(str, 1024,
+	ret = store_function_output_to_string(str, 0x200,
 			io_mon_dump_epoll_event, STDERR_FILENO, EPOLLOUT);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_STRING_EQUAL(str, ref1);
-	ret = store_function_output_to_string(str, 1024,
+	ret = store_function_output_to_string(str, 0x200,
 			io_mon_dump_epoll_event, STDERR_FILENO,
 			EPOLLOUT | EPOLLHUP);
 	CU_ASSERT_EQUAL(ret, 0);
@@ -426,10 +426,10 @@ static void testMON_PROCESS_EVENTS(void)
 	int state = STATE_START;
 	void in_cb(struct io_src *src)
 	{
-		char buf[1024];
+		char buf[0x200];
 		int r;
 
-		r = read(src->fd, buf, 1024);
+		r = read(src->fd, buf, 0x200);
 		CU_ASSERT_NOT_EQUAL_FATAL(r, -1);
 
 		if (0 == strcmp(msg1, buf)) {
