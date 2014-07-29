@@ -76,7 +76,7 @@ static void testSRC_MSG_SET_NEXT_MESSAGE(void)
 
 	ret = io_src_msg_set_next_message(&src, &msg, sizeof(msg));
 	CU_ASSERT_NOT_EQUAL(ret, -1);
-	CU_ASSERT_PTR_EQUAL(src.send_buf, &msg);
+	CU_ASSERT(src.send_buf == &msg);
 
 	/* error use cases */
 	ret = io_src_msg_set_next_message(NULL, &msg, sizeof(msg));

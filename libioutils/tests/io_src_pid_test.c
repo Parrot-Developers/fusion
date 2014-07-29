@@ -24,18 +24,18 @@
 #include <io_mon.h>
 #include <io_src_pid.h>
 
-static void dump_args(int argc, char *argv[])
+static void dump_args(int argc, const char * const argv[])
 {
 	do {
 		fprintf(stderr, "%s ", *argv);
 	} while (*(++argv));
 }
 
-static pid_t __attribute__((sentinel)) launch(char *prog, ...)
+static pid_t __attribute__((sentinel)) launch(const char *prog, ...)
 {
 	int ret;
 	int child_argc = 0;
-	char *child_argv[10] = {NULL};
+	const char * child_argv[10] = {NULL};
 	char *arg = (char *)-1;
 	va_list args;
 	pid_t pid;
@@ -64,6 +64,10 @@ static pid_t __attribute__((sentinel)) launch(char *prog, ...)
 		fprintf(stderr, "Executing ");
 		dump_args(child_argc, child_argv);
 		fprintf(stderr, "\n");
+		/*
+		 * generates a -Wcast-qual warning, don't know what to do or if
+		 * I can do anything in this case
+		 */
 		ret = execvp(child_argv[0], child_argv);
 		if (-1 == ret) {
 			perror("execve");
