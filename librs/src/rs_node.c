@@ -12,12 +12,12 @@
 #include <errno.h>
 
 /**
- * Matching callback based on the node adress
+ * @brief Matching callback based on the node address
  * @param node Node to find
  * @param data Current node to compare to
  * @return 1 if addresses do match
  */
-static int match(struct rs_node *node, const void *data)
+static int default_match(struct rs_node *node, const void *data)
 {
 	return node == data;
 };
@@ -132,7 +132,7 @@ struct rs_node *rs_node_prev(struct rs_node *node)
 
 struct rs_node *rs_node_find(struct rs_node *needle, struct rs_node *haystack)
 {
-	return rs_node_find_match(needle, match, haystack);
+	return rs_node_find_match(needle, default_match, haystack);
 }
 
 struct rs_node *rs_node_find_match(struct rs_node *node,
@@ -150,7 +150,7 @@ struct rs_node *rs_node_find_match(struct rs_node *node,
 
 struct rs_node *rs_node_remove(struct rs_node *list, struct rs_node *trash)
 {
-	return rs_node_remove_match(list, match, trash);
+	return rs_node_remove_match(list, default_match, trash);
 }
 
 struct rs_node *rs_node_remove_match(struct rs_node *list,
