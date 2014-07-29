@@ -105,6 +105,13 @@ static int has_events_pending(struct io_src *src)
 	return src->events & (src->active | IO_EPOLL_ERROR_EVENTS);
 }
 
+/**
+ * @fn io_src_match_fd
+ * @brief matches an io_src
+ * @param __n Node of the source to match
+ * @param __d Pointer to the value of the fd field to match the source with
+ * @return true iif the source has the given fd value
+ */
 static RS_NODE_MATCH_MEMBER(io_src, fd, node)
 
 /**
