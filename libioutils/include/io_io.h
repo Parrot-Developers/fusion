@@ -38,13 +38,13 @@ struct io_io;
  * @param data user data as was passed in io_io_read_start()
  * @return 0 if and only if more data is needed on read
  */
-typedef int (*io_io_read_cb_t) (struct io_io *io, struct rs_rb *rb, void *data);
+typedef int (*io_io_read_cb_t)(struct io_io *io, struct rs_rb *rb, void *data);
 
 /**
  * @def IO_IO_RB_BUFFER_SIZE
  * @brief size of the ring buffer's buffer
  */
-#define IO_IO_RB_BUFFER_SIZE 2048
+#define IO_IO_RB_BUFFER_SIZE 512
 
 /**
  * @struct io_io_read_ctx

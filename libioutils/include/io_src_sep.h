@@ -27,7 +27,7 @@ extern "C" {
  * @def IO_SRC_SEP_SIZE
  * @brief Maximum size of a message that can be reads
  */
-#define IO_SRC_SEP_SIZE 1024
+#define IO_SRC_SEP_SIZE 0x100
 
 #define IO_SRC_SEP_NO_SEP2 INT_MAX
 
