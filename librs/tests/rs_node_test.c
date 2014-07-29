@@ -24,7 +24,7 @@ struct int_node {
 
 struct str_node {
 	struct rs_node node;
-	char *val;
+	const char *val;
 };
 
 #define to_int_node(p) rs_container_of(p, struct int_node, node)
@@ -379,7 +379,7 @@ static void testRS_NODE_FIND_MATCH_str(void)
 	struct str_node str_node_a = {.val = "17",};
 	struct str_node str_node_b = {.val = "42",};
 	struct str_node str_node_c = {.val = "666",};
-	char *val;
+	const char *val;
 	struct rs_node *haystack = NULL;
 	struct rs_node *needle = NULL;
 

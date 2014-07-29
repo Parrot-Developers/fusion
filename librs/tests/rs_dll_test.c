@@ -613,7 +613,7 @@ static void testRS_DLL_REMOVE_MATCH(void)
 	int ret = 0;
 	int parity_cb(struct rs_node *n, const void *data)
 	{
-		int my_odd = *((int *)data);
+		const int my_odd = *((const int *)data);
 		struct int_node *int_node = to_int_node(n);
 
 		if (my_odd)
