@@ -53,8 +53,7 @@ static int out_msg(struct io_src_msg *msg, int fd)
 
 	if (msg->perform_io) {
 		/* msg->msg contains the message to send */
-		/* casting to void * is needed because of write's prototype */
-		sret = io_write(fd, (void *)msg->send_buf, msg->send_buf_size);
+		sret = io_write(fd, msg->send_buf, msg->send_buf_size);
 		if (-1 == sret)
 			return -errno;
 	} /* else, the source implementation performs output itself */

@@ -29,7 +29,7 @@ ssize_t io_read(int fd, void *buf, size_t count)
 	return TEMP_FAILURE_RETRY(read(fd, buf, count));
 }
 
-ssize_t io_write(int fd, void *buf, size_t count)
+ssize_t io_write(int fd, const void *buf, size_t count)
 {
 	return TEMP_FAILURE_RETRY(write(fd, buf, count));
 }

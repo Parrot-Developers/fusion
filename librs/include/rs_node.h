@@ -61,11 +61,11 @@ typedef int (*rs_node_cb_t)(struct rs_node *node);
 int type##_match_##member(struct rs_node *__n, const void *__d) \
 { \
 	struct type *__o = rs_container_of(__n, struct type, node_member); \
-	typeof(((struct type *)0)->member)*__v; \
+	const typeof(((struct type *)0)->member)*__v; \
 	 \
 	if (NULL == __d) \
 		return 0; \
-	__v = (typeof(((struct type *)0)->member)*)__d; \
+	__v = __d; \
  \
 	return __o->member == *__v; \
 }

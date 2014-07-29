@@ -62,7 +62,7 @@ static void io_log_raw(void (*log_cb)(const char *), const char *func,
 	/* xx xx xx xx xx xx xx xx xx xx xx xx xx xx xx xx
 	 * .................*/
 	for (i = 0; i < length; i++) {
-		byte = ((uint8_t *)buffer)[i] & 0xff;
+		byte = ((const uint8_t *)buffer)[i] & 0xff;
 		log_buf[((n % 16) * 3)] = hexdigits[byte >> 4];
 		log_buf[((n % 16) * 3) + 1] = hexdigits[byte & 0xf];
 		log_buf[((n % 16) * 3) + 2] = ' ';
@@ -341,7 +341,7 @@ static void write_src_cb(struct io_src *src)
 	/* write current buffer */
 	while (ret == 0 && writectx->nbwritten < buffer->length) {
 		ret = write_io(write_src->fd, io->log_tx, io->name,
-				(uint8_t *) buffer->address
+				(const uint8_t *) buffer->address
 						+ writectx->nbwritten,
 				buffer->length - writectx->nbwritten, &length);
 		if (ret == 0) {
