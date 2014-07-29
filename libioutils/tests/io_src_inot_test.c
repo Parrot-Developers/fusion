@@ -6,13 +6,14 @@
  *
  * Copyright (C) 2014 Parrot S.A.
  */
+#define _GNU_SOURCE
 #include <sys/stat.h>
 
 #include <unistd.h>
 #include <fcntl.h>
 
+#include <string.h>
 #include <inttypes.h>
-#include <libgen.h>
 
 #include <CUnit/Basic.h>
 
