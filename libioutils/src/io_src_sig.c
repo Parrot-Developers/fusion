@@ -62,6 +62,8 @@ static int build_sig_mask(sigset_t *m, va_list args, int signo)
 	/* add all the signals to the mask */
 	sigemptyset(m);
 	while (0 != signo) {
+		if (signo == SIGKILL || signo == SIGSTOP)
+			return -EINVAL;
 		ret = sigaddset(m, signo);
 		if (-1 == ret)
 			return -errno;

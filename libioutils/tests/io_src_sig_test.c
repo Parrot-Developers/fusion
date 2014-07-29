@@ -117,6 +117,10 @@ out:
 	CU_ASSERT(state & STATE_SIGUSR1_RECEIVED);
 	CU_ASSERT(state & STATE_SIGUSR2_RECEIVED);
 
+	/* cleanup */
+	io_src_sig_clean(&src_sig);
+	io_mon_clean(&mon);
+
 	/* error use cases */
 	ret = io_src_sig_init(NULL, sig_cb, SIGUSR1, SIGUSR2, NULL);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
@@ -124,10 +128,11 @@ out:
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = io_src_sig_init(&src_sig, sig_cb, NULL);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-
-	/* cleanup */
-	io_mon_clean(&mon);
-	io_src_sig_clean(&src_sig);
+	/* neither SIGSTOP nor SIGKILL can be caught or ignored */
+	ret = io_src_sig_init(&src_sig, sig_cb, SIGSTOP, NULL);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
+	ret = io_src_sig_init(&src_sig, sig_cb, SIGKILL, NULL);
+	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	/* check sigmask hasn't changed */
 	sigemptyset(&new_mask);

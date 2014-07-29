@@ -55,8 +55,9 @@ struct io_src_sig {
  * @param sig Signal source to initialize
  * @param cb User calback, notified when a monitored signal occur
  * @param ... List of signal, terminated by NULL, which corresponds to 0 or null
- * signal
- * @return errno compatible negative value
+ * signal. Neither SIGSTOP nor SIGKILL can be passed.
+ * @return errno compatible negative value, -EINVAL if a signal passed is
+ * SIGSTOP or SIGKILL
  */
 int io_src_sig_init(struct io_src_sig *sig, io_sig_cb_t *cb, ...)
 	__attribute__ ((sentinel(0)));
