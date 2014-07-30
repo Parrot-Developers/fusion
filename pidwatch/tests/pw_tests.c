@@ -87,18 +87,18 @@ out:
 	fclose(pmf);
 }
 
-static void dump_args(int argc, char *argv[])
+static void dump_args(int argc, const char *argv[])
 {
 	do {
 		fprintf(stderr, "%s ", *argv);
 	} while (*(++argv));
 }
 
-static pid_t __attribute__((sentinel)) launch(char *prog, ...)
+static pid_t __attribute__((sentinel)) launch(const char *prog, ...)
 {
 	int ret;
 	int child_argc = 0;
-	char *child_argv[10] = {NULL};
+	const char *child_argv[10] = {NULL};
 	char *arg = (char *)-1;
 	va_list args;
 	pid_t pid;
