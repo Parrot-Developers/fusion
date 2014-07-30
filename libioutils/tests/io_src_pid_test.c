@@ -36,6 +36,7 @@ static pid_t __attribute__((sentinel)) launch(const char *prog, ...)
 	int ret;
 	int child_argc = 0;
 	const char * child_argv[10] = {NULL};
+	/* NULL would stop prematurely the for loop, hence (char *)-1 */
 	char *arg = (char *)-1;
 	va_list args;
 	pid_t pid;
@@ -68,7 +69,7 @@ static pid_t __attribute__((sentinel)) launch(const char *prog, ...)
 		 * generates a -Wcast-qual warning, don't know what to do or if
 		 * I can do anything in this case
 		 */
-		ret = execvp(child_argv[0], child_argv);
+		ret = execvp(child_argv[0], (char * const*)child_argv);
 		if (-1 == ret) {
 			perror("execve");
 			exit(1);
