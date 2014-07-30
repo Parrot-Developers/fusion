@@ -426,7 +426,7 @@ int io_mon_activate_in_source(struct io_mon *mon, struct io_src *src,
 	return activate_source(mon, src, active, IO_IN);
 }
 
-int io_mon_process_events(struct io_mon *mon)
+int io_mon_poll(struct io_mon *mon, int timeout)
 {
 	ssize_t n = 0;
 	struct epoll_event events[MONITOR_MAX_SOURCES];
@@ -435,13 +435,16 @@ int io_mon_process_events(struct io_mon *mon)
 		return -EINVAL;
 
 	/* retrieve events */
-	n = io_epoll_wait(mon->epollfd, events, MONITOR_MAX_SOURCES,
-			0 /* don't block */
-			);
+	n = io_epoll_wait(mon->epollfd, events, MONITOR_MAX_SOURCES, timeout);
 	if (-1 == n)
 		return -errno;
 
 	return do_process_events_sets(mon, n, events);
+}
+
+int io_mon_process_events(struct io_mon *mon)
+{
+	return io_mon_poll(mon, 0 /* don't block */);
 }
 
 int io_mon_clean(struct io_mon *mon)

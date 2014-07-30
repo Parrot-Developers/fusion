@@ -131,12 +131,27 @@ int io_mon_activate_in_source(struct io_mon *mon, struct io_src *src,
 		int active);
 
 /**
+ * @brief Polls for events on the registered sources.
+ *
  * When monitor's fd is ready for reading operation, a call to
- * io_mon_process_events will dispatch each event to the relevant
+ * io_mon_poll will dispatch each event to the relevant
  * callback.<br />
+ * If no source has pending events, blocks during the given amount of time<br />
  * Sources which encounter errors (io_src_has_error() returns true) are removed
  * automatically
+ * @param timeout Number of milliseconds io_mon_poll should block waiting for
+ * events. If -1, blocks indefinitely, if 0, returns immediately
  *
+ * @return negative errno value on error, 0 otherwise
+ */
+int io_mon_poll(struct io_mon *mon, int timeout);
+
+/**
+ * @brief processes pending events. Doesn't block.
+ *
+ * Equivalent to io_mon_poll(mon, 0);
+ *
+ * @see io_mon_poll
  * @param mon Monitor's context
  * @return negative errno value on error, 0 otherwise
  */
