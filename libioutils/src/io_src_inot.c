@@ -250,7 +250,7 @@ static void clean_watches(struct io_src_inot *inot)
  * @param bytes number of bytes in buf
  * @return errno-compatible negative value on error, 0 on success
  */
-static int process_events(struct io_src_inot *inot, char *buf, int bytes)
+static int process_events(struct io_src_inot *inot, char *buf, size_t bytes)
 {
 	char *p, *upper_bound;
 	struct inotify_event *event;
@@ -298,20 +298,27 @@ static void inot_cb(struct io_src *src)
 	int ret;
 	int toread;
 	char __attribute__((cleanup(rs_str_free)))*buf = NULL;
+	size_t buf_size;
 
 	ret = ioctl(src->fd, FIONREAD, &toread);
 	if (ret < 0 || toread == 0)
 		return;
+	/*
+	 * according to fs/notify/inotify/inotify_user.c:inotify_ioctl(),
+	 * the value returned by FIONREAD is positive, hence the cast is safe.
+	 */
+	assert(toread >= 0);
+	buf_size = (size_t)toread;
 
-	buf = calloc(1, toread);
+	buf = calloc(1, buf_size);
 	if (buf == NULL)
 		return;
 
-	sret = read(src->fd, buf, toread);
+	sret = read(src->fd, buf, buf_size);
 	if (sret < 0)
 		return;
 
-	ret = process_events(to_inot(src), buf, toread);
+	ret = process_events(to_inot(src), buf, buf_size);
 }
 
 /**

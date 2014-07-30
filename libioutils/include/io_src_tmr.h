@@ -73,8 +73,6 @@ int io_src_tmr_init(struct io_src_tmr *tmr, io_tmr_cb_t cb);
  */
 int io_src_tmr_set(struct io_src_tmr *tmr, int timeout);
 
-/* TODO implement get_source */
-
 /**
  * Allows to choose if the timer is periodic or one shot. This will be taken
  * into account at the following call to io_src_tmr_set()

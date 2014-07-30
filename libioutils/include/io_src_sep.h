@@ -72,7 +72,7 @@ struct io_src_sep {
 	/** second separator byte, INT_MAX for none */
 	char sep2;
 	/** 1 if the separator is made of two bytes, 0 otherwise */
-	int two_bytes;
+	bool two_bytes;
 	/** user callback, notified when one of the registered signals occur */
 	io_src_sep_cb_t *cb;
 	/** buffer containing the bytes read from the source */

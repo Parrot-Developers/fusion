@@ -63,7 +63,7 @@ static void testSRC_INOT_ADD_WATCH(void)
 	ret = io_src_inot_add_watch(&inot, &watch);
 	CU_ASSERT_EQUAL(ret, 0);
 	/* update a watch */
-	watch.events &= ~IN_DELETE;
+	watch.events = IN_ALL_EVENTS & ~IN_DELETE;
 	ret = io_src_inot_add_watch(&inot, &watch);
 	CU_ASSERT_EQUAL(ret, 0);
 	/* reinstalling the same watch is a noop */
@@ -155,7 +155,7 @@ static void testSRC_INOT_CLEAN(void)
 static bool check_event(uint32_t *states, uint32_t event, uint32_t step,
 		uint32_t state)
 {
-	uint32_t step_mask = 1 << state;
+	uint32_t step_mask = 1u << state;
 
 	if (*states != step_mask - 1 || step != event)
 		return false;

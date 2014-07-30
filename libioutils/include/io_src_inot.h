@@ -70,7 +70,7 @@ struct io_src_inot_watch {
 	/** path of the file system element being watched */
 	const char *path;
 	/** inotify events set */
-	int events;
+	uint32_t events;
 	/** callback called on events concerning the watch descriptor */
 	io_src_inot_cb_t *cb;
 };

@@ -95,14 +95,14 @@ static int register_source(struct io_mon *mon, struct io_src *src)
 }
 
 /**
- * Says if a source still has events pending mathching at least one of the
+ * Says if a source still has events pending matching at least one of the
  * events it is registered for and the error events
  * @param src Source
  * @return Non-zero if there is still events to process, 0 otherwise
  */
-static int has_events_pending(struct io_src *src)
+static bool has_events_pending(struct io_src *src)
 {
-	return src->events & (src->active | IO_EPOLL_ERROR_EVENTS);
+	return (src->events & (src->active | IO_EPOLL_ERROR_EVENTS)) != 0;
 }
 
 /**
@@ -355,7 +355,11 @@ int io_mon_add_source(struct io_mon *mon, struct io_src *src)
 		return ret;
 
 	/* by default, only IN monitoring is activated */
-	src->active = src->type & ~IO_OUT;
+	/*
+	 * cast is ok because it can't change the value of type and it's needed
+	 * because otherwise, there is a -Wsign-conversion warning
+	 */
+	src->active = (long)src->type & ~IO_OUT;
 
 	return register_source(mon, src);
 }

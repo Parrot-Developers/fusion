@@ -165,7 +165,8 @@ static int install_filter(int pidfd, pid_t pid)
 		BPF_STMT(BPF_LD | BPF_W | BPF_ABS, NLMSG_LENGTH(0) +
 				offsetof(struct cn_proc_msg,
 					evt.event_data.exit.process_pid)),
-		BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, htonl(pid), 0, 1),
+		/* here pid has been tested >= 1, so the cast is ok */
+		BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, htonl((uint32_t)pid), 0, 1),
 
 		/* message is sent to user space */
 		BPF_STMT(BPF_RET|BPF_K, 0xffffffff),
@@ -346,7 +347,12 @@ int pidwatch_wait(int pidfd, int *status)
 
 	/* exit_code has the same semantic as status from wait(2) */
 	if (NULL != status)
-		*status = ev->event_data.exit.exit_code;
+		/*
+		 * don't know why the exit_code field is unsigned, but as the
+		 * value is meant to have the same meaning as status in wait,
+		 * the cast must be ok
+		 */
+		*status = (int)ev->event_data.exit.exit_code;
 
 	return ev->event_data.exit.process_pid;
 }

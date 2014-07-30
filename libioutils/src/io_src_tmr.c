@@ -139,11 +139,11 @@ int io_src_tmr_set(struct io_src_tmr *tmr, int timeout)
 
 	if (IO_SRC_TMR_DISARM != timeout) {
 		nval.it_value.tv_sec = timeout / MSEC_PER_SEC;
-		nval.it_value.tv_nsec = ((long long)timeout % MSEC_PER_SEC) *
+		nval.it_value.tv_nsec = ((long)timeout % MSEC_PER_SEC) *
 				NSEC_PER_MSEC;
 		if (tmr->periodic) {
 			nval.it_interval.tv_sec = timeout / MSEC_PER_SEC;
-			nval.it_interval.tv_nsec = ((long long)timeout
+			nval.it_interval.tv_nsec = ((long)timeout
 					% MSEC_PER_SEC) * NSEC_PER_MSEC;
 		}
 	} /* else, disarm */

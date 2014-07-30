@@ -99,14 +99,6 @@ static int separator_found(struct io_src_sep *sep, char *c)
 }
 
 /**
- * @def chunk_len
- * @param sep Separator source
- * @param c Current position in the string
- * @return Length of the last chunk found, including separator(s)
- */
-#define chunk_len(sep, c) (1 + (sep)->two_bytes + (c) - buf_read_start((sep)))
-
-/**
  * Searches each separator occurrences and notifies user of each corresponding
  * chunk
  * @param sep Separator source
@@ -121,7 +113,12 @@ static int parse(struct io_src_sep *sep)
 			cur + sep->two_bytes < buf_write_start(sep);
 			cur++)
 		if (separator_found(sep, cur)) {
-			ret = notify_user(sep, chunk_len(sep, cur));
+			/* cast is ok because !!two_bytes is 0 or 1 */
+			unsigned sep_offset = 1 + (unsigned)(!!sep->two_bytes);
+			ptrdiff_t data_len = cur - buf_read_start(sep);
+			unsigned chunk_len = sep_offset + (unsigned)data_len;
+
+			ret = notify_user(sep, chunk_len);
 			if (0 > ret)
 				return ret;
 			if (0 < ret)
@@ -168,7 +165,7 @@ static void sep_cb(struct io_src *src)
 
 	/* get some data */
 	sret = io_read(src->fd, buf_write_start(sep), to_read(sep));
-	if (-1 == sret)
+	if (sret < 0)
 		return;
 	if (0 == sret) {
 		end_of_file(sep);
@@ -176,7 +173,8 @@ static void sep_cb(struct io_src *src)
 	}
 
 	/* something has been read */
-	sep->up_to += sret;
+	/* cast is ok because sret just has ben tested positive */
+	sep->up_to += (unsigned)sret;
 
 	consume(sep);
 }
@@ -184,15 +182,24 @@ static void sep_cb(struct io_src *src)
 int io_src_sep_init(struct io_src_sep *sep_src, int fd, io_src_sep_cb_t *cb,
 		int sep1, int sep2)
 {
+	if (sep1 != (char)sep1)
+		return -EINVAL;
+	if (sep2 != (char)sep2 && sep2 != IO_SRC_SEP_NO_SEP2)
+		return -EINVAL;
+
 	if (NULL == sep_src || NULL == cb || -1 == fd)
 		return -EINVAL;
 
 	memset(sep_src, 0, sizeof(*sep_src));
 
 	sep_src->cb = cb;
-	sep_src->sep1 = sep1;
-	sep_src->sep2 = sep2;
+	/*
+	 * both the two following casts are ok because the values have been
+	 * tested to be in range at the begining of the function
+	 */
+	sep_src->sep1 = (char)sep1;
 	sep_src->two_bytes = IO_SRC_SEP_NO_SEP2 != sep2;
+	sep_src->sep2 = (char)(sep_src->two_bytes ? sep2 : '\0');
 
 	/* can fail only on parameters */
 	return io_src_init(&(sep_src->src), fd, IO_IN, sep_cb);
