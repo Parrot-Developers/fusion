@@ -318,10 +318,9 @@ int pidwatch_wait(int pidfd, int *status)
 			.iov_len = sizeof(buf),
 		},
 	};
-	struct sockaddr_nl addr;
 	struct msghdr msghdr = {
-		.msg_name = &addr,
-		.msg_namelen = sizeof(addr),
+		.msg_name = NULL,
+		.msg_namelen = 0,
 		.msg_iov = iov,
 		.msg_iovlen = 1,
 		.msg_control = NULL,
