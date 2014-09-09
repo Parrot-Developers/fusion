@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <inttypes.h>
 
 #include <CUnit/Basic.h>
 
@@ -126,7 +127,7 @@ static pid_t __attribute__((sentinel)) launch(const char *prog, ...)
 		/* in child */
 		fprintf(stderr, "Executing ");
 		dump_args(child_argc, child_argv);
-		fprintf(stderr, "\n");
+		fprintf(stderr, " (%jd)\n", (intmax_t)getpid());
 		ret = execvp(child_argv[0], child_argv);
 		if (-1 == ret) {
 			perror("execve");
