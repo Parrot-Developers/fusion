@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 #include <errno.h>
 #include <inttypes.h>
@@ -215,6 +216,119 @@ static void testPIDWATCH_WAIT(void)
 	close(pidfd);
 }
 
+static const char *get_process_name(pid_t pid)
+{
+	FILE *fp;
+	static char buf[80];
+	char *nl, *ret = "";
+
+	snprintf(buf, sizeof(buf), "/proc/%d/comm", pid);
+	fp = fopen(buf, "r");
+	if (fp) {
+		ret = fgets(buf, sizeof(buf), fp);
+		/* clobber newline character */
+		nl = ret ? strchr(ret, '\n') : NULL;
+		if (nl)
+			*nl = '\0';
+		fclose(fp);
+	}
+	return ret;
+}
+
+static bool testPIDWATCH_WAIT_145990_loop(void)
+{
+	pid_t pid;
+	pid_t pid_ret;
+	int pidfd;
+	int status;
+	int wstatus;
+	int ret;
+	int reaped = false;
+	bool quit = false;
+
+	/* initialization */
+	pidfd = E(int, pidwatch_create(SOCK_CLOEXEC));
+	CU_ASSERT_NOT_EQUAL(pidfd, -1);
+
+	/* normal cases */
+	/* normal termination */
+	pid = E(pid_t, launch("usleep", "10000", NULL));
+	CU_ASSERT_NOT_EQUAL(pid, -1);
+	ret = E(int, pidwatch_set_pid(pidfd, pid));
+	CU_ASSERT_NOT_EQUAL(ret, -1);
+	while (!reaped) {
+		pid_ret = E(pid_t, pidwatch_wait(pidfd, &status));
+		CU_ASSERT_NOT_EQUAL(pid_ret, -1);
+		CU_ASSERT_EQUAL(pid_ret, pid);
+		if (pid_ret != pid) {
+			fprintf(stderr, "pid_ret = %jd, pid = %jd\n",
+					(intmax_t)pid_ret, (intmax_t)(pid));
+			fprintf(stderr, "process 1: %s\n", get_process_name(pid_ret));
+			fprintf(stderr, "process 2: %s\n", get_process_name(pid));
+			quit = true;
+		} else {
+			/* cleanup */
+			waitpid(pid, &wstatus, 0);
+			CU_ASSERT_EQUAL(status, wstatus);
+			reaped = true;
+		}
+	}
+
+	close(pidfd);
+
+	return quit;
+}
+
+static bool loop = true;
+
+static void sighandler(int tata)
+{
+	loop = false;
+}
+
+static pid_t start_fork_loop(void)
+{
+	pid_t pid;
+
+	signal(SIGUSR1, sighandler);
+	pid = fork();
+	if (0 == pid) {/* in child */
+		while (loop) {
+			pid = fork();
+			if (pid == 0) /* in grand child */
+				exit(0);
+			waitpid(pid, NULL, 0);
+		}
+		exit(0);
+	}
+
+	/* in parent */
+	return pid;
+}
+
+static void stop_fork_loop(pid_t pid)
+{
+	kill(pid, SIGUSR1);
+	waitpid(pid, NULL, 0);
+}
+
+static void testPIDWATCH_WAIT_145990(void)
+{
+	int count = 1000;
+	pid_t pid;
+
+	pid = start_fork_loop();
+	fprintf(stderr, "fork loop has pid (%jd)\n", (intmax_t)pid);
+
+	while (count--) {
+		fprintf(stderr, "************** turn %d\n", 1000 - count);
+		if (testPIDWATCH_WAIT_145990_loop())
+			break;
+	}
+
+	stop_fork_loop(pid);
+}
+
 static void testPIDWATCH_SET_PID(void)
 {
 	pid_t pid;
@@ -319,6 +433,10 @@ static const struct test_t tests[] = {
 		{
 				.fn = testPIDWATCH_WAIT,
 				.name = "pidwatch_wait"
+		},
+		{
+				.fn = testPIDWATCH_WAIT_145990,
+				.name = "pidwatch_wait_145990"
 		},
 		{
 				.fn = testPIDWATCH_SET_PID,
