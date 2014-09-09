@@ -11,6 +11,7 @@
 #endif /* _GNU_SOURCE */
 #include <unistd.h>
 
+#include <signal.h>
 #include <errno.h>
 #include <stdarg.h>
 #include <string.h>
