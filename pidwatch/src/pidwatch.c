@@ -227,17 +227,22 @@ int pidwatch_create(int flags)
 	if (-1 == pidfd)
 		return -1;
 
-	ret = bind(pidfd, (struct sockaddr *)&addr, sizeof(addr));
-	if (-1 == ret)
-		goto err;
-
-	/* must filter before subscription (start of message stream) */
+	/*
+	 * must filter before binding. filtering only before sending the
+	 * subscription message isn't sufficient because messages are broadcast
+	 * when there is at least one receiver, to all the bound clients, event
+	 * those who haven't subscribed
+	 */
 	/*
 	 * monitor for init's death : quite unlikely...
-	 * by doing this, we avoid receiving messages until we knwo which
+	 * by doing this, we avoid receiving messages until we know which
 	 * process we want to monitor
 	 */
 	ret = install_filter(pidfd, 1);
+	if (-1 == ret)
+		goto err;
+
+	ret = bind(pidfd, (struct sockaddr *)&addr, sizeof(addr));
 	if (-1 == ret)
 		goto err;
 
