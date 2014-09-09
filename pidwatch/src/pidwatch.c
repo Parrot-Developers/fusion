@@ -116,22 +116,10 @@ struct __attribute__ ((__packed__)) cn_proc_msg {
 static int install_filter(int pidfd, pid_t pid)
 {
 	struct sock_filter filter[] = {
-		/* check only one message is contained */
+		/* check message's type is NLMSG_DONE */
 		BPF_STMT(BPF_LD | BPF_H | BPF_ABS,
 				offsetof(struct nlmsghdr, nlmsg_type)),
 		BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, htons(NLMSG_DONE), 1, 0),
-		BPF_STMT(BPF_RET|BPF_K, 0x0), /* message is dropped */
-
-		/* check message isn't an error */
-		BPF_STMT(BPF_LD | BPF_H | BPF_ABS,
-				offsetof(struct nlmsghdr, nlmsg_type)),
-		BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, htons(NLMSG_ERROR), 0, 1),
-		BPF_STMT(BPF_RET|BPF_K, 0x0), /* message is dropped */
-
-		/* check message isn't an no-op */
-		BPF_STMT(BPF_LD | BPF_H | BPF_ABS,
-				offsetof(struct nlmsghdr, nlmsg_type)),
-		BPF_JUMP(BPF_JMP|BPF_JEQ|BPF_K, htons(NLMSG_NOOP), 0, 1),
 		BPF_STMT(BPF_RET|BPF_K, 0x0), /* message is dropped */
 
 		/* check message comes from the kernel */
