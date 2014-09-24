@@ -19,6 +19,8 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
+
 /**
  * @struct rs_rb
  * @brief Ring buffer structure
@@ -30,13 +32,21 @@ struct rs_rb {
 	size_t len;		/** buffer length i.e. bytes stored in the rb */
 	size_t read;		/** read offset */
 	size_t write;		/** write offset */
+	bool mirror;		/** memory mirrored, plus base must be freed */
 };
 
 /**
- * Initializes a ring buffer, with a buffer and it's size
+ * Initializes a ring buffer, with a buffer and it's size.
  * @param rb Ring buffer to initialize
- * @param buffer Buffer used by the ring buffer
- * @param size Size of the buffer, must be a power of two
+ * @param buffer Buffer used by the ring buffer. If buffer is NULL, then
+ * rs_rb_init() will take care of the allocation. In this case, the memory
+ * allocated will be mapped twice in consecutive locations, so that read and
+ * write operations will not have to care about wrapping.
+ * @param size Size of the buffer, must be a power of two. If buffer is NULL,
+ * then size will be rounded to the next multiple of a page size, that is, the
+ * value returned by sysconf(_SC_PAGE_SIZE). Note that in this case, page_size
+ * must be still be a power of two, so in systems where it is not the case,
+ * the buffer parameter can't be NULL.
  * @return -1 on error, 0 otherwise
  */
 int rs_rb_init(struct rs_rb *rb, void *buffer, size_t size);

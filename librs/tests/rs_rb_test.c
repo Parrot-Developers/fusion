@@ -31,8 +31,6 @@ static void testRS_RB_INIT(void)
 	/* error use cases */
 	ret = rs_rb_init(NULL, buffer, 4);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
-	ret = rs_rb_init(&rb, NULL, 4);
-	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = rs_rb_init(&rb, buffer, 0);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	/* non power of two sizes aren't allowed */
