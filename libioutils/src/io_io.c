@@ -416,9 +416,8 @@ int io_io_init(struct io_io *io, struct io_mon *mon, const char *name,
 	io->log_rx = NULL;
 	io->log_tx = NULL;
 
-	/* create 2KB ring buffer for read */
-	ret = rs_rb_init(&io->readctx.rb, io->readctx.rb_buffer,
-			IO_IO_RB_BUFFER_SIZE);
+	/* create a magic ring buffer for reads, the size should be 4096 */
+	ret = rs_rb_init(&io->readctx.rb, NULL, IO_IO_RB_BUFFER_SIZE);
 	if (ret < 0)
 		return ret;
 
