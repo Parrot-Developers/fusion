@@ -55,7 +55,8 @@ struct io_src_tmr {
 };
 
 /**
- * Initializes a relative timer.
+ * Initializes a relative timer. Timer is disabled until the first call to
+ * io_src_tmr_set().
  * @param tmr Timer source to initialize
  * @param cb User callback, notified the timer expires
  * @return errno compatible negative value on error, 0 on success
@@ -68,7 +69,7 @@ int io_src_tmr_init(struct io_src_tmr *tmr, io_tmr_cb_t cb);
  * make it periodic.
  * @param tmr Timer source to arm
  * @param timeout Timeout of the timer IO_SRC_TMR_DISARM for timeout to disarm
- * in ms
+ * in milliseconds
  * @return errno compatible negative value on error, 0 on success
  */
 int io_src_tmr_set(struct io_src_tmr *tmr, int timeout);
