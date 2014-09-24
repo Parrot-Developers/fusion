@@ -85,7 +85,7 @@ int type##_match_##member(struct rs_node *__n, const void *__d) \
 int type##_match_str_##member(struct rs_node *__n, const void *__d) \
 { \
 	struct type *__o = rs_container_of(__n, struct type, node_member); \
-	if (NULL == __d) \
+	if (__d == NULL || __o->member == NULL) \
 		return 0; \
 	return 0 == strcmp(__o->member, (const char *)__d); \
 }
