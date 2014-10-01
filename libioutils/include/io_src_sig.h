@@ -11,6 +11,8 @@
 #define IO_SRC_SIG_H_
 #include <sys/signalfd.h>
 
+#include <signal.h>
+
 #include "io_src.h"
 
 #ifdef __cplusplus
