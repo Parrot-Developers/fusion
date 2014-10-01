@@ -22,7 +22,7 @@ LOCAL_SRC_FILES += $(call all-c-files-under,tests)
 LOCAL_LIBRARIES += libfautes
 endif
 
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_LIBRARY)
 
 ###############################################################################
 # tst-libioutils

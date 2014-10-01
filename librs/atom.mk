@@ -20,7 +20,7 @@ LOCAL_SRC_FILES += $(call all-c-files-under,tests)
 LOCAL_LIBRARIES := libfautes
 endif # TARGET_TEST
 
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_LIBRARY)
 
 ###############################################################################
 # tst-librs
