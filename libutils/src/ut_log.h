@@ -92,6 +92,6 @@ extern const char *ut_log_level_str[];
  * @def ut_inf
  * @brief logs a message at the info level
  */
-#define ut_info(fmt, ...) ut_log(UT_ERR, fmt, ##__VA_ARGS__)
+#define ut_info(fmt, ...) ut_log(UT_INFO, fmt, ##__VA_ARGS__)
 
 #endif /* UT_LOG_H_ */
