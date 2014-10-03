@@ -14,6 +14,7 @@
 
 struct suite_t *libutils_test_suites[] = {
 		&file_suite,
+		&module_suite,
 		&process_suite,
 		&string_suite,
 		NULL, /* NULL guard */
@@ -22,6 +23,7 @@ struct suite_t *libutils_test_suites[] = {
 static void libutils_pool_initializer(void)
 {
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(file_suite);
+	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(module_suite);
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(process_suite);
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(string_suite);
 }
