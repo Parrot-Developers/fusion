@@ -59,7 +59,7 @@ static void __attribute__ ((constructor)) ut_module_init(void)
 
 	ret = ut_file_to_string(MODPROBE_PROCFS, &loaded_modprobe_path);
 	if (ret < 0 || !ut_file_is_executable(loaded_modprobe_path))
-		ut_info("impossible to read "MODPROBE_PROCFS", defaulting to "
+		ut_info(MODPROBE_PROCFS" gave no usable result, defaulting to "
 				MODPROBE_DEFAULT_PATH);
 	else
 		modprobe_path = loaded_modprobe_path;
