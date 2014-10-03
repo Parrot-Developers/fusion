@@ -13,12 +13,14 @@
 #include "ut_fautes.h"
 
 struct suite_t *libutils_test_suites[] = {
+		&file_suite,
 		&string_suite,
 		NULL, /* NULL guard */
 };
 
 static void libutils_pool_initializer(void)
 {
+	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(file_suite);
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(string_suite);
 }
 
