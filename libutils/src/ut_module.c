@@ -191,6 +191,10 @@ int ut_modules_load(const struct ut_module *list)
 	while (list->name != NULL) {
 		if (ut_string_is_invalid(list->name))
 			return -EINVAL;
+		if (ut_module_is_loaded(list)) {
+			list++;
+			continue;
+		}
 
 		ret = ut_string_append(&module_list, " %s", list->name);
 		if (ret < 0) {
