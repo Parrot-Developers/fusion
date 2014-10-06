@@ -104,7 +104,7 @@ static void testUT_MODULE_IS_LOADED(void)
 			.name = "usbcore",
 	};
 	struct ut_module improbable_module = {
-			/* assume we'll always have usb */
+			/* assume this one won't ever exist */
 			.name = "ursule",
 	};
 	struct ut_module module;
@@ -145,6 +145,11 @@ static void testUT_MODULES_ARE_LOADED(void)
 	static const struct ut_module empty_list[1] = {};
 
 	nb_modules = read_modules_list(modules);
+	if (nb_modules == 0) {
+		fprintf(stderr, "\n* no module loaded on the system, tests for "
+				"ut_modules_are_loaded can't be ran *\n");
+		return;
+	}
 	list = calloc(nb_modules + 1, sizeof(*list));
 	CU_ASSERT_PTR_NOT_NULL_FATAL(list);
 	while (--nb_modules)
