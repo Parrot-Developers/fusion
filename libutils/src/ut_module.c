@@ -204,8 +204,9 @@ int ut_modules_load(const struct ut_module *list)
 		list++;
 	}
 
+	/* all the modules are already loaded or built-in */
 	if (module_list == NULL)
-		return -EINVAL;
+		return 0;
 
 	ret = ut_process_vsystem("%s -a %s", modprobe_path, module_list);
 	if (ret != 0) {

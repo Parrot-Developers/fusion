@@ -77,16 +77,18 @@ static void testUT_MODULES_LOAD(void)
 	int ret;
 	static struct ut_module list[2];
 
+	/* normal use cases */
 	/* TODO don't have any clue on how to test that... */
+	/* an empty list is ok */
+	list[0].name = NULL;
+	ret = ut_modules_load(list);
+	CU_ASSERT_EQUAL(ret, 0);
 
 	/* error use cases */
 	list[0].name = "improbable_module_name";
 	ret = ut_modules_load(list);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	list[0].name = "";
-	ret = ut_modules_load(list);
-	CU_ASSERT_NOT_EQUAL(ret, 0);
-	list[0].name = NULL;
 	ret = ut_modules_load(list);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = ut_modules_load(NULL);
