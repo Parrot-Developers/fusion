@@ -57,7 +57,9 @@ extern "C" {
  * Frees a string and pass the corresponding pointer to NULL, useful with
  * __attribute__((cleanup(...)))
  * @param str String to free
+ * @deprecated use ut_string_free from libutils
  */
+static void rs_str_free(char **str) __attribute__ ((deprecated));
 static inline void rs_str_free(char **str)
 {
 	if (NULL == str || NULL == *str)
@@ -70,7 +72,9 @@ static inline void rs_str_free(char **str)
 /**
  * Closes a file and sets it to NULL
  * @param file File to close
+ * @deprecated use ut_string_match_prefix from ut_file_close
  */
+static void rs_file_close(FILE **file) __attribute__ ((deprecated));
 static inline void rs_file_close(FILE **file)
 {
 	if (NULL == file || NULL == *file)
@@ -85,7 +89,10 @@ static inline void rs_file_close(FILE **file)
  * @param str String to test
  * @param prefix Prefix to match str with
  * @return non-zero if the string does match
+ * @deprecated use ut_string_match_prefix from libutils
  */
+static int rs_str_match_prefix(const char *str, const char *prefix)
+__attribute__ ((deprecated));
 static inline int rs_str_match_prefix(const char *str, const char *prefix)
 {
 	if (NULL == str || NULL == prefix)
@@ -98,7 +105,10 @@ static inline int rs_str_match_prefix(const char *str, const char *prefix)
  * Says if a string is invalid, i.e. if it is NULL or empty
  * @param str String to check the validity of
  * @return true if the string is NULL or empty, 0 otherwise
+ * @deprecated use ut_string_is_invalid from libutils
  */
+static bool rs_str_is_invalid(const char *str)
+__attribute__ ((deprecated));
 static inline bool rs_str_is_invalid(const char *str)
 {
 	return NULL == str || '\0' == *str;
@@ -107,7 +117,9 @@ static inline bool rs_str_is_invalid(const char *str)
 /**
  * Suppresses the white spaces from the right of a string
  * @param str String to right strip
+ * @deprecated use ut_string_rstrip from libutils
  */
+static inline void rs_str_rstrip(char *str) __attribute__ ((deprecated));
 static inline void rs_str_rstrip(char *str)
 {
 	size_t s;
