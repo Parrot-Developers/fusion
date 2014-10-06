@@ -46,8 +46,6 @@ int ut_file_to_string(const char *path, char **string);
 
 /**
  * Tests whether or not a path exists as a file and is executable
- * @note if the path is a link, even to a valid executable file, it will return
- * false
  * @param path Path to test
  * @return true iif the given path is executable
  */
