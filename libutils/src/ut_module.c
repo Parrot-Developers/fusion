@@ -58,8 +58,15 @@ static void __attribute__ ((constructor)) ut_module_init(void)
 	/* read the modprobe command line from /proc/sys/kernel/modprobe */
 
 	ret = ut_file_to_string(MODPROBE_PROCFS, &loaded_modprobe_path);
-	if (ret < 0 || !ut_file_is_executable(loaded_modprobe_path))
-		ut_info(MODPROBE_PROCFS" gave no usable result, defaulting to "
+	if (ret < 0 || ut_string_is_invalid(loaded_modprobe_path)) {
+		ut_info("could'nt read "MODPROBE_PROCFS" defaulting to "
+				MODPROBE_DEFAULT_PATH);
+		return;
+	}
+	ut_string_rstrip(loaded_modprobe_path);
+	if (!ut_file_is_executable(loaded_modprobe_path))
+		ut_info("the content of "MODPROBE_PROCFS" doesn't point to "
+				"valid executable 'modprobe', defaulting to "
 				MODPROBE_DEFAULT_PATH);
 	else
 		modprobe_path = loaded_modprobe_path;
