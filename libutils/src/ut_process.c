@@ -15,6 +15,7 @@
 
 #include "ut_string.h"
 #include "ut_process.h"
+#include "ut_log.h"
 
 int ut_process_vsystem(const char *fmt, ...)
 {
