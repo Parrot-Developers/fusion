@@ -54,7 +54,7 @@ static long get_file_size(FILE *f)
  * Read the content of a file, which reports a size of 0
  * @param f File to read
  * @param string in output, contains the content of the file
- * @return errvo compatible negative value on error, 0 on success
+ * @return errno compatible negative value on error, 0 on success
  */
 static int do_file_to_string_zero_size(FILE *f, char **string)
 {
