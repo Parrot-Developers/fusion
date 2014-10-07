@@ -129,7 +129,7 @@ static pid_t __attribute__((sentinel)) launch(const char *prog, ...)
 		fprintf(stderr, "Executing ");
 		dump_args(child_argc, child_argv);
 		fprintf(stderr, " (%jd)\n", (intmax_t)getpid());
-		ret = execvp(child_argv[0], child_argv);
+		ret = execvp(child_argv[0], (char * const*)child_argv);
 		if (-1 == ret) {
 			perror("execve");
 			exit(1);
