@@ -28,6 +28,8 @@
 #ifndef RS_DLL_H_
 #define RS_DLL_H_
 
+#include <ut_utils.h>
+
 #include <rs_node.h>
 
 #ifdef __cplusplus

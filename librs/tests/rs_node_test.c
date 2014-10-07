@@ -14,6 +14,8 @@
 
 #include <rs_node.h>
 
+#include <ut_utils.h>
+
 #include <fautes.h>
 #include <fautes_utils.h>
 
@@ -27,7 +29,7 @@ struct str_node {
 	const char *val;
 };
 
-#define to_int_node(p) rs_container_of(p, struct int_node, node)
+#define to_int_node(p) ut_container_of(p, struct int_node, node)
 
 static int int_node_test_equals(struct rs_node *node_a, void *int_node_b)
 {

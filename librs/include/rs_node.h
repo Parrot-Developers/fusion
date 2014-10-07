@@ -13,8 +13,6 @@
 
 #include <stddef.h>
 
-#include <rs_utils.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -60,7 +58,7 @@ typedef int (*rs_node_cb_t)(struct rs_node *node);
 #define RS_NODE_MATCH_MEMBER(type, member, node_member) \
 int type##_match_##member(struct rs_node *__n, const void *__d) \
 { \
-	struct type *__o = rs_container_of(__n, struct type, node_member); \
+	struct type *__o = ut_container_of(__n, struct type, node_member); \
 	const typeof(((struct type *)0)->member)*__v; \
 	 \
 	if (NULL == __d) \
@@ -84,7 +82,7 @@ int type##_match_##member(struct rs_node *__n, const void *__d) \
 #define RS_NODE_MATCH_STR_MEMBER(type, member, node_member) \
 int type##_match_str_##member(struct rs_node *__n, const void *__d) \
 { \
-	struct type *__o = rs_container_of(__n, struct type, node_member); \
+	struct type *__o = ut_container_of(__n, struct type, node_member); \
 	if (__d == NULL || __o->member == NULL) \
 		return 0; \
 	return 0 == strcmp(__o->member, (const char *)__d); \

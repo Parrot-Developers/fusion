@@ -17,7 +17,6 @@ struct suite_t *librs_test_suites[] = {
 		&hmap_suite,
 		&node_suite,
 		&rb_suite,
-		&utils_suite,
 		NULL, /* NULL guard */
 };
 
@@ -27,7 +26,6 @@ static void librs_pool_initializer(void)
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(hmap_suite);
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(node_suite);
 	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(rb_suite);
-	FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT(utils_suite);
 }
 
 struct pool_t fautes_pool = {

@@ -22,7 +22,7 @@ struct int_node {
 	int val;
 };
 
-#define to_int_node(p) rs_container_of(p, struct int_node, node)
+#define to_int_node(p) ut_container_of(p, struct int_node, node)
 
 static int dll_test_equals(struct rs_node *a, const struct rs_node *b)
 {

@@ -18,8 +18,9 @@
 #include <stdlib.h>
 #include <errno.h>
 
+#include <ut_string.h>
+
 #include "rs_hmap.h"
-#include "rs_utils.h"
 
 /**
  * @var hash_prime
@@ -121,7 +122,7 @@ int rs_hmap_lookup(struct rs_hmap *map, const char *key,
 	struct rs_hmap_entry *entry;
 	uint32_t hash;
 
-	if (map_is_invalid(map) || rs_str_is_invalid(key) || NULL == data)
+	if (map_is_invalid(map) || ut_string_is_invalid(key) || NULL == data)
 		return -EINVAL;
 
 	*data = NULL;
@@ -152,7 +153,7 @@ int rs_hmap_insert(struct rs_hmap *map, const char *key, void *data)
 	uint32_t hash;
 	struct rs_hmap_entry *entry;
 
-	if (map_is_invalid(map) || rs_str_is_invalid(key))
+	if (map_is_invalid(map) || ut_string_is_invalid(key))
 		return -EINVAL;
 
 	entry = calloc(1, sizeof(*entry));
@@ -190,7 +191,7 @@ int rs_hmap_remove(struct rs_hmap *map, const char *key,
 	struct rs_hmap_entry *entry, *prev = NULL;
 	uint32_t hash;
 
-	if (map_is_invalid(map)  || rs_str_is_invalid(key))
+	if (map_is_invalid(map)  || ut_string_is_invalid(key))
 		return -EINVAL;
 	if (NULL != data)
 		*data = NULL;
