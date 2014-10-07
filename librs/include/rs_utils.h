@@ -3,6 +3,8 @@
  * @date 14 mai 2013
  * @author nicolas.carrier@parrot.com
  * @brief Common utility functions
+ * @note all the content of this header is deprecated, one must use ut_utils,
+ * ut_string or ut_file from libutils
  *
  * Copyright (C) 2013 Parrot S.A.
  */
