@@ -9,6 +9,7 @@
 #ifndef UT_FILE_H_
 #define UT_FILE_H_
 #include <stdbool.h>
+#include <stdio.h>
 
 /**
  * Closes a file and sets it to NULL
