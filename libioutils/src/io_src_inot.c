@@ -19,16 +19,21 @@
 
 #include <search.h>
 
+#include <string.h>
+#include <stdlib.h>
 #include <assert.h>
 #include <errno.h>
 #include <limits.h>
 #include <inttypes.h>
 
+#include <ut_utils.h>
+#include <ut_string.h>
+#include <ut_file.h>
+
 #include "io_src_inot.h"
 #include "io_platform.h"
 #include "io_utils.h"
 
-#include "rs_utils.h"
 
 /**
  * @def IO_SRC_INVALID_WATCH_DESCRIPTOR
@@ -40,7 +45,7 @@
  * @def to_inot
  * @brief retrieve an inotify context knowing it's libioutils source
  */
-#define to_inot(s) rs_container_of((s), struct io_src_inot, src)
+#define to_inot(s) ut_container_of((s), struct io_src_inot, src)
 
 /**
  * @def to_inot_watch
@@ -65,7 +70,7 @@ static void inot_watch_delete(struct io_src_inot_watch **watch)
 	 * rm_watch, this field won't be modified. But when we allocate ourself
 	 * a watch (clone) we strdup() it and so we must free it
 	 */
-	rs_str_free((char **)&w->path);
+	ut_string_free((char **)&w->path);
 	memset(w, 0, sizeof(*w));
 	free(w);
 
@@ -297,7 +302,7 @@ static void inot_cb(struct io_src *src)
 	ssize_t sret;
 	int ret;
 	int toread;
-	char __attribute__((cleanup(rs_str_free)))*buf = NULL;
+	char __attribute__((cleanup(ut_string_free)))*buf = NULL;
 	size_t buf_size;
 
 	ret = ioctl(src->fd, FIONREAD, &toread);
@@ -367,7 +372,7 @@ err:
  */
 static bool watch_is_invalid(struct io_src_inot_watch *watch)
 {
-	return watch == NULL || rs_str_is_invalid(watch->path) ||
+	return watch == NULL || ut_string_is_invalid(watch->path) ||
 			watch->events == 0 || watch->cb == NULL;
 }
 
@@ -463,7 +468,7 @@ int io_src_inot_rm_watch(struct io_src_inot *inot,
 	int ret;
 	struct io_src_inot_watch *w;
 
-	if (inot == NULL || watch == NULL || rs_str_is_invalid(watch->path))
+	if (inot == NULL || watch == NULL || ut_string_is_invalid(watch->path))
 		return -EINVAL;
 
 	w = remove_watch(inot, watch->path);
@@ -490,7 +495,7 @@ void io_src_inot_clean(struct io_src_inot *inot)
 
 	clean_watches(inot);
 	io_src_clean(&inot->src);
-	io_close(&inot->src.fd);
+	ut_file_fd_close(&inot->src.fd);
 
 	memset(inot, 0, sizeof(*inot));
 }

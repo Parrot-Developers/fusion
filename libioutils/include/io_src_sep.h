@@ -12,10 +12,10 @@
 
 #ifndef IO_SRC_SEP_H_
 #define IO_SRC_SEP_H_
-
+#include <stdbool.h>
 #include <limits.h>
 
-#include <rs_utils.h>
+#include <ut_utils.h>
 
 #include <io_src.h>
 
@@ -91,7 +91,7 @@ struct io_src_sep {
  * @def to_src
  * @brief Convert a source to it's signal source container
  */
-#define to_src_sep(p) rs_container_of(p, struct io_src_sep, src)
+#define to_src_sep(p) ut_container_of(p, struct io_src_sep, src)
 
 /**
  * Initializes a separator source

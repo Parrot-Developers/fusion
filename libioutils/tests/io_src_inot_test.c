@@ -17,6 +17,8 @@
 
 #include <CUnit/Basic.h>
 
+#include <ut_utils.h>
+
 #include <io_mon.h>
 #include <io_src_inot.h>
 
@@ -179,7 +181,7 @@ static const uint32_t file_steps[] = {
 
 static uint32_t file_state = 0;
 
-#define STATE_FILE_DONE ((1 << RS_ARRAY_SIZE(file_steps)) - 1)
+#define STATE_FILE_DONE ((1 << UT_ARRAY_SIZE(file_steps)) - 1)
 
 static const uint32_t dir_steps[] = {
 		IN_CREATE,
@@ -193,7 +195,7 @@ static const uint32_t dir_steps[] = {
 
 static uint32_t dir_state = 0;
 
-#define STATE_DIR_DONE ((1 << RS_ARRAY_SIZE(dir_steps)) - 1)
+#define STATE_DIR_DONE ((1 << UT_ARRAY_SIZE(dir_steps)) - 1)
 
 struct main_ctx {
 	struct io_src_inot inot;
@@ -201,7 +203,7 @@ struct main_ctx {
 	struct io_src_inot_watch file_watch;
 };
 
-#define to_main_ctx(i) rs_container_of((i), struct main_ctx, inot)
+#define to_main_ctx(i) ut_container_of((i), struct main_ctx, inot)
 
 static void inot_cb(struct io_src_inot *inot, struct inotify_event *evt,
 		struct io_src_inot_watch *watch)
@@ -218,7 +220,7 @@ static void inot_cb(struct io_src_inot *inot, struct inotify_event *evt,
 		/* event concerning TEST_DIR */
 		state = &dir_state;
 		steps = dir_steps;
-		size = RS_ARRAY_SIZE(dir_steps);
+		size = UT_ARRAY_SIZE(dir_steps);
 		if (evt->mask == IN_DELETE) {
 			ret = io_src_inot_rm_watch(&ctx->inot, &ctx->dir_watch);
 			CU_ASSERT_EQUAL(ret, 0);
@@ -229,7 +231,7 @@ static void inot_cb(struct io_src_inot *inot, struct inotify_event *evt,
 		/* event concerning TEST_FILE */
 		state = &file_state;
 		steps = file_steps;
-		size = RS_ARRAY_SIZE(file_steps);
+		size = UT_ARRAY_SIZE(file_steps);
 	}
 
 	if (evt->len != 0)

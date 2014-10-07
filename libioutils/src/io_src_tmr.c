@@ -23,10 +23,12 @@
 #include <errno.h>
 #include <poll.h>
 
-#include <rs_utils.h>
+#include <ut_utils.h>
+#include <ut_file.h>
+
+#include <io_utils.h>
 
 #include "io_platform.h"
-#include "io_utils.h"
 #include "io_src_tmr.h"
 
 /* useful time ratio value */
@@ -37,7 +39,7 @@
  * @def to_tmr_src
  * @brief Convert a source to it's timer source container
  */
-#define to_tmr_src(p) rs_container_of(p, struct io_src_tmr, src)
+#define to_tmr_src(p) ut_container_of(p, struct io_src_tmr, src)
 
 /**
  * Read a value from a timer which has expired
@@ -105,7 +107,7 @@ void io_src_tmr_clean(struct io_src_tmr *tmr)
 		return;
 
 	tmr->cb = NULL;
-	io_close(&tmr->src.fd);
+	ut_file_fd_close(&tmr->src.fd);
 
 	io_src_clean(&tmr->src);
 }

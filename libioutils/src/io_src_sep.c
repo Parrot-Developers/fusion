@@ -17,9 +17,10 @@
 #include <string.h>
 #include <stdio.h>
 
+#include <io_utils.h>
+
 #include "io_mon.h"
 #include "io_src_sep.h"
-#include "io_utils.h"
 
 /**
  * @def buf_write_start

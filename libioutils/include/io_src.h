@@ -13,7 +13,7 @@
 
 #include <stddef.h>
 
-#include <rs_utils.h>
+#include <ut_utils.h>
 #include <rs_node.h>
 
 #ifdef __cplusplus
@@ -113,7 +113,7 @@ struct io_src {
  * @def to_src
  * @brief Convert a list node to it's container interface
  */
-#define to_src(p) rs_container_of(p, struct io_src, node)
+#define to_src(p) ut_container_of(p, struct io_src, node)
 
 /**
  * Initializes a source

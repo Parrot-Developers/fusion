@@ -19,12 +19,13 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include <rs_utils.h>
+#include <ut_utils.h>
+#include <ut_file.h>
 
 #include <io_mon.h>
+#include <io_utils.h>
 
 #include "io_platform.h"
-#include "io_utils.h"
 
 #define MONITOR_MAX_SOURCES 10
 
@@ -279,7 +280,7 @@ static int activate_source(struct io_mon *mon, struct io_src *src,
  */
 static void mon_cb(struct io_src *src)
 {
-	struct io_mon *mon = rs_container_of(src, struct io_mon, src);
+	struct io_mon *mon = ut_container_of(src, struct io_mon, src);
 
 	io_mon_process_events(mon);
 }
@@ -460,7 +461,7 @@ int io_mon_clean(struct io_mon *mon)
 	}
 
 	if (-1 != mon->epollfd)
-		io_close(&mon->epollfd);
+		ut_file_fd_close(&mon->epollfd);
 	memset(mon, 0, sizeof(*mon));
 	io_src_clean(&mon->src);
 	mon->epollfd = -1;

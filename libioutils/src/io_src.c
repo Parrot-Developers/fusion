@@ -13,8 +13,9 @@
 #include <errno.h>
 #include <string.h>
 
+#include <ut_file.h>
+
 #include <io_src.h>
-#include <io_utils.h>
 
 /**
  * Checks if the arguments of io_src_init are valid
@@ -77,7 +78,7 @@ int io_src_close_fd(struct io_src *src)
 	if (NULL == src || -1 == src->fd)
 		return -EINVAL;
 
-	ret = io_close(&src->fd);
+	ret = ut_file_fd_close(&src->fd);
 	if (-1 == ret)
 		return -errno;
 

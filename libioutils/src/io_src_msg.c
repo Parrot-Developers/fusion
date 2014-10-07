@@ -9,9 +9,10 @@
 #include <errno.h>
 #include <string.h>
 
+#include <io_utils.h>
+
 #include "io_mon.h"
 #include "io_src_msg.h"
-#include "io_utils.h"
 
 /**
  * Receives a message and notifies it to the client

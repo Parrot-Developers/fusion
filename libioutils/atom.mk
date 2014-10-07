@@ -14,7 +14,7 @@ LOCAL_EXPORT_C_INCLUDES  := $(LOCAL_PATH)/include
 
 LOCAL_SRC_FILES := $(call all-c-files-under,src)
 
-LOCAL_LIBRARIES := librs libpidwatch
+LOCAL_LIBRARIES := librs libpidwatch libutils
 
 ifdef TARGET_TEST
 LOCAL_SRC_FILES += $(call all-c-files-under,tests)

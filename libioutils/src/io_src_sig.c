@@ -16,18 +16,20 @@
 #include <stdarg.h>
 #include <string.h>
 
-#include <rs_utils.h>
+#include <ut_utils.h>
+#include <ut_file.h>
+
+#include <io_utils.h>
 
 #include "io_mon.h"
 #include "io_src_sig.h"
 #include "io_platform.h"
-#include "io_utils.h"
 
 /**
  * @def to_src
  * @brief Convert a source to it's signal source container
  */
-#define to_src_sig(p) rs_container_of(p, struct io_src_sig, src)
+#define to_src_sig(p) ut_container_of(p, struct io_src_sig, src)
 
 /**
  * Source callback, reads the signal and notifies the client
@@ -154,7 +156,7 @@ void io_src_sig_clean(struct io_src_sig *sig)
 	if (NULL == sig)
 		return;
 
-	io_close(&sig->src.fd);
+	ut_file_fd_close(&sig->src.fd);
 	/* restore gently the signal mask */
 	sigprocmask(SIG_SETMASK, &(sig->old_mask), NULL);
 	sigemptyset(&(sig->mask));

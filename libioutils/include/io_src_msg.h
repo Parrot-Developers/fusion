@@ -10,7 +10,8 @@
 #ifndef IO_SRC_MSG_H_
 #define IO_SRC_MSG_H_
 
-#include <rs_utils.h>
+#include <ut_utils.h>
+#include <ut_file.h>
 
 #include <io_src.h>
 
@@ -28,7 +29,7 @@ struct io_src_msg;
  * @def to_src_msg
  * @brief Convert a source to it's message source container
  */
-#define to_src_msg(p) rs_container_of(p, struct io_src_msg, src)
+#define to_src_msg(p) ut_container_of(p, struct io_src_msg, src)
 
 /**
  * @typedef io_src_msg_cb_t

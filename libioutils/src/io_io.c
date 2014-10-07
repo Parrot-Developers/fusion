@@ -25,8 +25,9 @@
 #include <fcntl.h>
 #include <ctype.h>
 
+#include <ut_string.h>
+
 #include <io_src_tmr.h>
-#include <io_utils.h>
 
 #include "io_io.h"
 
@@ -141,7 +142,7 @@ static int read_io(int fd, int ign_eof, void (*log_cb)(const char *),
  */
 static void read_src_cb(struct io_src *read_src)
 {
-	struct io_io *io = rs_container_of(read_src, struct io_io, src);
+	struct io_io *io = ut_container_of(read_src, struct io_io, src);
 	struct io_io_read_ctx *readctx = &io->readctx;
 	size_t length = 0;
 	void *buffer;
@@ -264,7 +265,7 @@ static void process_next_write(struct io_io *io)
 	first = rs_dll_pop(&ctx->buffers);
 	if (first) {
 		/* get next write buffer */
-		ctx->current = rs_container_of(first, struct io_io_write_buffer,
+		ctx->current = ut_container_of(first, struct io_io_write_buffer,
 				node);
 		/* add fd object in loop if not already done */
 		io_mon_activate_out_source(io->mon, io->write_src, 1);
@@ -286,9 +287,9 @@ static void process_next_write(struct io_io *io)
  */
 static void write_timer_cb(struct io_src_tmr *timer, uint64_t *nbexpired)
 {
-	struct io_io_write_ctx *ctx = rs_container_of(timer,
+	struct io_io_write_ctx *ctx = ut_container_of(timer,
 			struct io_io_write_ctx, timer);
-	struct io_io *io = rs_container_of(ctx, struct io_io, writectx);
+	struct io_io *io = ut_container_of(ctx, struct io_io, writectx);
 	struct io_io_write_buffer *buffer;
 
 	/* get current write buffer */
@@ -311,9 +312,9 @@ static void write_timer_cb(struct io_src_tmr *timer, uint64_t *nbexpired)
  */
 static void write_src_cb(struct io_src *src)
 {
-	struct io_io_write_ctx *writectx = rs_container_of(src,
+	struct io_io_write_ctx *writectx = ut_container_of(src,
 			struct io_io_write_ctx, src);
-	struct io_io *io = rs_container_of(writectx, struct io_io, writectx);
+	struct io_io *io = ut_container_of(writectx, struct io_io, writectx);
 	struct io_io_write_buffer *buffer;
 	enum io_io_write_status status;
 	size_t length = 0;
@@ -386,7 +387,7 @@ static void default_write_cb(struct io_io_write_buffer *buffer,
  */
 static void duplex_src_cb(struct io_src *src)
 {
-	struct io_io *io = rs_container_of(src, struct io_io, src);
+	struct io_io *io = ut_container_of(src, struct io_io, src);
 
 	/* TODO errors ? */
 
@@ -404,7 +405,7 @@ int io_io_init(struct io_io *io, struct io_mon *mon, const char *name,
 	int duplex = fd_in == fd_out;
 	enum io_src_event source_type = duplex ? IO_DUPLEX : IO_IN;
 
-	if (NULL == io || NULL == mon || rs_str_is_invalid(name))
+	if (NULL == io || NULL == mon || ut_string_is_invalid(name))
 		return -EINVAL;
 
 	if (fd_in < 0 || fd_out < 0)
@@ -629,7 +630,7 @@ int io_io_write_abort(struct io_io *io)
 	}
 
 	while ((node = rs_dll_pop(&ctx->buffers))) {
-		buffer = rs_container_of(node, struct io_io_write_buffer, node);
+		buffer = ut_container_of(node, struct io_io_write_buffer, node);
 		(*buffer->cb)(buffer, IO_IO_WRITE_ABORTED);
 	}
 

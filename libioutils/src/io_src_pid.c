@@ -16,10 +16,10 @@
 
 #include <pidwatch.h>
 
-#include <rs_utils.h>
+#include <ut_utils.h>
+#include <ut_file.h>
 
 #include "io_platform.h"
-#include "io_utils.h"
 #include "io_mon.h"
 #include "io_src_pid.h"
 
@@ -27,7 +27,7 @@
  * @def to_src
  * @brief Convert a source to it's pid source container
  */
-#define to_src_pid(p) rs_container_of(p, struct io_src_pid, src)
+#define to_src_pid(p) ut_container_of(p, struct io_src_pid, src)
 
 /**
  * Source callback, reads the pidwatch event and notifies the client
@@ -100,7 +100,7 @@ void io_src_pid_clean(struct io_src_pid *pid)
 	pid->pid = 0;
 	pid->status = 0;
 	pid->cb = NULL;
-	io_close(&pid->src.fd);
+	ut_file_fd_close(&pid->src.fd);
 
 	io_src_clean(&(pid->src));
 }

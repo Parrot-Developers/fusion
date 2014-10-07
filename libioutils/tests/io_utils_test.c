@@ -13,6 +13,8 @@
 
 #include <fautes.h>
 
+#include <ut_file.h>
+
 #include <io_platform.h>
 
 #include "io_utils.h"
@@ -36,7 +38,7 @@ static void testSET_NON_BLOCKING(void)
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 
 	/* cleanup */
-	io_close(&fd);
+	ut_file_fd_close(&fd);
 }
 
 static const struct test_t tests[] = {

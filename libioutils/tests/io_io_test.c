@@ -7,15 +7,17 @@
  * Copyright (C) 2013 Parrot S.A.
  */
 #include <sys/socket.h>
+#include <unistd.h>
 
 #include <CUnit/Basic.h>
 
 #include <fautes.h>
 #include <fautes_utils.h>
 
+#include <ut_file.h>
+
 #include <io_mon.h>
 #include <io_io.h>
-#include <io_utils.h>
 
 #define SUITE_NAME "io_suite"
 
@@ -63,8 +65,8 @@ static void testIO_INIT(void)
 
 	/* cleanup */
 	io_io_clean(&io);
-	io_close(sockets + 0);
-	io_close(sockets + 1);
+	ut_file_fd_close(sockets + 0);
+	ut_file_fd_close(sockets + 1);
 	io_mon_clean(&mon);
 }
 
@@ -94,8 +96,8 @@ static void testIO_CLEAN(void)
 
 	/* cleanup */
 	io_mon_clean(&mon);
-	io_close(sockets + 0);
-	io_close(sockets + 1);
+	ut_file_fd_close(sockets + 0);
+	ut_file_fd_close(sockets + 1);
 }
 
 static int dummy_io_cb(struct io_io *io, struct rs_rb *rb, void *data)
@@ -134,8 +136,8 @@ static void testIO_READ_START(void)
 	/* cleanup */
 	io_io_clean(&io);
 	io_mon_clean(&mon);
-	io_close(sockets + 0);
-	io_close(sockets + 1);
+	ut_file_fd_close(sockets + 0);
+	ut_file_fd_close(sockets + 1);
 }
 
 static void testIO_LOG_RX(void)
@@ -167,8 +169,8 @@ static void testIO_LOG_RX(void)
 	/* cleanup */
 	io_io_clean(&io);
 	io_mon_clean(&mon);
-	io_close(sockets + 0);
-	io_close(sockets + 1);
+	ut_file_fd_close(sockets + 0);
+	ut_file_fd_close(sockets + 1);
 }
 
 static void testIO_LOG_TX(void)
@@ -200,8 +202,8 @@ static void testIO_LOG_TX(void)
 	/* cleanup */
 	io_io_clean(&io);
 	io_mon_clean(&mon);
-	io_close(sockets + 0);
-	io_close(sockets + 1);
+	ut_file_fd_close(sockets + 0);
+	ut_file_fd_close(sockets + 1);
 }
 
 static void testIO_READ_STOP(void)
@@ -234,8 +236,8 @@ static void testIO_READ_STOP(void)
 	/* cleanup */
 	io_io_clean(&io);
 	io_mon_clean(&mon);
-	io_close(sockets + 0);
-	io_close(sockets + 1);
+	ut_file_fd_close(sockets + 0);
+	ut_file_fd_close(sockets + 1);
 }
 
 static void testIO_IS_READ_STARTED(void)
@@ -270,8 +272,8 @@ static void testIO_IS_READ_STARTED(void)
 
 	/* cleanup */
 	io_mon_clean(&mon);
-	io_close(sockets + 0);
-	io_close(sockets + 1);
+	ut_file_fd_close(sockets + 0);
+	ut_file_fd_close(sockets + 1);
 }
 
 static void testIO_HAS_READ_ERROR(void)
@@ -301,8 +303,8 @@ static void testIO_HAS_READ_ERROR(void)
 	/* cleanup */
 	io_io_clean(&io);
 	io_mon_clean(&mon);
-	io_close(sockets + 0);
-	io_close(sockets + 1);
+	ut_file_fd_close(sockets + 0);
+	ut_file_fd_close(sockets + 1);
 }
 
 static void dummy_write_cb(struct io_io_write_buffer *buffer,
@@ -351,8 +353,8 @@ static void testIO_WRITE_ADD(void)
 	/* cleanup */
 	io_io_clean(&io);
 	io_mon_clean(&mon);
-	io_close(sockets + 0);
-	io_close(sockets + 1);
+	ut_file_fd_close(sockets + 0);
+	ut_file_fd_close(sockets + 1);
 #undef MSG
 }
 
@@ -399,8 +401,8 @@ static void testIO_ABORT(void)
 	/* cleanup */
 	io_io_clean(&io);
 	io_mon_clean(&mon);
-	io_close(sockets + 0);
-	io_close(sockets + 1);
+	ut_file_fd_close(sockets + 0);
+	ut_file_fd_close(sockets + 1);
 #undef MSG
 }
 
@@ -575,8 +577,8 @@ out:
 	io_src_clean(&sock_src);
 	io_io_clean(io);
 	io_mon_clean(&mon);
-	io_close(sockets + 0);
-	io_close(sockets + 1);
+	ut_file_fd_close(sockets + 0);
+	ut_file_fd_close(sockets + 1);
 }
 
 static void testIO_WRITE_BUFFER_INIT(void)

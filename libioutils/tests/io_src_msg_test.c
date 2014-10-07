@@ -17,11 +17,10 @@
 
 #include <CUnit/Basic.h>
 
-#include <rs_utils.h>
+#include <ut_utils.h>
 
 #include <io_mon.h>
 #include <io_src_msg.h>
-#include <io_utils.h>
 
 #include <fautes.h>
 #include <fautes_utils.h>
@@ -43,12 +42,12 @@ struct my_msg_src {
 	int pipefds[2];
 };
 
-#define to_src_my_msg_src(p) rs_container_of(p, struct my_msg_src, msg_src)
+#define to_src_my_msg_src(p) ut_container_of(p, struct my_msg_src, msg_src)
 
 static void my_msg_src_clean(struct my_msg_src *my_src)
 {
-	io_close(&my_src->pipefds[0]);
-	io_close(&my_src->pipefds[1]);
+	ut_file_fd_close(&my_src->pipefds[0]);
+	ut_file_fd_close(&my_src->pipefds[1]);
 
 	memset(&(my_src->msg), 0, sizeof(my_src->msg));
 

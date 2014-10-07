@@ -13,7 +13,7 @@
 
 #include <errno.h>
 
-#include <io_utils.h>
+#include <ut_file.h>
 
 /*
  * note, syscall numbers are extracted from arch/arm/include/asm/unistd.h in the
@@ -57,7 +57,7 @@ int io_signalfd(int fd, const sigset_t *mask, int flags)
 			if (0 > ret) {
 				/* free fd only if allocated by us */
 				if (-1 == fd)
-					io_close(&new_fd);
+					ut_file_fd_close(&new_fd);
 				return -errno;
 			}
 		}
@@ -66,7 +66,7 @@ int io_signalfd(int fd, const sigset_t *mask, int flags)
 			if (0 > ret) {
 				/* free fd only if allocated by us */
 				if (-1 == fd)
-					io_close(&new_fd);
+					ut_file_fd_close(&new_fd);
 				return -errno;
 			}
 		}
