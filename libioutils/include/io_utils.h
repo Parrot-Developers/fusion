@@ -86,7 +86,7 @@ int io_set_non_blocking(int fd);
  * @param fd pointer to the file descriptor to close
  * @return 0 on success, -1 on error with errno set. On error, fd is left
  * untouched
- * @deprecated use ut_fd_close from libutils
+ * @deprecated use ut_file_fd_close from libutils
  */
 int io_close(int *fd) __attribute__ ((deprecated));
 
