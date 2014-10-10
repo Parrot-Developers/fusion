@@ -28,6 +28,12 @@ then
 	exit 1
 fi
 
+if [ "$1" = "--help" ]; then
+	usage 0
+fi
+
+type=$1
+
 # update version numbers where necessary
 
 # find the next tag name
@@ -62,20 +68,27 @@ then
 fi
 
 # we have found the last tag ${tag}, we have to split it now and create the new
-# one
-tag_prefix=${tag%[0-9]*-lib}
-revision=${tag##${project_name}-[0-9]*\.[0-9]*\.}
-revision=${revision%%-lib}
+# version number and the new tag
+version=${tag##${project_name}-}
+revision=${version##[0-9]*\.[0-9]*\.}
+major=${version%%\.[0-9]*}
+minor=${version##${major}\.}
+minor=${minor%%\.${revision}}
 
-revision=$((${revision} + 1))
+if [ "${type}" = "revision" ]; then
+	revision=$((${revision} + 1))
+elif [ "${type}" = "minor" ]; then
+	minor=$((${minor} + 1))
+	revision=0
+elif [ "${type}" = "major" ]; then
+	major=$((${major} + 1))
+	minor=0
+	revision=0
+fi
 
-new_tag=${tag_prefix}${revision}-lib
+new_version=${major}.${minor}.${revision}
 
-# update the version, where it is written in source files, makefiles and doc
-version_prefix=${tag_prefix##${project_name}-}
-major=${version_prefix%%\.[0-9]*\.}
-minor=${version_prefix%%\.}
-minor=${minor##[0-9]*\.}
+new_tag=${project_name}-${new_version}
 
 # then tag, with annotation
 message="$(~/workspace/release/release_note.py ${project_path} ${new_tag} ${current_branch})"
