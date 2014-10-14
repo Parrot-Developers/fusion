@@ -316,10 +316,11 @@ bool ut_modules_contains(const struct ut_module *list, const char *name)
 
 bool ut_module_bindings_are_valid(const struct ut_module *module)
 {
-	const struct ut_module_binding *binding = module->bindings;
+	const struct ut_module_binding *binding;
 
 	if (module == NULL)
 		return false;
+	binding = module->bindings;
 
 	while (binding->gen_filters[0] != NULL)
 		if (!binding_is_valid(binding))
