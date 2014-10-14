@@ -206,7 +206,7 @@ bool ut_file_is_executable(const char *path)
 	if (ut_string_is_invalid(path))
 		return false;
 
-	memset(&st, 0, sizeof(&st));
+	memset(&st, 0, sizeof(st));
 	ret = stat(path, &st);
 	if (ret == -1)
 		return false;
