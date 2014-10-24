@@ -112,7 +112,7 @@ int rs_dll_enqueue(struct rs_dll *dll, struct rs_node *node)
 int rs_dll_insert_sorted(struct rs_dll *dll, struct rs_node *node)
 {
 	struct rs_node *a = node;
-	struct rs_node *b; /* cursor for walkthrough */
+	struct rs_node *b = NULL; /* cursor for walkthrough */
 
 	if (NULL == dll || NULL == node)
 		return -EINVAL;
@@ -123,7 +123,7 @@ int rs_dll_insert_sorted(struct rs_dll *dll, struct rs_node *node)
 	if (rs_dll_is_empty(dll))
 		return rs_dll_push(dll, node);
 
-	while ((b = rs_dll_next(dll)))
+	while ((b = rs_dll_next_from(dll, b)))
 		if (dll->vtable.compare(a, b) < 0) { /* a < b */
 			/* insert as new head */
 			if (b == dll->head)

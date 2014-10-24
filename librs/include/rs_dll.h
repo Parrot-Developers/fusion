@@ -167,12 +167,13 @@ struct rs_node *rs_dll_pop(struct rs_dll *dll);
 /**
  * When NULL is returned, the internal cursor is rewinded so that the next call
  * will return the first element of the list
- * @note one should rather use rs_dll_next_from() which doesn't relies on
+ * @deprecated one should rather use rs_dll_next_from() which doesn't relies on
  * an inner state (the cursor). Among others, one benefit is that there is no
  * need to rewind after a partial walk through
  * @param dll Doubly linked list
  * @return Next element of the list, NULL if none
  */
+__attribute__((deprecated("use rs_dll_next_from(), not of _next()/_rewind()")))
 struct rs_node *rs_dll_next(struct rs_dll *dll);
 
 /**
@@ -195,6 +196,9 @@ struct rs_node *rs_dll_next_from(const struct rs_dll *dll,
 /**
  * Rewinds the doubly linked list, so that the next call to rs_dll_next will
  * return it's first element
+ * @deprecated one should rather use rs_dll_next_from() which doesn't relies on
+ * an inner state (the cursor). Among others, one benefit is that there is no
+ * need to rewind after a partial walk through
  * @param dll Doubly linked list
  * @return Negative errno compatible value on error otherwise zero
  */
