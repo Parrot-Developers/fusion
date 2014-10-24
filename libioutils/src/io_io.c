@@ -242,7 +242,8 @@ static int write_io(int fd, void (*log_cb)(const char *), const char *name,
 	/* log data written */
 	if (NULL != log_cb)
 		io_log_raw(log_cb, __func__, buffer, *length,
-				"%s read fd=%d length=%d", name, fd, *length);
+				"%s written fd=%d length=%d", name, fd,
+				*length);
 
 
 	return ret;
