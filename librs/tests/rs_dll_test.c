@@ -226,13 +226,14 @@ static void testRS_DLL_INSERT_SORTED(void)
 	CU_ASSERT_EQUAL(rs_dll_get_count(&dll), 4);
 
 	/* check the list is really well ordered */
-	node = rs_dll_next(&dll);
+	node = NULL;
+	node = rs_dll_next_from(&dll, node);
 	CU_ASSERT_EQUAL(to_int_node(node)->val, 0);
-	node = rs_dll_next(&dll);
+	node = rs_dll_next_from(&dll, node);
 	CU_ASSERT_EQUAL(to_int_node(node)->val, 1);
-	node = rs_dll_next(&dll);
+	node = rs_dll_next_from(&dll, node);
 	CU_ASSERT_EQUAL(to_int_node(node)->val, 2);
-	node = rs_dll_next(&dll);
+	node = rs_dll_next_from(&dll, node);
 	CU_ASSERT_EQUAL(to_int_node(node)->val, 3);
 
 	/* error use case */
@@ -576,23 +577,23 @@ static void testRS_DLL_REMOVE(void)
 	node = rs_dll_remove(&dll, &(int_node_needle.node));
 	CU_ASSERT_PTR_NOT_NULL_FATAL(node);
 
-	node = rs_dll_next(&dll);
+	node = rs_dll_next_from(&dll, NULL);
 	CU_ASSERT_EQUAL(to_int_node(node)->val, 666);
-	node = rs_dll_next(&dll);
+	node = rs_dll_next_from(&dll, node);
 	CU_ASSERT_EQUAL(to_int_node(node)->val, 17);
 
 	int_node_needle.val = 17;
 	node = rs_dll_remove(&dll, &(int_node_needle.node));
 	CU_ASSERT_PTR_NOT_NULL_FATAL(node);
 
-	node = rs_dll_next(&dll);
+	node = rs_dll_next_from(&dll, NULL);
 	CU_ASSERT_EQUAL(to_int_node(node)->val, 666);
 
 	int_node_needle.val = 666;
 	node = rs_dll_remove(&dll, &(int_node_needle.node));
 	CU_ASSERT_PTR_NOT_NULL_FATAL(node);
 
-	node = rs_dll_next(&dll);
+	node = rs_dll_next_from(&dll, NULL);
 	CU_ASSERT_PTR_NULL(node);
 
 	/* error use case */
