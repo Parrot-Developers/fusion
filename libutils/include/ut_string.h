@@ -37,12 +37,19 @@ int ut_string_append(char **str, const char *fmt, ...)
 
 /**
  * Says whether or not a string matches a given prefix
- * @param str String to test
- * @param prefix Prefix to match str with
+ * @param str String to test, can be NULL
+ * @param prefix Prefix to match str with, can be NULL
  * @return true if the string does match
  */
 bool ut_string_match_prefix(const char *str, const char *prefix);
 
+/**
+ * Says whether or not, two strings are identical or not
+ * @param str1 First string, can be NULL
+ * @param str2 Second string, can be NULL
+ * @return true if the strings are identical and not NULL does match
+ */
+bool ut_string_match(const char *str1, const char *str2);
 
 /**
  * Suppresses the white spaces from the right of a string

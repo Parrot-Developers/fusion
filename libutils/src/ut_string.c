@@ -63,9 +63,17 @@ int ut_string_append(char **str, const char *fmt, ...)
 bool ut_string_match_prefix(const char *str, const char *prefix)
 {
 	if (str == NULL || prefix == NULL)
-		return 0;
+		return false;
 
 	return strncmp(str, prefix, strlen(prefix)) == 0;
+}
+
+bool ut_string_match(const char *str1, const char *str2)
+{
+	if (str1 == NULL || str2 == NULL)
+		return false;
+
+	return strcmp(str1, str2) == 0;
 }
 
 char *ut_string_rstrip(char *str)
