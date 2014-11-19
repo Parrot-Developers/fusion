@@ -36,6 +36,14 @@
 #define UT_TO_LOWER(c) ((c) | UT_BIT(5))
 
 /**
+ * @def UT_TO_UPPER
+ * @brief unsets the fifth bit, that is, if the number is in the range
+ * ['a', 'z'],  put it in ['A', 'Z']
+ * @note doesn't check if c really is in ['a', 'z']
+ */
+#define UT_TO_UPPER(c) ((c) & ~UT_BIT(5))
+
+/**
  * @def UT_IS_AZ_LOWER
  * @brief checks if the number is in the ['a', 'z'] range
  */
