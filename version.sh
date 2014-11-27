@@ -37,7 +37,7 @@ type=$1
 # update version numbers where necessary
 
 # find the next tag name
-tag_pattern="[a-z0-9_]*-[0-9]*\.[0-9]*\.[0-9]*-lib"
+tag_pattern="fusion-[0-9]*\.[0-9]*\.[0-9]*"
 
 tag_list=$(git tag --list ${tag_pattern} | tac)
 
