@@ -10,6 +10,7 @@
 #ifndef UT_FAUTES_H_
 #define UT_FAUTES_H_
 
+extern struct suite_t bits_suite;
 extern struct suite_t file_suite;
 extern struct suite_t module_suite;
 extern struct suite_t process_suite;
