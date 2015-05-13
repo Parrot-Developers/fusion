@@ -46,6 +46,16 @@ long ut_file_get_file_size(const char *path);
 int ut_file_to_string(const char *path, char **string);
 
 /**
+ * Writes the content of a buffer to a file.
+ * @param buffer Buffer to write
+ * @param size Number of bytes from buffer, to write to the file
+ * @param path Path of the file to write into
+ * @return 0 on success, -EIO on write error, -errno code from fopen on any
+ * other error.
+ */
+int ut_file_write_buffer(const void *buffer, size_t size, const char *path);
+
+/**
  * Tests whether or not a path exists as a file and is executable
  * @param path Path to test
  * @return true iif the given path is executable

@@ -198,6 +198,20 @@ int ut_file_to_string(const char *path, char **string)
 	return do_file_to_string(f, string);
 }
 
+int ut_file_write_buffer(const void *buffer, size_t size, const char *path)
+{
+	size_t sret;
+	FILE __attribute__((cleanup(ut_file_close))) *file = NULL;
+
+	file = fopen(path, "wbe");
+	if (path == NULL)
+		return -errno;
+
+	sret = fwrite(buffer, size, 1, file);
+
+	return sret != 1 ? -EIO : 0;
+}
+
 bool ut_file_is_executable(const char *path)
 {
 	struct stat st;
