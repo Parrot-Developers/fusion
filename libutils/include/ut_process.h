@@ -19,4 +19,13 @@
 int ut_process_vsystem(const char *command, ...)
 __attribute__ ((format (printf, 1, 2)));
 
+/**
+ * Change the name of the current process. Useful for differentiating processes
+ * between a fork and an exec.
+ * @param fmt printf format string
+ * @return errno-compatible negative value on error, 0 on success
+ */
+__attribute__ ((format (printf, 1, 2)))
+int ut_process_change_name(const char *fmt, ...);
+
 #endif /* UT_PROCESS_H_ */

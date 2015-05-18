@@ -9,6 +9,8 @@
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif /* _GNU_SOURCE */
+#include <sys/prctl.h>
+
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -32,4 +34,24 @@ int ut_process_vsystem(const char *fmt, ...)
 	}
 
 	return system(cmd);
+}
+
+int ut_process_change_name(const char *fmt, ...)
+{
+	int ret;
+	char __attribute__((cleanup(ut_string_free))) *new_name = NULL;
+	va_list args;
+
+	va_start(args, fmt);
+	ret = vasprintf(&new_name, fmt, args);
+	va_end(args);
+	if (-1 == ret) {
+		new_name = NULL;
+		return -ENOMEM;
+	}
+	ret = prctl(PR_SET_NAME, (unsigned long)new_name, 0, 0, 0);
+	if (ret < 0)
+		return -errno;
+
+	return 0;
 }
