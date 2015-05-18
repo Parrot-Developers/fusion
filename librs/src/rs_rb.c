@@ -58,7 +58,12 @@ static int allocate_mirrored_buffer(struct rs_rb *rb, size_t size,
 
 int rs_rb_init(struct rs_rb *rb, void *buffer, size_t size)
 {
-	long page_size;
+	/*
+	 * this initialization is absurd, but it is to silence gcc which issues
+	 * a warning because it isn't smart enough to see that page_size is
+	 * initialized AND used iif rb->mirror is true
+	 */
+	long page_size = 0;
 
 	if (rb == NULL)
 		return -EINVAL;
