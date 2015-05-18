@@ -64,10 +64,8 @@ extern const char *ut_log_level_str[];
  * @brief base logging macro, for defining the level specific ones. Not to be
  * used directly
  */
-#define ut_log(lvl, fmt, ...) do { \
-	ut_log_wrap("[%s] %s: " fmt "\n", ut_log_level_str[lvl], __func__, \
-		##__VA_ARGS__); \
-} while (0)
+#define ut_log(lvl, fmt, ...) ut_log_wrap("[%s] %s: " fmt "\n",\
+		ut_log_level_str[lvl], __func__, ##__VA_ARGS__);
 
 /**
  * @def ut_crit

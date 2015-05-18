@@ -56,7 +56,7 @@ bool ut_string_match(const char *str1, const char *str2);
  * @param str String to right strip
  * @return str
  */
-char* ut_string_rstrip(char *str);
+char *ut_string_rstrip(char *str);
 
 /**
  * Suppresses the white spaces from the left of a string
