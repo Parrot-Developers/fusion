@@ -67,4 +67,29 @@
  */
 #define UT_IS_09_OR_AZ_NO_CASE(c) (UT_IS_09((c)) || UT_IS_AZ_NO_CASE((c)))
 
+#ifdef UT_BIT_FIELD_128_BIT
+typedef unsigned __int128 uint128_t;
+#define UT_BIT_FIELD_MAX 128
+typedef uint128_t ut_bit_field_t;
+#else /* UT_BIT_FIELD_128_BIT */
+#define UT_BIT_FIELD_MAX 64
+typedef uint64_t ut_bit_field_t;
+#endif /* UT_BIT_FIELD_128_BIT */
+
+#define INVALID_INDEX ((uint8_t)-1)
+
+/**
+ * Finds the first free index
+ * @return INVALID_INDEX if no free index is found, index claimed otherwise,
+ * between 0 and INDEX_MAX - 1 inclusive
+ */
+uint8_t claim_free_index(ut_bit_field_t *indices);
+
+/**
+ * Marks an index as reusable
+ * @param index index to release
+ * @return errno-compatible negative value on error, 0 on success
+ */
+int release_index(ut_bit_field_t *indices, uint8_t index);
+
 #endif /* UT_BITS_H_ */
