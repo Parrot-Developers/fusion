@@ -11,6 +11,9 @@
 #endif /* _GNU_SOURCE */
 #include <sys/prctl.h>
 
+#include <fcntl.h>              /* Obtain O_* constant definitions */
+#include <unistd.h>
+
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -18,6 +21,7 @@
 #include "ut_string.h"
 #include "ut_process.h"
 #include "ut_log.h"
+#include "ut_file.h"
 
 int ut_process_vsystem(const char *fmt, ...)
 {
@@ -54,4 +58,93 @@ int ut_process_change_name(const char *fmt, ...)
 		return -errno;
 
 	return 0;
+}
+
+int ut_process_sync_init(struct ut_process_sync *sync, bool cloexec)
+{
+	int ret;
+	int flags = cloexec ? O_CLOEXEC : 0;
+
+	if (sync == NULL)
+		return -EINVAL;
+
+	ret = pipe2(sync->pico, flags);
+	if (ret < 0) {
+		ret = -errno;
+		goto err;
+	}
+	ret = pipe2(sync->poci, flags);
+	if (ret < 0) {
+		ret = -errno;
+		goto err;
+	}
+
+	return 0;
+err:
+	ut_process_sync_clean(sync);
+
+	return ret;
+}
+
+int ut_process_sync_child_lock(struct ut_process_sync *sync)
+{
+	ssize_t sret;
+	char c;
+
+	if (sync == NULL)
+		return -EINVAL;
+
+	sret = TEMP_FAILURE_RETRY(read(sync->poci[0], &c, 1));
+
+	return sret == -1 ? -errno : 0;
+}
+
+int ut_process_sync_child_unlock(struct ut_process_sync *sync)
+{
+	ssize_t sret;
+	char c;
+
+	if (sync == NULL)
+		return -EINVAL;
+
+	sret = TEMP_FAILURE_RETRY(write(sync->pico[1], &c, 1));
+
+	return sret == -1 ? -errno : 0;
+}
+
+int ut_process_sync_parent_lock(struct ut_process_sync *sync)
+{
+	ssize_t sret;
+	char c;
+
+	if (sync == NULL)
+		return -EINVAL;
+
+	sret = TEMP_FAILURE_RETRY(read(sync->pico[0], &c, 1));
+
+	return sret == -1 ? -errno : 0;
+}
+
+int ut_process_sync_parent_unlock(struct ut_process_sync *sync)
+{
+	ssize_t sret;
+	char c;
+
+	if (sync == NULL)
+		return -EINVAL;
+
+	sret = TEMP_FAILURE_RETRY(write(sync->poci[1], &c, 1));
+
+	return sret == -1 ? -errno : 0;
+}
+
+void ut_process_sync_clean(struct ut_process_sync *sync)
+{
+	if (sync == NULL)
+		return;
+
+	ut_file_fd_close(sync->pico + 0);
+	ut_file_fd_close(sync->pico + 1);
+	ut_file_fd_close(sync->poci + 0);
+	ut_file_fd_close(sync->poci + 1);
 }
