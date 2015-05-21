@@ -60,6 +60,17 @@ int ut_process_change_name(const char *fmt, ...)
 	return 0;
 }
 
+char *ut_process_get_name(char name[17])
+{
+	int ret;
+
+	memset(name, 0, 17);
+	ret = prctl(PR_GET_NAME, (unsigned long)name, 0, 0, 0);
+	name[16] = 0;
+
+	return ret == 0 ? name : NULL;
+}
+
 int ut_process_sync_init(struct ut_process_sync *sync, bool cloexec)
 {
 	int ret;

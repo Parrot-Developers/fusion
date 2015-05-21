@@ -30,6 +30,14 @@ __attribute__ ((format (printf, 1, 2)))
 int ut_process_change_name(const char *fmt, ...);
 
 /**
+ * Gets the name of the current process
+ * @param name char buffer of at least 17 bytes
+ * @return name on success, NULL otherwise, with errno set as specified
+ * in prctl(PR_GET_NAME...)
+ */
+char *ut_process_get_name(char name[17]);
+
+/**
  * @struct ut_process_sync
  * @brief parent/child synchronization mechanism
  *
