@@ -8,6 +8,7 @@
  */
 #ifndef UT_PROCESS_H_
 #define UT_PROCESS_H_
+#include <stdbool.h>
 
 /**
  * Variadic version of the system() function
