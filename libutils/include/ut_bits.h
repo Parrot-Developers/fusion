@@ -8,6 +8,7 @@
  */
 #ifndef UT_BITS_H_
 #define UT_BITS_H_
+#include <stdint.h>
 
 /**
  * @def UT_LOW_NIBBLE
