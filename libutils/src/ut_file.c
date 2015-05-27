@@ -119,7 +119,7 @@ static int do_file_to_string(FILE *f, char **string)
 		return -errno;
 	}
 	sret = fread(*string, size, 1, f);
-	if (sret != 1) {
+	if (sret != 1 && ferror(f)) {
 		ret = -errno;
 		ut_string_free(string);
 		ut_err("fread error");
