@@ -40,6 +40,24 @@ int ut_process_vsystem(const char *fmt, ...)
 	return system(cmd);
 }
 
+FILE *ut_process_vpopen(const char *fmt, const char *type, ...)
+{
+	int ret = -1;
+	char __attribute__((cleanup(ut_string_free))) *cmd = NULL;
+	va_list args;
+
+	va_start(args, type);
+	ret = vasprintf(&cmd, fmt, args);
+	va_end(args);
+	if (-1 == ret) {
+		cmd = NULL;
+		errno = ENOMEM;
+		return NULL;
+	}
+
+	return popen(cmd, type);
+}
+
 int ut_process_change_name(const char *fmt, ...)
 {
 	int ret;

@@ -21,6 +21,18 @@ int ut_process_vsystem(const char *command, ...)
 __attribute__ ((format (printf, 1, 2)));
 
 /**
+ * Variadic version of the popen() function
+ * @see man popen
+ * @param command a-la-printf format for building the command-line.
+ * @param type
+ * @return NULL on error with errno set, otherwise FILE * object as popen would
+ * return. On error, errno is set to ENOMEM if the command allocation failed, or
+ * according to popen in other error cases.
+ */
+__attribute__ ((format (printf, 1, 3)))
+FILE *ut_process_vpopen(const char *command, const char *type, ...);
+
+/**
  * Change the name of the current process. Useful for differentiating processes
  * between a fork and an exec.
  * @param fmt printf format string
