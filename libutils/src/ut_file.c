@@ -192,7 +192,7 @@ int ut_file_to_string(const char *path, char **string)
 	f = fopen(path, "rbe");
 	if (f == NULL) {
 		ut_perr("fopen", errno);
-		return errno;
+		return -errno;
 	}
 
 	return do_file_to_string(f, string);
