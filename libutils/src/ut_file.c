@@ -212,7 +212,13 @@ int ut_file_write_buffer(const void *buffer, size_t size, const char *path)
 	return sret != 1 ? -EIO : 0;
 }
 
-bool ut_file_is_executable(const char *path)
+/**
+ * Perform access(2) like test on a file
+ * @param path path of the file to test
+ * @param how how flag passed to access
+ * @return true iif the test is successful
+ */
+static bool test_file(const char *path, int how)
 {
 	struct stat st;
 	int ret;
@@ -228,5 +234,15 @@ bool ut_file_is_executable(const char *path)
 	if (!S_ISREG(st.st_mode))
 		return false;
 
-	return access(path, X_OK) == 0;
+	return access(path, how) == 0;
+}
+
+bool ut_file_is_executable(const char *path)
+{
+	return test_file(path, X_OK);
+}
+
+bool ut_file_exists(const char *path)
+{
+	return test_file(path, F_OK);
 }
