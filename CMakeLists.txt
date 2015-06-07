@@ -10,4 +10,6 @@ set (CPACK_RESOURCE_FILE_LICENSE
 set (CPACK_PACKAGE_VERSION_MAJOR "0")
 set (CPACK_PACKAGE_VERSION_MINOR "3")
 set (CPACK_PACKAGE_VERSION_PATCH "2")
+set (CPACK_DEBIAN_PACKAGE_MAINTAINER
+    "Nicolas Carrier - carrier.nicolas0@gmail.com")
 include (CPack)
