@@ -5,8 +5,10 @@ include_directories(include)
 
 add_executable(pidwait example/pidwait.c)
 
-add_library(pidwatch src/pidwatch.c
-	include/pidwatch.h)
+add_library(pidwatch
+    SHARED
+    src/pidwatch.c
+    include/pidwatch.h)
 
 target_link_libraries(pidwait pidwatch)
 
