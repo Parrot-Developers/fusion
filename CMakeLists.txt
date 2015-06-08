@@ -5,6 +5,7 @@ include_directories(fautes/include)
 
 add_subdirectory(fautes)
 add_subdirectory(pidwatch)
+add_subdirectory(libutils)
 
 # build a CPack driven installer package
 include(InstallRequiredSystemLibraries)
