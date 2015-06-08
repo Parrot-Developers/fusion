@@ -1,8 +1,10 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 project(fusion)
 
-add_subdirectory(pidwatch)
+include_directories(fautes/include)
+
 add_subdirectory(fautes)
+add_subdirectory(pidwatch)
 
 # build a CPack driven installer package
 include(InstallRequiredSystemLibraries)

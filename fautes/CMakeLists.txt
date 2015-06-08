@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 project(fautes)
 include_directories(include)
 
@@ -10,7 +10,7 @@ add_library(libfautes
     lib/fautes_utils.c
     include/fautes.h
     include/fautes_utils.h)
-set_target_properties(libfautes PROPERTIES OUTPUT_NAME  fautes)
+set_target_properties(libfautes PROPERTIES OUTPUT_NAME fautes)
 install(TARGETS libfautes DESTINATION lib)
 install(FILES include/fautes.h DESTINATION include)
 install(FILES include/fautes_utils.h DESTINATION include)
