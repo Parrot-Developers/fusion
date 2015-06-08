@@ -3,11 +3,14 @@ project(fusion)
 
 include_directories(fautes/include)
 include_directories(libutils/include)
+include_directories(pidwatch/include)
+include_directories(librs/include)
 
 add_subdirectory(fautes)
 add_subdirectory(pidwatch)
 add_subdirectory(libutils)
 add_subdirectory(librs)
+add_subdirectory(libioutils)
 
 # build a CPack driven installer package
 include(InstallRequiredSystemLibraries)
