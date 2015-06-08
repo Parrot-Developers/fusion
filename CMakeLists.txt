@@ -2,10 +2,12 @@ cmake_minimum_required(VERSION 2.8)
 project(fusion)
 
 include_directories(fautes/include)
+include_directories(libutils/include)
 
 add_subdirectory(fautes)
 add_subdirectory(pidwatch)
 add_subdirectory(libutils)
+add_subdirectory(librs)
 
 # build a CPack driven installer package
 include(InstallRequiredSystemLibraries)
