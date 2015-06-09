@@ -1,5 +1,5 @@
 /**
- * @file tests_common.c
+ * @file fautes_utils.c
  * @date Mar 22, 2012
  * @author nicolas.carrier@parrot.com
  * @brief
@@ -8,21 +8,57 @@
  */
 
 #ifndef _GNU_SOURCE
-#define _GNU_SOURCE /* asprintf vasprintf */
+#define _GNU_SOURCE
 #endif
-
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/mman.h>
+
 #include <fcntl.h>
 #include <unistd.h>
-#include <sys/mman.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 #include <limits.h>
 
+#include <CUnit/Automated.h>
+#include <CUnit/Basic.h>
+
 #include <fautes_utils.h>
+
+/**
+ * Registers a test suite and all it's tests to the CUnit framework
+ * @param suite Suite of unit tests
+ * @return Error code of the first error to happen in either CU_add_suite
+ * or CU_add_test
+ */
+static CU_ErrorCode suite_register(struct suite_t *suite)
+{
+	CU_pSuite pSuite = NULL;
+	CU_pTest pTest = NULL;
+	const struct test_t *test = &(suite->tests[0]);
+
+	pSuite = CU_add_suite(suite->name, suite->init, suite->clean);
+	if (NULL == pSuite) {
+		CU_cleanup_registry();
+		fprintf(stderr, "CU_add_suite %s\n", CU_get_error_msg());
+		return CU_get_error();
+	}
+
+	/* add the tests to the suite */
+	do {
+		pTest = CU_add_test(pSuite, test->name, test->fn);
+		if (NULL == pTest) {
+			CU_cleanup_registry();
+			fprintf(stderr, "CU_add_test %s\n", CU_get_error_msg());
+			return CU_get_error();
+		}
+	} while ((++test)->fn);
+
+	return CUE_SUCCESS;
+}
 
 int read_from_output(char *buf, size_t size, const char *cmd)
 {
@@ -248,4 +284,51 @@ out:
 		close(fd);
 
 	return result;
+}
+
+int fautes_run_test_pool(struct pool_t *pool, bool xml)
+{
+	CU_ErrorCode cu_err = CUE_SUCCESS;
+	struct suite_t **suite;
+	int tests_failed = 0;
+
+	if (pool->initializer)
+		pool->initializer();
+
+	suite = pool->suites;
+
+	cu_err = CU_initialize_registry();
+	if (CUE_SUCCESS != cu_err) {
+		fprintf(stderr, "CU_initialize_registry %s\n",
+				CU_get_error_msg());
+		return -CU_get_error();
+	}
+
+	/* register all tests suites */
+	do {
+		if ((*suite)->active) {
+			cu_err = suite_register(*suite);
+			if (CUE_SUCCESS != cu_err) {
+				fprintf(stderr, "CU_initialize_registry %s\n",
+						CU_get_error_msg());
+				return -CU_get_error();
+			}
+		} else {
+			printf("WARNING suite %s inactive\n", (*suite)->name);
+		}
+	} while (*(++suite));
+
+	if (xml) {
+		CU_set_output_filename(pool->name);
+		CU_automated_run_tests();
+		CU_list_tests_to_file();
+	} else {
+		CU_basic_set_mode(CU_BRM_VERBOSE);
+		CU_basic_run_tests();
+	}
+	tests_failed += CU_get_number_of_tests_failed();
+
+	CU_cleanup_registry();
+
+	return tests_failed;
 }

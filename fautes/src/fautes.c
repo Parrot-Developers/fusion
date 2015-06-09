@@ -10,50 +10,13 @@
 #define _GNU_SOURCE
 #endif /* _GNU_SOURCE */
 
-#include <unistd.h>
-#include <signal.h>
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <dlfcn.h>
 
-#include <CUnit/Automated.h>
-#include <CUnit/Basic.h>
-
 #include <fautes.h>
-
-/**
- * Registers a test suite and all it's tests to the CUnit framework
- * @param suite Suite of unit tests
- * @return Error code of the first error to happen in either CU_add_suite
- * or CU_add_test
- */
-static CU_ErrorCode suite_register(struct suite_t *suite)
-{
-	CU_pSuite pSuite = NULL;
-	CU_pTest pTest = NULL;
-	const struct test_t *test = &(suite->tests[0]);
-
-	pSuite = CU_add_suite(suite->name, suite->init, suite->clean);
-	if (NULL == pSuite) {
-		CU_cleanup_registry();
-		fprintf(stderr, "CU_add_suite %s\n", CU_get_error_msg());
-		return CU_get_error();
-	}
-
-	/* add the tests to the suite */
-	do {
-		pTest = CU_add_test(pSuite, test->name, test->fn);
-		if (NULL == pTest) {
-			CU_cleanup_registry();
-			fprintf(stderr, "CU_add_test %s\n", CU_get_error_msg());
-			return CU_get_error();
-		}
-	} while ((++test)->fn);
-
-	return CUE_SUCCESS;
-}
+#include <fautes_utils.h>
 
 static void usage(char *progname)
 {
@@ -108,9 +71,6 @@ static struct pool_t *get_test_pool(const char *so_lib, void **lib_handle)
 		goto out;
 	}
 
-	if ((*res).initializer)
-		(*res).initializer();
-
 	printf("Found test suite %s for %s\n", res->name, so_lib);
 out:
 	if (NULL == res)
@@ -121,12 +81,12 @@ out:
 
 int main(int argc, char *argv[])
 {
+	// TODO use booleans
+	int ret;
 	int xml = 0;
-	CU_ErrorCode cu_err = CUE_SUCCESS;
-	struct suite_t **suite;
 	char **so_lib;
 	void *lib_handle;
-	unsigned tests_failed = 0;
+	int tests_failed = 0;
 	int failure;
 	struct pool_t *pool;
 
@@ -150,51 +110,13 @@ int main(int argc, char *argv[])
 					*so_lib);
 			continue;
 		}
-		suite = pool->suites;
-
-		/* TODO extract / split what follows */
-		/* initialize the CUnit test registry */
-		cu_err = CU_initialize_registry();
-		if (CUE_SUCCESS != cu_err) {
-			fprintf(stderr, "CU_initialize_registry %s\n",
-					CU_get_error_msg());
+		ret = fautes_run_test_pool(pool, xml);
+		if (ret < 0) {
 			dlclose(lib_handle);
-			return CU_get_error();
+			break;
 		}
-
-		/* register all tests suites */
-		do {
-			if ((*suite)->active) {
-				cu_err = suite_register(*suite);
-				if (CUE_SUCCESS != cu_err) {
-					fprintf(stderr,
-						"CU_initialize_registry %s\n",
-						CU_get_error_msg());
-					dlclose(lib_handle);
-					return CU_get_error();
-				}
-			} else {
-				printf("WARNING suite %s inactive\n",
-						(*suite)->name);
-			}
-		} while (*(++suite));
-
-		if (xml) {
-			/* Run all tests using the automated interface */
-			/* generates an xml output */
-			CU_set_output_filename(pool->name);
-			CU_automated_run_tests();
-			CU_list_tests_to_file();
-			tests_failed += CU_get_number_of_tests_failed();
-		} else {
-			/* Run all tests using the CUnit Basic interface */
-			/* results are echoed to standard output */
-			CU_basic_set_mode(CU_BRM_VERBOSE);
-			CU_basic_run_tests();
-			tests_failed += CU_get_number_of_tests_failed();
-		}
-
-		CU_cleanup_registry();
+		if (ret > 0)
+			tests_failed += ret;
 
 		dlclose(lib_handle);
 	} while (*(++so_lib));

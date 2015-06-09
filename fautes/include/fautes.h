@@ -14,8 +14,8 @@
 
 #ifndef FAUTES_H_
 #define FAUTES_H_
-
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include <CUnit/CUError.h>
 
@@ -97,6 +97,16 @@ struct pool_t {
 		__active_state = 0 != strcmp(__sas, "0"); \
 	suite.active = __active_state; \
 } while (0)
+
+/**
+ * Executes all the tests in a test pool.
+ * @param pool Tests pool to execute
+ * @param xml true if the result must be stored in an xml file, false if they
+ * must be written to standard output
+ * @return negative CUnit error code on error, the number of failed tests on
+ * success
+ */
+int fautes_run_test_pool(struct pool_t *pool, bool xml);
 
 #ifdef __cplusplus
 }
