@@ -73,6 +73,14 @@ int io_src_pid_init(struct io_src_pid *pid_src, io_pid_cb_t *cb);
 int io_src_pid_set_pid(struct io_src_pid *pid_src, pid_t pid);
 
 /**
+ * Returns the pid currently registered in the source
+ * @param pid_src Pid source
+ * @return pid of the process monitored, IO_SRC_PID_DISABLE with errno set
+ * suitably. In particular ESRCH if no pid is monitored.
+ */
+pid_t io_src_pid_get_pid(struct io_src_pid *pid_src);
+
+/**
  * Returns the underlying io_src of the pid source
  * @param pid Pid source
  * @return io_src of the pid source

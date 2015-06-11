@@ -92,6 +92,19 @@ int io_src_pid_set_pid(struct io_src_pid *pid_src, pid_t pid)
 	return 0;
 }
 
+pid_t io_src_pid_get_pid(struct io_src_pid *pid_src)
+{
+	if (pid_src == NULL) {
+		errno = EINVAL;
+		return IO_SRC_PID_DISABLE;
+	}
+
+	if (pid_src->pid)
+		errno = ESRCH;
+
+	return pid_src->pid;
+}
+
 void io_src_pid_clean(struct io_src_pid *pid)
 {
 	if (NULL == pid)
