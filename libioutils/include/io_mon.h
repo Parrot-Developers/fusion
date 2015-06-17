@@ -12,6 +12,8 @@
 #define IO_MONITOR_H_
 #include <sys/epoll.h>
 
+#include <stdbool.h>
+
 #include <io_src.h>
 
 #ifdef __cplusplus
@@ -84,6 +86,15 @@ int io_mon_add_source(struct io_mon *mon, struct io_src *src);
  */
 int io_mon_add_sources(struct io_mon *mon, ...)
 	__attribute__ ((sentinel(0)));
+
+/**
+ * Checks whether a source is registered in a given monitor.
+ * @param mon Monitor's context
+ * @param src Source to test for registration
+ * @return true if the source is registered and false if it isn't or on error.
+ * In this case, errno is set.
+ */
+bool io_mon_is_registered(struct io_mon *mon, struct io_src *src);
 
 /**
  * De-registers a source from the monitor

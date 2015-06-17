@@ -377,6 +377,17 @@ int io_mon_add_sources(struct io_mon *mon, ...)
 	return ret;
 }
 
+bool io_mon_is_registered(struct io_mon *mon, struct io_src *src)
+{
+	errno = 0;
+	if (mon == NULL || src == NULL) {
+		errno = EINVAL;
+		return false;
+	}
+
+	return find_source_by_fd(mon, src->fd) != NULL;
+}
+
 int io_mon_remove_source(struct io_mon *mon, struct io_src *src)
 {
 	if (NULL == mon || NULL == src)
