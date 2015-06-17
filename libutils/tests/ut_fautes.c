@@ -6,11 +6,16 @@
  *
  * Copyright (C) 2012 Parrot S.A.
  */
+#include <unistd.h>
+
 #include <stdlib.h>
 
 #include <fautes.h>
 
 #include "ut_fautes.h"
+
+/* set an interpreter section so that this lib can be run as an executable */
+const char ut_interp[] __attribute__((section(".interp"))) = FUSION_INTERPRETER;
 
 struct suite_t *libutils_test_suites[] = {
 		&bits_suite,
@@ -35,3 +40,12 @@ struct pool_t fautes_pool = {
 	.initializer = libutils_pool_initializer,
 	.suites = libutils_test_suites,
 };
+
+void libutils_tests(void)
+{
+	int ret;
+
+	ret = fautes_run_test_pool(&fautes_pool, false);
+
+	_exit(ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE);
+}
