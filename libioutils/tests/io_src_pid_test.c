@@ -103,7 +103,7 @@ static void testSRC_PID_INIT(void)
 	/* normal use cases */
 	ret = io_mon_init(&mon);
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
-	pid = launch("usleep", "10000", NULL);
+	pid = launch("sleep", ".01", NULL);
 	CU_ASSERT_NOT_EQUAL_FATAL(pid, -1);
 	ret = io_src_pid_init(&pid_src, cb);
 	CU_ASSERT_EQUAL(ret, 0);
@@ -173,7 +173,7 @@ static void testSRC_PID_SET_PID(void)
 	/* normal use cases */
 	ret = io_mon_init(&mon);
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
-	pid = launch("usleep", "10000", NULL);
+	pid = launch("sleep", ".01", NULL);
 	CU_ASSERT_NOT_EQUAL_FATAL(pid, -1);
 	ret = io_src_pid_init(&pid_src, cb);
 	CU_ASSERT_EQUAL(ret, 0);
@@ -212,7 +212,7 @@ static void testSRC_PID_SET_PID(void)
 
 	/* reuse the pid source */
 	process_dead = false;
-	pid = launch("usleep", "10000", NULL);
+	pid = launch("sleep", ".01", NULL);
 	CU_ASSERT_NOT_EQUAL_FATAL(pid, -1);
 	ret = io_src_pid_set_pid(&pid_src, pid);
 	CU_ASSERT_EQUAL(ret, 0);
