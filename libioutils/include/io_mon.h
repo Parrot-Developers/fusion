@@ -23,6 +23,8 @@ extern "C" {
  * @brief global monitor's context, handles the pool of sources and callbacks
  */
 struct io_mon {
+	/** source for simplifying the integration with another io_mon */
+	struct io_src src;
 	/** sources list for I/O operations */
 	/*
 	 * note the first node can't be a real source in order to guarantee that
@@ -32,8 +34,6 @@ struct io_mon {
 	struct rs_node source;
 	/** file descriptor for monitoring all the sources */
 	int epollfd;
-	/** source for simplifying the integration with another io_mon */
-	struct io_src src;
 };
 
 /**
