@@ -6,11 +6,17 @@
  *
  * Copyright (C) 2012 Parrot S.A.
  */
+#include <unistd.h>
+
 #include <stdlib.h>
 
 #include <fautes.h>
 
 #include "io_fautes.h"
+
+/* set an interpreter section so that this lib can be run as an executable */
+const char io_interp[] __attribute__((section(".interp"))) =
+		FUSION_INTERPRETER;
 
 struct suite_t *libioutils_test_suites[] = {
 		&io_suite,
@@ -48,3 +54,13 @@ struct pool_t fautes_pool = {
 	.initializer = libioutils_pool_initializer,
 	.suites = libioutils_test_suites,
 };
+
+void libioutils_tests(void)
+{
+	int ret;
+	fprintf(stderr, "HERE\n");
+
+	ret = fautes_run_test_pool(&fautes_pool, false);
+
+	_exit(ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE);
+}
