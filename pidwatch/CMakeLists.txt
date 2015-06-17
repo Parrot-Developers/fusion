@@ -21,6 +21,7 @@ if (${PIDWATCH_FAUTES_SUPPORT})
 endif(${PIDWATCH_FAUTES_SUPPORT})
 add_library(pidwatch SHARED ${LIBPIDWATCH_SOURCES})
 target_link_libraries(pidwatch ${LIBPIDWATCH_LINK_LIBRARIES})
+set_target_properties(pidwatch PROPERTIES LINK_FLAGS "-Wl,-e,libpidwatch_tests")
 install(TARGETS pidwatch DESTINATION lib)
 
 add_executable(pidwait example/pidwait.c)
