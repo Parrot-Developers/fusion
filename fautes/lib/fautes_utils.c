@@ -189,6 +189,19 @@ static void init_tests(void)
 			suite_cleanup_failure_message_handler);
 }
 
+/**
+ * Frees a string and sets it's pointer to NULL
+ * @param str String to free
+ */
+static void str_free(char **str)
+{
+	if (NULL == str || NULL == *str)
+		return;
+
+	free(*str);
+	*str = NULL;
+}
+
 int read_from_output(char *buf, size_t size, const char *cmd)
 {
 	FILE *f = NULL;
@@ -227,15 +240,6 @@ out:
 		pclose(f);
 
 	return ret;
-}
-
-static void str_free(char **str)
-{
-	if (NULL == str || NULL == *str)
-		return;
-
-	free(*str);
-	*str = NULL;
 }
 
 int vread_from_output(char *buf, size_t size, const char *fmt, ...)
