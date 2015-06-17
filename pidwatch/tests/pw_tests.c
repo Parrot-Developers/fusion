@@ -186,7 +186,7 @@ static void testPIDWATCH_WAIT(void)
 
 	/* normal cases */
 	/* normal termination */
-	pid = E(pid_t, launch("usleep", "10000", NULL));
+	pid = E(pid_t, launch("sleep", ".01", NULL));
 	CU_ASSERT_NOT_EQUAL(pid, -1);
 	ret = E(int, pidwatch_set_pid(pidfd, pid));
 	CU_ASSERT_NOT_EQUAL(ret, -1);
@@ -197,7 +197,7 @@ static void testPIDWATCH_WAIT(void)
 	CU_ASSERT_EQUAL(status, wstatus);
 
 	/* terminated by signal */
-	pid = E(pid_t, launch("usleep", "10000", NULL));
+	pid = E(pid_t, launch("sleep", ".01", NULL));
 	CU_ASSERT_NOT_EQUAL(pid, -1);
 	ret = E(int, pidwatch_set_pid(pidfd, pid));
 	CU_ASSERT_NOT_EQUAL(ret, -1);
@@ -252,7 +252,7 @@ static bool testPIDWATCH_WAIT_145990_loop(void)
 
 	/* normal cases */
 	/* normal termination */
-	pid = E(pid_t, launch("usleep", "10000", NULL));
+	pid = E(pid_t, launch("sleep", ".01", NULL));
 	CU_ASSERT_NOT_EQUAL(pid, -1);
 	ret = E(int, pidwatch_set_pid(pidfd, pid));
 	CU_ASSERT_NOT_EQUAL(ret, -1);
@@ -342,7 +342,7 @@ static void testPIDWATCH_SET_PID(void)
 	CU_ASSERT_NOT_EQUAL(pidfd, -1);
 
 	/* normal cases */
-	pid = E(pid_t, launch("usleep", "10000", NULL));
+	pid = E(pid_t, launch("sleep", ".01", NULL));
 	CU_ASSERT_NOT_EQUAL(pid, -1);
 	ret = E(int, pidwatch_set_pid(pidfd, pid));
 	CU_ASSERT_NOT_EQUAL(ret, -1);
@@ -351,7 +351,7 @@ static void testPIDWATCH_SET_PID(void)
 	waitpid(pid, &status, 0);
 
 	/* pidwatch can be reused to monitor an new process */
-	pid = E(pid_t, launch("usleep", "10000", NULL));
+	pid = E(pid_t, launch("sleep", ".01", NULL));
 	CU_ASSERT_NOT_EQUAL(pid, -1);
 	ret = E(int, pidwatch_set_pid(pidfd, pid));
 	CU_ASSERT_NOT_EQUAL(ret, -1);
