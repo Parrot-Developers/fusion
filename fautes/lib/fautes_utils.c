@@ -10,6 +10,8 @@
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
+#include <sys/time.h>
+#include <sys/resource.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
@@ -27,6 +29,18 @@
 #include <CUnit/Basic.h>
 
 #include <fautes_utils.h>
+
+/**
+ * @var running_suite
+ * @brief Current test suite being executed by cunit.
+ */
+static CU_pSuite running_suite = NULL;
+
+/**
+ * @var start_ru
+ * @brief rusage structure used to compute the CPU time used by the tests
+ */
+static struct rusage start_ru;
 
 /**
  * Registers a test suite and all it's tests to the CUnit framework
@@ -58,6 +72,121 @@ static CU_ErrorCode suite_register(struct suite_t *suite)
 	} while ((++test)->fn);
 
 	return CUE_SUCCESS;
+}
+
+/**
+ * Cunit test start handler, defines the current test suite if none and print
+ * it's name. Also print the current test's name
+ * @param test Test being started
+ * @param suite Suite which the test belongs to
+ */
+static void test_start_message_handler(const CU_pTest test,
+		const CU_pSuite suite)
+{
+	if (running_suite == NULL || running_suite != suite) {
+		printf("\nSuite: %s", suite->pName);
+		running_suite = suite;
+	}
+	printf("\n  Test: %s ...", test->pName);
+}
+
+/**
+ * Handler which displays a summary of the result of a test run
+ * @param test Test which has just finished running
+ * @param suite Suite which the test belongs to
+ * @param failure_list List of failed tests
+ */
+static void test_complete_message_handler(const CU_pTest test,
+		const CU_pSuite suite, const CU_pFailureRecord failure_list)
+{
+	CU_pFailureRecord f = failure_list;
+	int i;
+	char *name;
+	char *cond;
+
+	if (f == NULL) {
+		printf("passed");
+		return;
+	}
+
+	printf("FAILED");
+	for (i = 1; f != NULL; f = f->pNext, i++) {
+		name = f->strFileName == NULL ? "" : f->strFileName;
+		cond = f->strCondition == NULL ? "" : f->strCondition;
+		printf("\n    %d. %s:%u  - %s", i, name, f->uiLineNumber, cond);
+	}
+}
+
+/**
+ * Final summary of all the test suites ran.
+ * @param failure Not used
+ */
+static void all_tests_complete_message_handler(const CU_pFailureRecord failure)
+{
+	CU_pTestRegistry registry = CU_get_registry();
+	CU_pRunSummary summary = CU_get_run_summary();
+	struct rusage end_ru;
+	struct timeval diff_tv;
+
+	printf("\n\nRun Summary:    Type  Total    Ran Passed Failed Inactive\n");
+	printf("              suites %*u %*u    n/a %*u %*u\n",
+			6, registry->uiNumberOfSuites,
+			6, summary->nSuitesRun,
+			6, summary->nSuitesFailed,
+			8, summary->nSuitesInactive);
+	printf("               tests %*u %*u %*u %*u %*u\n",
+			6, registry->uiNumberOfTests,
+			6, summary->nTestsRun,
+			6, summary->nTestsRun - summary->nTestsFailed,
+			6, summary->nTestsFailed,
+			8, summary->nTestsInactive);
+	printf("             asserts %*u %*u %*u %*u      n/a\n",
+			6, summary->nAsserts,
+			6, summary->nAsserts,
+			6, summary->nAsserts - summary->nAssertsFailed,
+			6, summary->nAssertsFailed);
+	getrusage(RUSAGE_SELF, &end_ru);
+	timersub(&end_ru.ru_utime, &start_ru.ru_utime, &diff_tv);
+	printf("\nElapsed time = % 4d.%03d seconds\n", diff_tv.tv_sec,
+			diff_tv.tv_usec / 1000);
+}
+
+/**
+ * Prints a message when a test initialization failed
+ * @param suite Suite which initialization step failed
+ */
+static void suite_init_failure_message_handler(const CU_pSuite suite)
+{
+	printf("\nWARNING - Suite initialization failed for '%s'.",
+			suite->pName);
+}
+
+/**
+ * Prints a message when a test cleanup failed
+ * @param suite Suite which cleanup step failed
+ */
+static void suite_cleanup_failure_message_handler(const CU_pSuite pSuite)
+{
+	printf("\nWARNING - Suite cleanup failed for '%s'.", pSuite->pName);
+}
+
+/**
+ * Initializes the cunit tests
+ */
+static void init_tests(void)
+{
+	getrusage(RUSAGE_SELF, &start_ru);
+	setvbuf(stdout, NULL, _IONBF, 0);
+	setvbuf(stderr, NULL, _IONBF, 0);
+
+	printf("\n\tTests ran with Cunit "CU_VERSION"\n\n");
+
+	CU_set_test_start_handler(test_start_message_handler);
+	CU_set_test_complete_handler(test_complete_message_handler);
+	CU_set_all_test_complete_handler(all_tests_complete_message_handler);
+	CU_set_suite_init_failure_handler(suite_init_failure_message_handler);
+	CU_set_suite_cleanup_failure_handler(
+			suite_cleanup_failure_message_handler);
 }
 
 int read_from_output(char *buf, size_t size, const char *cmd)
@@ -323,8 +452,8 @@ int fautes_run_test_pool(struct pool_t *pool, bool xml)
 		CU_automated_run_tests();
 		CU_list_tests_to_file();
 	} else {
-		CU_basic_set_mode(CU_BRM_VERBOSE);
-		CU_basic_run_tests();
+		init_tests();
+		CU_run_all_tests();
 	}
 	tests_failed += CU_get_number_of_tests_failed();
 
