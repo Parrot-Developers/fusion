@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
 		return 0;
 	}
 
-	xml = 0 == strcmp(argv[1], "xml");
+	xml = 0 == strcmp(argv[1], "xml") || fautes_generate_xml();
 	/* the first library path follows the progname or the xml flag */
 	so_lib = argv + 1 + xml;
 

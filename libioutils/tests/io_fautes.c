@@ -58,9 +58,8 @@ struct pool_t fautes_pool = {
 void libioutils_tests(void)
 {
 	int ret;
-	fprintf(stderr, "HERE\n");
 
-	ret = fautes_run_test_pool(&fautes_pool, false);
+	ret = fautes_run_test_pool(&fautes_pool, fautes_generate_xml());
 
 	_exit(ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE);
 }
