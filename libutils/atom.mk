@@ -18,6 +18,10 @@ LOCAL_SRC_FILES := $(call all-c-files-under,src)
 ifdef TARGET_TEST
 LOCAL_SRC_FILES += $(call all-c-files-under,tests)
 
+LOCAL_CFLAGS := -DFUSION_INTERPRETER=\"$(TARGET_LOADER)\"
+
+LOCAL_LDFLAGS := -Wl,-e,$(LOCAL_MODULE)_tests
+
 LOCAL_LIBRARIES += libfautes
 endif # TARGET_TEST
 

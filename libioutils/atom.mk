@@ -19,6 +19,10 @@ LOCAL_LIBRARIES := librs libpidwatch libutils
 ifdef TARGET_TEST
 LOCAL_SRC_FILES += $(call all-c-files-under,tests)
 
+LOCAL_CFLAGS := -DFUSION_INTERPRETER=\"$(TARGET_LOADER)\"
+
+LOCAL_LDFLAGS := -Wl,-e,$(LOCAL_MODULE)_tests
+
 LOCAL_LIBRARIES += libfautes
 endif
 
