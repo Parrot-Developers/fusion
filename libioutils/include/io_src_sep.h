@@ -49,6 +49,10 @@ struct io_src_sep;
  *     end of file is reached, in this case, it is called once more with a zero
  *     len argument
  *   </li>
+ *   <li>
+ *     an error has occurred, in this case,
+ *     io_src_has_error(io_src_sep_get_source(sep)) will be true
+ *   </li>
  * </ul>
  * @param sep Source separator buffer
  * @param chunk Chunk of data read

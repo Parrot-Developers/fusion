@@ -160,24 +160,26 @@ static void sep_cb(struct io_src *src)
 	ssize_t sret;
 	struct io_src_sep *sep = to_src_sep(src);
 
-	/* TODO treat I/O THEN errors */
-	if (io_src_has_error(src))
-		return;
+	if (io_src_has_in(src)) {
+		/* get some data */
+		sret = io_read(src->fd, buf_write_start(sep), to_read(sep));
+		if (sret < 0)
+			return;
+		if (0 == sret) {
+			end_of_file(sep);
+			return;
+		}
 
-	/* get some data */
-	sret = io_read(src->fd, buf_write_start(sep), to_read(sep));
-	if (sret < 0)
-		return;
-	if (0 == sret) {
-		end_of_file(sep);
-		return;
+		/* something has been read */
+		/* cast is ok because sret just has been tested positive */
+		sep->up_to += (unsigned)sret;
+
+		consume(sep);
+	} else {
+		/* here, there must be an error, notify with 0-length */
+		notify_user(sep, 0);
 	}
 
-	/* something has been read */
-	/* cast is ok because sret just has ben tested positive */
-	sep->up_to += (unsigned)sret;
-
-	consume(sep);
 }
 
 int io_src_sep_init(struct io_src_sep *sep_src, int fd, io_src_sep_cb_t *cb,
