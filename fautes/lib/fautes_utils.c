@@ -465,3 +465,12 @@ int fautes_run_test_pool(struct pool_t *pool, bool xml)
 
 	return tests_failed;
 }
+
+bool fautes_generate_xml(void)
+{
+	const char *env;
+
+	env = getenv("FAUTES_XML");
+
+	return env != NULL && strcmp(env, "n") != 0;
+}

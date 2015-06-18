@@ -108,6 +108,14 @@ struct pool_t {
  */
 int fautes_run_test_pool(struct pool_t *pool, bool xml);
 
+/**
+ * Return true if the user wants to generate xml from the tests result, i.e. if
+ * the environment variable FAUTES_XML is defined and if it's content is
+ * anything but "n"
+ * @return true iif xml must be generated
+ */
+bool fautes_generate_xml(void);
+
 #ifdef __cplusplus
 }
 #endif
