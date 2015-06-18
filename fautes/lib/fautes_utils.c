@@ -19,6 +19,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -147,8 +148,9 @@ static void all_tests_complete_message_handler(const CU_pFailureRecord failure)
 			6, summary->nAssertsFailed);
 	getrusage(RUSAGE_SELF, &end_ru);
 	timersub(&end_ru.ru_utime, &start_ru.ru_utime, &diff_tv);
-	printf("\nElapsed time = % 4d.%03d seconds\n", diff_tv.tv_sec,
-			diff_tv.tv_usec / 1000);
+	printf("\nElapsed time = % 4jd.%03jd seconds\n",
+			(intmax_t)diff_tv.tv_sec,
+			(intmax_t)(diff_tv.tv_usec / 1000));
 }
 
 /**
