@@ -16,4 +16,9 @@ extern struct suite_t module_suite;
 extern struct suite_t process_suite;
 extern struct suite_t string_suite;
 
+/**
+ * Entry point of the library when the .so in executed directly.
+ */
+void libutils_tests(void);
+
 #endif /* UT_FAUTES_H_ */

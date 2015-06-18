@@ -22,4 +22,9 @@ extern struct suite_t src_suite;
 extern struct suite_t src_tmr_suite;
 extern struct suite_t utils_suite;
 
+/**
+ * Entry point of the library when the .so in executed directly.
+ */
+void libioutils_tests(void);
+
 #endif /* IO_FAUTES_H_ */

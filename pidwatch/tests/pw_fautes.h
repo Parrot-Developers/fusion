@@ -12,4 +12,9 @@
 
 extern struct suite_t pidwatch_suite;
 
+/**
+ * Entry point of the library when the .so in executed directly.
+ */
+void libpidwatch_tests(void);
+
 #endif /* PW_FAUTES_H_ */
