@@ -158,7 +158,8 @@ int io_mon_activate_in_source(struct io_mon *mon, struct io_src *src,
 int io_mon_poll(struct io_mon *mon, int timeout);
 
 /**
- * @brief processes pending events. Doesn't block.
+ * @brief processes pending events. Doesn't block. Any source with error is
+ * removed after the user has been called back.
  *
  * Equivalent to io_mon_poll(mon, 0);
  *
