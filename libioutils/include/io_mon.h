@@ -123,23 +123,23 @@ void io_mon_dump_epoll_event(uint32_t events);
  * (De-)Activates the monitoring of a particular output source
  * @param mon Monitor
  * @param src Source to (de-)activate
- * @param active non-zero if the source must be monitored, 0 otherwise
+ * @param active true if the source must be monitored, false otherwise
  *
  * @return negative errno value on error, 0 otherwise
  */
 int io_mon_activate_out_source(struct io_mon *mon, struct io_src *src,
-		int active);
+		bool active);
 
 /**
  * (De-)Activates the monitoring of a particular input source
  * @param mon Monitor
  * @param src Source to (de-)activate
- * @param active non-zero if the source must be monitored, 0 otherwise
+ * @param active true if the source must be monitored, false otherwise
  *
  * @return negative errno value on error, 0 otherwise
  */
 int io_mon_activate_in_source(struct io_mon *mon, struct io_src *src,
-		int active);
+		bool active);
 
 /**
  * @brief Polls for events on the registered sources.

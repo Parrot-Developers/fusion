@@ -249,14 +249,14 @@ static int do_process_events_sets(struct io_mon *mon, int n,
  * implementation
  * @param mon Monitor
  * @param src Source to (de-)activate
- * @param active non-zero if the source must be monitored, 0 otherwise
+ * @param active true if the source must be monitored, false otherwise
  * @param direction Direction to alter the monitoring of, either IO_IN or
  * IO_OUT, not both
  *
  * @return negative errno value on error, 0 otherwise
  */
 static int activate_source(struct io_mon *mon, struct io_src *src,
-		int active, enum io_src_event direction)
+		bool active, enum io_src_event direction)
 {
 	enum io_src_event old_active;
 	if (NULL == mon || NULL == src || !(direction & src->type))
@@ -427,13 +427,13 @@ void io_mon_dump_epoll_event(uint32_t events)
 }
 
 int io_mon_activate_out_source(struct io_mon *mon, struct io_src *src,
-		int active)
+		bool active)
 {
 	return activate_source(mon, src, active, IO_OUT);
 }
 
 int io_mon_activate_in_source(struct io_mon *mon, struct io_src *src,
-		int active)
+		bool active)
 {
 	return activate_source(mon, src, active, IO_IN);
 }
