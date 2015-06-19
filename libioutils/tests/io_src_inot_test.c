@@ -325,8 +325,8 @@ static void testSRC_INOT_FULL_TEST(void)
 			goto out;
 
 		ret = io_mon_process_events(&mon);
-		CU_ASSERT_EQUAL(ret, 0);
-		if (0 != ret)
+		CU_ASSERT(ret >= 0);
+		if (ret < 0)
 			goto out;
 	} while (dir_state != STATE_DIR_DONE || file_state != STATE_FILE_DONE);
 

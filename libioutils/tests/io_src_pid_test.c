@@ -132,8 +132,8 @@ static void testSRC_PID_INIT(void)
 		goto out;
 
 	ret = io_mon_process_events(&mon);
-	CU_ASSERT_EQUAL(ret, 0);
-	if (0 != ret)
+	CU_ASSERT(ret >= 0);
+	if (ret < 0)
 		goto out;
 
 	CU_ASSERT(process_dead)
@@ -202,8 +202,8 @@ static void testSRC_PID_SET_PID(void)
 		goto out;
 
 	ret = io_mon_process_events(&mon);
-	CU_ASSERT_EQUAL(ret, 0);
-	if (0 != ret)
+	CU_ASSERT(ret >= 0);
+	if (ret < 0)
 		goto out;
 
 	CU_ASSERT(process_dead)
@@ -237,8 +237,8 @@ static void testSRC_PID_SET_PID(void)
 		goto out;
 
 	ret = io_mon_process_events(&mon);
-	CU_ASSERT_EQUAL(ret, 0);
-	if (0 != ret)
+	CU_ASSERT(ret >= 0);
+	if (ret < 0)
 		goto out;
 
 	CU_ASSERT(process_dead)

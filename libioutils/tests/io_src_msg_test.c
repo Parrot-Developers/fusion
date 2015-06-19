@@ -190,8 +190,8 @@ static void testSRC_MSG_INIT_read(void)
 			goto out;
 
 		ret = io_mon_process_events(&mon);
-		CU_ASSERT_EQUAL(ret, 0);
-		if (0 != ret)
+		CU_ASSERT(ret >= 0);
+		if (ret < 0)
 			goto out;
 
 		loop = STATE_ALL_DONE != state;
@@ -312,8 +312,8 @@ static void testSRC_MSG_INIT_write(void)
 
 		if (FD_ISSET(mon.epollfd, &rfds)) {
 			ret = io_mon_process_events(&mon);
-			CU_ASSERT_EQUAL(ret, 0);
-			if (0 != ret)
+			CU_ASSERT(ret >= 0);
+			if (ret < 0)
 				goto out;
 		}
 		if (FD_ISSET(msg_src.pipefds[0], &rfds)) {

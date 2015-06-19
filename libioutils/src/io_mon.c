@@ -440,6 +440,7 @@ int io_mon_activate_in_source(struct io_mon *mon, struct io_src *src,
 
 int io_mon_poll(struct io_mon *mon, int timeout)
 {
+	int ret;
 	ssize_t n = 0;
 	struct epoll_event events[MONITOR_MAX_SOURCES];
 
@@ -451,7 +452,10 @@ int io_mon_poll(struct io_mon *mon, int timeout)
 	if (-1 == n)
 		return -errno;
 
-	return do_process_events_sets(mon, n, events);
+	ret = do_process_events_sets(mon, n, events);
+
+	return ret < 0 ? ret : n;
+
 }
 
 int io_mon_process_events(struct io_mon *mon)

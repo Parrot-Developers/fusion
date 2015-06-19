@@ -153,7 +153,8 @@ int io_mon_activate_in_source(struct io_mon *mon, struct io_src *src,
  * @param timeout Number of milliseconds io_mon_poll should block waiting for
  * events. If -1, blocks indefinitely, if 0, returns immediately
  *
- * @return negative errno value on error, 0 otherwise
+ * @return negative errno value on error, the number of processed events sources
+ * otherwise
  */
 int io_mon_poll(struct io_mon *mon, int timeout);
 
@@ -165,7 +166,8 @@ int io_mon_poll(struct io_mon *mon, int timeout);
  *
  * @see io_mon_poll
  * @param mon Monitor's context
- * @return negative errno value on error, 0 otherwise
+ * @return negative errno value on error, the number of processed events sources
+ * otherwise
  */
 int io_mon_process_events(struct io_mon *mon);
 

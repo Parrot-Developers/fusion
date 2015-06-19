@@ -137,8 +137,8 @@ static void testSRC_SEP(const int sep_pair[2], const char *big_msg, size_t sz)
 			reached_state(&state, STATE_TIMER_EXPIRED);
 		} else {
 			ret = io_mon_process_events(&mon);
-			CU_ASSERT_EQUAL(ret, 0);
-			if (0 != ret)
+			CU_ASSERT(ret >= 0);
+			if (ret < 0)
 				goto out;
 		}
 

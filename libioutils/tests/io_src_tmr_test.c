@@ -78,7 +78,7 @@ static void testIO_SRC_TMR_SET(void)
 	if (-1 == ret)
 		goto out;
 	ret = io_mon_process_events(&mon);
-	CU_ASSERT_EQUAL(ret, 0);
+	CU_ASSERT(ret >= 0);
 
 	CU_ASSERT(expired);
 
@@ -102,7 +102,7 @@ static void testIO_SRC_TMR_SET(void)
 	if (-1 == ret)
 		goto out;
 	ret = io_mon_process_events(&mon);
-	CU_ASSERT_EQUAL(ret, 0);
+	CU_ASSERT(ret >= 0);
 
 	CU_ASSERT_FALSE(expired);
 
