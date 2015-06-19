@@ -179,7 +179,7 @@ static const uint32_t file_steps[] = {
 		IN_DELETE_SELF,
 };
 
-static uint32_t file_state = 0;
+static uint32_t file_state;
 
 #define STATE_FILE_DONE ((1 << UT_ARRAY_SIZE(file_steps)) - 1)
 
@@ -193,7 +193,7 @@ static const uint32_t dir_steps[] = {
 		IN_DELETE,
 };
 
-static uint32_t dir_state = 0;
+static uint32_t dir_state;
 
 #define STATE_DIR_DONE ((1 << UT_ARRAY_SIZE(dir_steps)) - 1)
 
@@ -335,7 +335,7 @@ out:
 	CU_ASSERT_EQUAL(dir_state, STATE_DIR_DONE);
 	if (dir_state != STATE_DIR_DONE)
 		fprintf(stderr, "dir_state is 0x%"PRIx32", expected 0x%x\n",
-				dir_state ,STATE_DIR_DONE);
+				dir_state, STATE_DIR_DONE);
 	CU_ASSERT_EQUAL(file_state, STATE_FILE_DONE);
 	if (file_state != STATE_FILE_DONE)
 		fprintf(stderr, "file_state is 0x%"PRIx32", expected 0x%x\n",
