@@ -208,8 +208,6 @@ static void testSRC_PID_SET_PID(void)
 
 	CU_ASSERT(process_dead)
 
-	return;
-
 	/* reuse the pid source */
 	process_dead = false;
 	pid = launch("sleep", ".01", NULL);
