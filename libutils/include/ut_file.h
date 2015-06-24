@@ -69,4 +69,11 @@ bool ut_file_is_executable(const char *path);
  */
 bool ut_file_exists(const char *path);
 
+/**
+ * Tests whether or not a path exists as a directory
+ * @param path Path to test
+ * @return true iif the given path is a directory and exists
+ */
+bool ut_file_is_dir(const char *path);
+
 #endif /* UT_FILE_H_ */

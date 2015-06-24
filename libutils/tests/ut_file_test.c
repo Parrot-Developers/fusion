@@ -123,6 +123,14 @@ static void testUT_FILE_IS_EXECUTABLE(void)
 	CU_ASSERT(!ut_file_is_executable(NULL));
 }
 
+static void testUT_FILE_IS_DIR(void)
+{
+	CU_ASSERT(ut_file_is_dir("/bin"));
+	CU_ASSERT(!ut_file_is_dir("/bin/sh"));
+	CU_ASSERT(!ut_file_is_dir(""));
+	CU_ASSERT(!ut_file_is_dir(NULL));
+}
+
 static const struct test_t tests[] = {
 		{
 				.fn = testUT_FILE_CLOSE,
@@ -143,6 +151,10 @@ static const struct test_t tests[] = {
 		{
 				.fn = testUT_FILE_IS_EXECUTABLE,
 				.name = "ut_file_is_executable"
+		},
+		{
+				.fn = testUT_FILE_IS_DIR,
+				.name = "ut_file_is_dir"
 		},
 
 		/* NULL guard */

@@ -218,7 +218,7 @@ int ut_file_write_buffer(const void *buffer, size_t size, const char *path)
  * @param how how flag passed to access
  * @return true iif the test is successful
  */
-static bool test_file(const char *path, int how)
+static bool test_file(const char *path, int how, unsigned type)
 {
 	struct stat st;
 	int ret;
@@ -231,7 +231,7 @@ static bool test_file(const char *path, int how)
 	if (ret == -1)
 		return false;
 
-	if (!S_ISREG(st.st_mode))
+	if (!((st.st_mode & S_IFMT) == type))
 		return false;
 
 	return access(path, how) == 0;
@@ -239,10 +239,15 @@ static bool test_file(const char *path, int how)
 
 bool ut_file_is_executable(const char *path)
 {
-	return test_file(path, X_OK);
+	return test_file(path, X_OK, S_IFREG);
 }
 
 bool ut_file_exists(const char *path)
 {
-	return test_file(path, F_OK);
+	return test_file(path, F_OK, S_IFREG);
+}
+
+bool ut_file_is_dir(const char *path)
+{
+	return test_file(path, F_OK, S_IFDIR);
 }
