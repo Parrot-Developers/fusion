@@ -50,6 +50,17 @@ int ut_process_change_name(const char *fmt, ...);
 char *ut_process_get_name(char name[17]);
 
 /**
+ * Checks if there is currently a process tracing the current process with
+ * ptrace. This is handy to detect if we are ran in gdb and for example, adapt
+ * the handling of signals not to interfere with gdb.
+ * @note Please be aware that a debugger could attach at any moment and thus,
+ * the result of this function can change
+ * @return true if the process is being ptraced, that is, if /proc/self/status
+ * contains a TracerPid: field
+ */
+bool ut_process_is_being_ptraced(void);
+
+/**
  * @struct ut_process_sync
  * @brief parent/child synchronization mechanism
  *

@@ -22,6 +22,7 @@
 #include "ut_process.h"
 #include "ut_log.h"
 #include "ut_file.h"
+#include "ut_utils.h"
 
 int ut_process_vsystem(const char *fmt, ...)
 {
@@ -87,6 +88,30 @@ char *ut_process_get_name(char name[17])
 	name[16] = 0;
 
 	return ret == 0 ? name : NULL;
+}
+
+bool ut_process_is_being_ptraced(void)
+{
+	char __attribute__((cleanup(ut_string_free))) *line = NULL;
+	FILE __attribute__((cleanup(ut_file_close))) *fp = NULL;
+	ssize_t n;
+	size_t len = 0;
+	const char tracer_needle[] = "TracerPid:";
+
+	fp = fopen("/proc/self/status", "re");
+	if (fp == NULL)
+		return false;
+
+	while (true) {
+		n = getline(&line, &len, fp);
+		if (n <= 0)
+			return false;
+
+		if (strstr(line, tracer_needle) != NULL)
+			return atoi(line + UT_ARRAY_SIZE(tracer_needle)) != 0;
+	}
+
+	return false; /* in theory, never reached */
 }
 
 int ut_process_sync_init(struct ut_process_sync *sync, bool cloexec)
