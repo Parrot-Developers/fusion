@@ -1,0 +1,11 @@
+#!/bin/bash
+
+read line1
+
+echo $line1 > /dev/stdout
+
+read line2
+
+echo $line2 > /dev/stderr
+
+exit 1
