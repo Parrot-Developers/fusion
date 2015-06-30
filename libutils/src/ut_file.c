@@ -6,10 +6,14 @@
  * @author nicolas.carrier@parrot.com
  * @copyright Copyright (C) 2014 Parrot S.A.
  */
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif /* _GNU_SOURCE */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
@@ -179,6 +183,7 @@ long ut_file_get_file_size(const char *path)
 	return get_file_size(f);
 }
 
+// TODO veplace with vstring
 int ut_file_to_string(const char *path, char **string)
 {
 	FILE __attribute__((cleanup(ut_file_close)))*f = NULL;
@@ -196,6 +201,26 @@ int ut_file_to_string(const char *path, char **string)
 	}
 
 	return do_file_to_string(f, string);
+}
+
+int ut_file_to_vstring(char **string, const char *fmt, ...)
+{
+	int ret;
+	va_list args;
+	char __attribute__((cleanup(ut_string_free)))*path = NULL;
+
+	if (ut_string_is_invalid(fmt))
+		return -EINVAL;
+
+	va_start(args, fmt);
+	ret = vasprintf(&path, fmt, args);
+	va_end(args);
+	if (ret == -1) {
+		path = NULL;
+		return -ENOMEM;
+	}
+
+	return ut_file_to_string(path, string);
 }
 
 int ut_file_write_buffer(const void *buffer, size_t size, const char *path)
