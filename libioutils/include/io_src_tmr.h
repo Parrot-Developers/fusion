@@ -39,7 +39,7 @@ struct io_src_tmr;
  * @param tmr Timer source
  * @param nbexpired Number of expirations of the timer
  */
-typedef void (*io_tmr_cb_t)(struct io_src_tmr *tmr, uint64_t *nbexpired);
+typedef void (*io_tmr_cb)(struct io_src_tmr *tmr, uint64_t *nbexpired);
 
 /**
  * @struct io_src_tmr
@@ -49,7 +49,7 @@ struct io_src_tmr {
 	/** inner monitor source */
 	struct io_src src;
 	/** user callback, notified the timer expires */
-	io_tmr_cb_t cb;
+	io_tmr_cb cb;
 	/** 0 if the timer triggers only once, non-zero if it is periodic */
 	int periodic;
 };
@@ -61,7 +61,7 @@ struct io_src_tmr {
  * @param cb User callback, notified the timer expires
  * @return errno compatible negative value on error, 0 on success
  */
-int io_src_tmr_init(struct io_src_tmr *tmr, io_tmr_cb_t cb);
+int io_src_tmr_init(struct io_src_tmr *tmr, io_tmr_cb cb);
 
 /**
  * Arms (or disarms) the timer and sets it's relative timeout. By default, the

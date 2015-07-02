@@ -83,7 +83,7 @@ static void tmr_cb(struct io_src *src)
 	/* nothing to do on epoll error, source is automatically removed */
 }
 
-int io_src_tmr_init(struct io_src_tmr *tmr, io_tmr_cb_t cb)
+int io_src_tmr_init(struct io_src_tmr *tmr, io_tmr_cb cb)
 {
 	int fd;
 
