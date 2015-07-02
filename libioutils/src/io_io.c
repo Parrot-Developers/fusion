@@ -508,7 +508,7 @@ int io_io_clean(struct io_io *io)
 	return 0;
 }
 
-int io_io_read_start(struct io_io *io, io_io_read_cb_t cb, void *data,
+int io_io_read_start(struct io_io *io, io_io_read_cb cb, void *data,
 		int clear)
 {
 	int ret;

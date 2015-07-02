@@ -28,7 +28,7 @@ enum io_io_state {
 	IO_IO_ERROR,  /**< read or write encountered an error */
 };
 
-/* forward reference for io_io_read_cb_t definition */
+/* forward reference for io_io_read_cb definition */
 struct io_io;
 
 /**
@@ -38,7 +38,7 @@ struct io_io;
  * @param data user data as was passed in io_io_read_start()
  * @return 0 if and only if more data is needed on read
  */
-typedef int (*io_io_read_cb_t)(struct io_io *io, struct rs_rb *rb, void *data);
+typedef int (*io_io_read_cb)(struct io_io *io, struct rs_rb *rb, void *data);
 
 /**
  * @def IO_IO_RB_BUFFER_SIZE
@@ -54,7 +54,7 @@ struct io_io_read_ctx {
 	enum io_io_state state;			/**< io read ctx state */
 	struct rs_rb rb;			/**< io read ring buffer */
 	char rb_buffer[IO_IO_RB_BUFFER_SIZE];	/**< ring buffer buffer */
-	io_io_read_cb_t cb;			/**< io read callback */
+	io_io_read_cb cb;			/**< io read callback */
 	void *data;				/**< callback user data */
 	int ign_eof;				/**< ignore end of file */
 };
@@ -155,7 +155,7 @@ int io_io_clean(struct io_io *io);
  * @param clear
  * @return Negative errno-compatible value on error, 0 on success
  */
-int io_io_read_start(struct io_io *io, io_io_read_cb_t cb, void *data,
+int io_io_read_start(struct io_io *io, io_io_read_cb cb, void *data,
 		int clear);
 
 /**
