@@ -68,15 +68,22 @@
  */
 #define UT_IS_09_OR_AZ_NO_CASE(c) (UT_IS_09((c)) || UT_IS_AZ_NO_CASE((c)))
 
-#ifdef UT_BIT_FIELD_128_BIT
-typedef unsigned __int128 uint128_t;
-#define UT_BIT_FIELD_MAX 128
-typedef uint128_t ut_bit_field_t;
-#else /* UT_BIT_FIELD_128_BIT */
-#define UT_BIT_FIELD_MAX 64
-typedef uint64_t ut_bit_field_t;
-#endif /* UT_BIT_FIELD_128_BIT */
+/**
+ * @typedef ut_bit_field_t
+ * @brief the biggest unsigned integer type possible, used to store a bit field
+ */
+typedef uintmax_t ut_bit_field_t;
 
+/**
+ * @def UT_BIT_FIELD_MAX
+ * @brief Maximum index which can be claimed in a bit field
+ */
+#define UT_BIT_FIELD_MAX (sizeof(ut_bit_field_t) * 8)
+
+/**
+ * @def UT_BIT_FIELD_INVALID_INDEX
+ * @brief Invalid value for a a bit field index
+ */
 #define UT_BIT_FIELD_INVALID_INDEX ((uint8_t)-1)
 
 /**
