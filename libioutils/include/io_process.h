@@ -129,7 +129,7 @@ struct io_process_parameters {
 	 */
 	bool copy;
 	/** for stdin_src, mutually exclusive with input buffer parameters */
-	io_src_cb_t *stdin_cb;
+	io_src_cb *stdin_cb;
 	/** for stdout_sep_src, mutually exclusive with stdout_src parameters */
 	io_src_sep_cb_t *stdout_sep_cb;
 	/** first separator character for the stdout separator source */
@@ -140,7 +140,7 @@ struct io_process_parameters {
 	 */
 	int out_sep2;
 	/** for stdout_src, mutually exclusive with stdout_sep_src parameters */
-	io_src_cb_t *stdout_cb;
+	io_src_cb *stdout_cb;
 	/** for stderr_sep_src, mutually exclusive with stderr_src parameters */
 	io_src_sep_cb_t *stderr_sep_cb;
 	/** first separator character for the stderr separator source */
@@ -151,7 +151,7 @@ struct io_process_parameters {
 	 */
 	int err_sep2;
 	/** for stderr_src, mutually exclusive with stderr_sep_src parameters */
-	io_src_cb_t *stderr_cb;
+	io_src_cb *stderr_cb;
 	/**
 	 * when elapsed, the process will receive the signal signum isn't
 	 * already dead
@@ -218,7 +218,7 @@ int io_process_set_input_buffer(struct io_process *process, const char *buffer,
  * @param cb Function called when the process is ready to read some data
  * @return errno-compatible negative value on error, 0 on success
  */
-int io_process_set_stdin_src(struct io_process *process, io_src_cb_t *cb);
+int io_process_set_stdin_src(struct io_process *process, io_src_cb *cb);
 
 /**
  * Defines a separator source which will be notified each time the process
@@ -239,7 +239,7 @@ int io_process_set_stdout_sep_src(struct io_process *process,
  * @param cb Callback notified when there is something to read
  * @return errno-compatible negative value on error, 0 on success
  */
-int io_process_set_stdout_src(struct io_process *process, io_src_cb_t *cb);
+int io_process_set_stdout_src(struct io_process *process, io_src_cb *cb);
 
 /**
  * Defines a separator source which will be notified each time the process
@@ -260,7 +260,7 @@ int io_process_set_stderr_sep_src(struct io_process *process,
  * @param cb Callback notified when there is something to read
  * @return errno-compatible negative value on error, 0 on success
  */
-int io_process_set_stderr_src(struct io_process *process, io_src_cb_t *cb);
+int io_process_set_stderr_src(struct io_process *process, io_src_cb *cb);
 
 /**
  * Defines a timeout after which the process will receive a signal, if not

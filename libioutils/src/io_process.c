@@ -101,7 +101,7 @@ static int set_sep_src(struct io_process *process, struct io_src_sep *sep_src,
  * @return Negative errno compatible value on error, 0 otherwise
  */
 static int set_src(struct io_process *process, struct io_src *src,
-		io_src_cb_t *cb, int pipefd[2], int fd_index)
+		io_src_cb *cb, int pipefd[2], int fd_index)
 {
 	int ret;
 	enum io_src_event type[2] = {IO_IN, IO_OUT};
@@ -397,7 +397,7 @@ err:
 	return ret;
 }
 
-int io_process_set_stdin_src(struct io_process *process, io_src_cb_t *cb)
+int io_process_set_stdin_src(struct io_process *process, io_src_cb *cb)
 {
 	if ((process->copy && process->rw != NULL) ||
 			(!process->copy && process->ro != NULL))
@@ -414,7 +414,7 @@ int io_process_set_stdout_sep_src(struct io_process *process,
 			cb, sep1, sep2);
 }
 
-int io_process_set_stdout_src(struct io_process *process, io_src_cb_t *cb)
+int io_process_set_stdout_src(struct io_process *process, io_src_cb *cb)
 {
 	return set_src(process, io_src_sep_get_source(&process->stdout_src), cb,
 			process->stdout_pipe, 0);
@@ -427,7 +427,7 @@ int io_process_set_stderr_sep_src(struct io_process *process,
 			cb, sep1, sep2);
 }
 
-int io_process_set_stderr_src(struct io_process *process, io_src_cb_t *cb)
+int io_process_set_stderr_src(struct io_process *process, io_src_cb *cb)
 {
 	return set_src(process, io_src_sep_get_source(&process->stderr_src), cb,
 			process->stderr_pipe, 0);

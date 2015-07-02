@@ -26,7 +26,7 @@
  * @return 1 if one argument at least is invalid, 0 otherwise
  */
 static int init_args_are_invalid(struct io_src *src, int fd,
-		enum io_src_event type, io_src_cb_t *cb)
+		enum io_src_event type, io_src_cb *cb)
 {
 	return NULL == src || fd < 0 ||
 			(type != IO_DUPLEX && type != IO_IN && type != IO_OUT)
@@ -34,7 +34,7 @@ static int init_args_are_invalid(struct io_src *src, int fd,
 }
 
 int io_src_init(struct io_src *src, int fd, enum io_src_event type,
-		io_src_cb_t *cb)
+		io_src_cb *cb)
 {
 	struct stat st;
 	int ret;

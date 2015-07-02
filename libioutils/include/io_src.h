@@ -66,7 +66,7 @@ enum io_src_event {
 struct io_src;
 
 /**
- * @typedef io_src_cb_t
+ * @typedef io_src_cb
  * @brief Callback notified when a source is ready to perform I/O. If an I/O
  * error occurs, the source is notified by mean of the callback and is
  * automatically removed once the callback returns.<br />
@@ -74,7 +74,7 @@ struct io_src;
  * type of event which occurred, be it an I/O error or a normal event.
  * @param src source ready for I/O
  */
-typedef void (io_src_cb_t)(struct io_src *src);
+typedef void (io_src_cb)(struct io_src *src);
 
 /**
  * @struct io_src
@@ -99,7 +99,7 @@ struct io_src {
 	 */
 	enum io_src_event type;
 	/** callback responsible of this source */
-	io_src_cb_t *cb;
+	io_src_cb *cb;
 
 	/**
 	 * epoll events which occurred on this source, set before the callback
@@ -124,7 +124,7 @@ struct io_src {
  * @return Negative errno compatible value on error otherwise zero
  */
 int io_src_init(struct io_src *src, int fd, enum io_src_event type,
-		io_src_cb_t *cb);
+		io_src_cb *cb);
 
 /**
  * Says whether a source is active for a given set of events
