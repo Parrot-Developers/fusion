@@ -32,7 +32,7 @@ struct io_src_msg;
 #define to_src_msg(p) ut_container_of(p, struct io_src_msg, src)
 
 /**
- * @typedef io_src_msg_cb_t
+ * @typedef io_src_msg_cb
  * @brief Called when an entire message has been received or when the source is
  * ready to write a message. No partial message can be read or written.
  * If the event type is IO_IN, the message received can be retrieved with a call
@@ -44,7 +44,7 @@ struct io_src_msg;
  * @param evt Type of the event to process, either IO_IN or IO_OUT, not
  * IO_DUPLEX
  */
-typedef void (io_src_msg_cb_t)(struct io_src_msg *src, enum io_src_event evt);
+typedef void (io_src_msg_cb)(struct io_src_msg *src, enum io_src_event evt);
 
 /**
  * @typedef io_src_msg
@@ -54,7 +54,7 @@ struct io_src_msg {
 	/** inner monitor source */
 	struct io_src src;
 	/** user callback, notified when I/O is possible */
-	io_src_msg_cb_t *cb;
+	io_src_msg_cb *cb;
 	/** size of the message to read */
 	unsigned rcv_buf_size;
 	/**
@@ -107,7 +107,7 @@ int io_src_msg_get_message(struct io_src_msg *msg_src, void **msg);
  * @return errno compatible negative value on error, 0 on success
  */
 int io_src_msg_init(struct io_src_msg *msg_src, int fd, enum io_src_event type,
-		io_src_msg_cb_t *cb, void *rcv_buf, unsigned len,
+		io_src_msg_cb *cb, void *rcv_buf, unsigned len,
 		unsigned perform_io);
 
 /**

@@ -106,7 +106,7 @@ int io_src_msg_get_message(struct io_src_msg *msg_src, void **msg)
 }
 
 int io_src_msg_init(struct io_src_msg *msg_src, int fd, enum io_src_event type,
-		io_src_msg_cb_t *cb, void *rcv_buf,
+		io_src_msg_cb *cb, void *rcv_buf,
 		unsigned len, unsigned perform_io)
 {
 	if (NULL == msg_src || -1 == fd || NULL == rcv_buf || NULL == cb ||
