@@ -26,12 +26,12 @@ extern "C" {
 struct io_src_sig;
 
 /**
- * @typedef io_sig_cb_t
+ * @typedef io_sig_cb
  * @brief Called when one of the monitored signals happens, with the
  * signalfd_siginfo field properly filled for use by the client
  * @param sig Signal source
  */
-typedef void (io_sig_cb_t)(struct io_src_sig *sig, struct signalfd_siginfo *si);
+typedef void (io_sig_cb)(struct io_src_sig *sig, struct signalfd_siginfo *si);
 
 /**
  * @typedef io_src_sig
@@ -45,7 +45,7 @@ struct io_src_sig {
 	/** signal mask state before the source setup, for being reinstalled */
 	sigset_t old_mask;
 	/** user callback, notified when one of the registered signals occur */
-	io_sig_cb_t *cb;
+	io_sig_cb *cb;
 	/** signal info structure, filled in before calling back the client */
 	struct signalfd_siginfo si;
 };
@@ -61,7 +61,7 @@ struct io_src_sig {
  * @return errno compatible negative value, -EINVAL if a signal passed is
  * SIGSTOP or SIGKILL
  */
-int io_src_sig_init(struct io_src_sig *sig, io_sig_cb_t *cb, ...)
+int io_src_sig_init(struct io_src_sig *sig, io_sig_cb *cb, ...)
 	__attribute__ ((sentinel(0)));
 
 /**

@@ -83,7 +83,7 @@ static int build_sig_mask(sigset_t *m, va_list args, int signo)
  * @param signo First signal of the ellipsis
  * @return non-zero if at least one argument is invalid, 0 otherwise
  */
-static int sig_init_args_are_invalid(struct io_src_sig *sig, io_sig_cb_t *cb,
+static int sig_init_args_are_invalid(struct io_src_sig *sig, io_sig_cb *cb,
 		int signo)
 {
 	return NULL == sig || NULL == cb || 0 == signo;
@@ -112,7 +112,7 @@ static int build_sfd(sigset_t *m, sigset_t *old_mask)
 	return io_signalfd(-1, m, 0);
 }
 
-int io_src_sig_init(struct io_src_sig *sig, io_sig_cb_t *cb, ...)
+int io_src_sig_init(struct io_src_sig *sig, io_sig_cb *cb, ...)
 {
 	int ret;
 	int fd;
