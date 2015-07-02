@@ -13,7 +13,6 @@
 #include <signal.h>
 #include <unistd.h>
 
-#include <error.h>
 #include <errno.h>
 #include <string.h>
 #include <stdarg.h>
@@ -244,36 +243,46 @@ static void in_child(struct io_process *process)
 
 	if (process->stdin_pipe[0] != -1) {
 		ret = dup2(process->stdin_pipe[0], STDIN_FILENO);
-		if (ret < 0)
-			error(EXIT_FAILURE, errno, "dup stdin");
+		if (ret < 0) {
+			fprintf(stderr, "dup2 stdin: %m\n");
+			_exit(EXIT_FAILURE);
+		}
 	}
 	if (process->stdout_pipe[1] != -1) {
 		ret = dup2(process->stdout_pipe[1], STDOUT_FILENO);
-		if (ret < 0)
-			error(EXIT_FAILURE, errno, "dup stdout");
+		if (ret < 0) {
+			fprintf(stderr, "dup2 stdout: %m\n");
+			_exit(EXIT_FAILURE);
+		}
 	}
 	if (process->stderr_pipe[1] != -1) {
 		ret = dup2(process->stderr_pipe[1], STDERR_FILENO);
-		if (ret < 0)
-			error(EXIT_FAILURE, errno, "dup stderr");
+		if (ret < 0) {
+			fprintf(stderr, "dup2 stderr: %m\n");
+			_exit(EXIT_FAILURE);
+		}
 	}
 	/* prepare the command-line */
 	argc = argz_count(process->command_line, process->command_line_len);
 	argv = calloc(argc + 1, sizeof(*argv));
 	if (argv == NULL) {
-		ULOGE("calloc: %m");
+		fprintf(stderr, "calloc: %m\n");
 		_exit(EXIT_FAILURE);
 	}
 	argz_extract(process->command_line, process->command_line_len, argv);
 	/* from here, log will be available to the parent if redirect enabled */
 	ret = prctl(PR_SET_PDEATHSIG, SIGKILL);
-	if (ret < 0)
-		error(EXIT_FAILURE, errno, "prctl");
+	if (ret < 0) {
+		fprintf(stderr, "prctl: %m\n");
+		_exit(EXIT_FAILURE);
+	}
 	for (i = sysconf(_SC_OPEN_MAX) - 1; i > 2; i--)
 		close(i);
 	ret = execv(argv[0], argv);
-	if (ret < 0)
-		error(EXIT_FAILURE, errno, "execve");
+	if (ret < 0) {
+		fprintf(stderr, "execve: %m\n");
+		_exit(EXIT_FAILURE);
+	}
 
 	_exit(EXIT_FAILURE);
 }
