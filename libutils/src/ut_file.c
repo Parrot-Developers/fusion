@@ -66,7 +66,7 @@ static int do_file_to_string_zero_size(FILE *f, char **string)
 #define BASE_SIZE 0x40
 	size_t sret;
 	size_t size = BASE_SIZE;
-	char *s;
+	char *s = NULL;
 
 	while (true) {
 		s = realloc(s, size + 1);
