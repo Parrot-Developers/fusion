@@ -28,17 +28,17 @@ enum ut_log_level {
 };
 
 /**
- * @typedef ut_log_f_t
+ * @typedef ut_log_f
  * @brief type of the callbacks accepted by the logging system
  */
-typedef int (ut_log_f_t)(const char *format, ...);
+typedef int (ut_log_f)(const char *format, ...);
 
 /**
  * @var ut_log_f
  * @brief callback used for logging messages, can be set, to change the logging
  * facility
  */
-extern ut_log_f_t *ut_log_f;
+extern ut_log_f *ut_log_cb;
 
 /**
  * @var ut_log_level_str
@@ -55,7 +55,7 @@ extern const char *ut_log_level_str[];
 #define ut_log_wrap(fmt, args...) do { \
 	int __errno_backup__ = errno; \
 	\
-	ut_log_f((fmt), ##args); \
+	ut_log_cb((fmt), ##args); \
 	errno = __errno_backup__; \
 } while (0)
 

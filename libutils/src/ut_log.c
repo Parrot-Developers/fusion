@@ -17,4 +17,4 @@ const char *ut_log_level_str[] = {
 		[UT_DEBUG]	= "\e[1;36mD\e[0m",
 };
 
-ut_log_f_t *ut_log_f = printf;
+ut_log_f *ut_log_cb = printf;
