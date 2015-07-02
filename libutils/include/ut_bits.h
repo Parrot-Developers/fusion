@@ -69,16 +69,16 @@
 #define UT_IS_09_OR_AZ_NO_CASE(c) (UT_IS_09((c)) || UT_IS_AZ_NO_CASE((c)))
 
 /**
- * @typedef ut_bit_field_t
+ * @typedef ut_bit_field
  * @brief the biggest unsigned integer type possible, used to store a bit field
  */
-typedef uintmax_t ut_bit_field_t;
+typedef uintmax_t ut_bit_field;
 
 /**
  * @def UT_BIT_FIELD_MAX
  * @brief Maximum index which can be claimed in a bit field
  */
-#define UT_BIT_FIELD_MAX (sizeof(ut_bit_field_t) * 8)
+#define UT_BIT_FIELD_MAX (sizeof(ut_bit_field) * 8)
 
 /**
  * @def UT_BIT_FIELD_INVALID_INDEX
@@ -91,13 +91,13 @@ typedef uintmax_t ut_bit_field_t;
  * @return UT_BIT_FIELD_INVALID_INDEX if no free index is found, index claimed
  * otherwise, between 0 and INDEX_MAX - 1 inclusive
  */
-uint8_t ut_bit_field_claim_free_index(ut_bit_field_t *indices);
+uint8_t ut_bit_field_claim_free_index(ut_bit_field *indices);
 
 /**
  * Marks an index as reusable
  * @param index index to release
  * @return errno-compatible negative value on error, 0 on success
  */
-int ut_bit_field_release_index(ut_bit_field_t *indices, uint8_t index);
+int ut_bit_field_release_index(ut_bit_field *indices, uint8_t index);
 
 #endif /* UT_BITS_H_ */

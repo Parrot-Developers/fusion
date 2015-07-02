@@ -12,10 +12,10 @@
 
 #include <ut_bits.h>
 
-uint8_t ut_bit_field_claim_free_index(ut_bit_field_t *indices)
+uint8_t ut_bit_field_claim_free_index(ut_bit_field *indices)
 {
 	uint8_t i;
-	ut_bit_field_t bit;
+	ut_bit_field bit;
 	uint8_t max = UT_BIT_FIELD_MAX - 1;
 
 	if (indices == NULL)
@@ -34,7 +34,7 @@ uint8_t ut_bit_field_claim_free_index(ut_bit_field_t *indices)
 	return UT_BIT_FIELD_INVALID_INDEX;
 }
 
-int ut_bit_field_release_index(ut_bit_field_t *indices, uint8_t index)
+int ut_bit_field_release_index(ut_bit_field *indices, uint8_t index)
 {
 	if (index >= UT_BIT_FIELD_MAX || indices == NULL)
 		return -EINVAL;
