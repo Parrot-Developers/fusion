@@ -46,12 +46,12 @@ struct suite_t {
 };
 
 /**
- * @typedef fautes_pool_initializer_t
+ * @typedef fautes_pool_initializer
  * @brief Initialization function for a test pool. For example, can read the
  * active state of test suites from environment with
  * FAUTES_GET_ACTIVE_STATE_FROM_ENVIRONMENT
  */
-typedef void (*fautes_pool_initializer_t)(void);
+typedef void (*fautes_pool_initializer)(void);
 
 /**
  * @struct pool_t
@@ -66,7 +66,7 @@ struct pool_t {
 	 */
 	const char *name;
 	/** initialization function of the pool (optional) */
-	fautes_pool_initializer_t initializer;
+	fautes_pool_initializer initializer;
 	/** NULL-terminated list of test suites (required) */
 	struct suite_t **suites;
 };
