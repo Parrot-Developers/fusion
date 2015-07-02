@@ -34,7 +34,7 @@ extern "C" {
 struct io_src_tmr;
 
 /**
- * @typedef io_pid_cb_t
+ * @typedef io_pid_cb
  * @brief Called when the timer has expired
  * @param tmr Timer source
  * @param nbexpired Number of expirations of the timer

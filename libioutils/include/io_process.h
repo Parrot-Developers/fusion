@@ -43,7 +43,7 @@ struct io_process {
 	/** pid src notifying when the process dies */
 	struct io_src_pid pid_src;
 	/** client callback called when the process terminates */
-	io_pid_cb_t *termination_cb;
+	io_pid_cb *termination_cb;
 	/**
 	 * buffer for input data, if the stdin isn't configured as a source,
 	 * will be used to feed data in the process' standard input
@@ -174,7 +174,7 @@ struct io_process_parameters {
  * the argv[0] of the process created. The list must end with a NULL pointer
  * @return errno-compatible negative value on error, 0 on success
  */
-int io_process_init(struct io_process *process, io_pid_cb_t termination_cb, ...)
+int io_process_init(struct io_process *process, io_pid_cb termination_cb, ...)
 	__attribute__ ((sentinel(0)));
 
 /**
@@ -190,7 +190,7 @@ int io_process_init(struct io_process *process, io_pid_cb_t termination_cb, ...)
  * the argv[0] of the process created. The list must end with a NULL pointer
  * @return errno-compatible negative value on error, 0 on success
  */
-int io_process_vinit(struct io_process *process, io_pid_cb_t termination_cb,
+int io_process_vinit(struct io_process *process, io_pid_cb termination_cb,
 		va_list args);
 
 /*
@@ -346,7 +346,7 @@ int io_process_prepare(struct io_process *process,
  */
 int io_process_init_prepare(struct io_process *process,
 		struct io_process_parameters *parameters,
-		io_pid_cb_t termination_cb, ...);
+		io_pid_cb termination_cb, ...);
 
 /**
  * Convenience function which calls io_process_vinit() and io_process_prepare()
@@ -358,7 +358,7 @@ int io_process_init_prepare(struct io_process *process,
  */
 int io_process_vinit_prepare(struct io_process *process,
 		struct io_process_parameters *parameters,
-		io_pid_cb_t termination_cb, va_list args);
+		io_pid_cb termination_cb, va_list args);
 
 /**
  * Convenience function which calls io_process_init(), io_process_prepare() and
@@ -370,7 +370,7 @@ int io_process_vinit_prepare(struct io_process *process,
  */
 int io_process_init_prepare_and_launch(struct io_process *process,
 		struct io_process_parameters *parameters,
-		io_pid_cb_t termination_cb, ...)
+		io_pid_cb termination_cb, ...)
 __attribute__ ((sentinel(0)));
 
 /**
@@ -384,7 +384,7 @@ __attribute__ ((sentinel(0)));
  */
 int io_process_vinit_prepare_and_launch(struct io_process *process,
 		struct io_process_parameters *parameters,
-		io_pid_cb_t termination_cb, va_list args);
+		io_pid_cb termination_cb, va_list args);
 
 /**
  * Convenience function which calls io_process_init(), io_process_prepare(),
@@ -396,7 +396,7 @@ int io_process_vinit_prepare_and_launch(struct io_process *process,
  */
 int io_process_init_prepare_launch_and_wait(struct io_process *process,
 		struct io_process_parameters *parameters,
-		io_pid_cb_t termination_cb, ...)
+		io_pid_cb termination_cb, ...)
 __attribute__ ((sentinel(0)));
 
 /**
@@ -410,7 +410,7 @@ __attribute__ ((sentinel(0)));
  */
 int io_process_vinit_prepare_launch_and_wait(struct io_process *process,
 		struct io_process_parameters *parameters,
-		io_pid_cb_t termination_cb, va_list args);
+		io_pid_cb termination_cb, va_list args);
 
 /* waits for the process thus can block */
 /**

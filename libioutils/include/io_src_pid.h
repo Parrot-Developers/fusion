@@ -29,7 +29,7 @@ extern "C" {
 struct io_src_pid;
 
 /**
- * @typedef io_pid_cb_t
+ * @typedef io_pid_cb
  * @brief Called when the monitored process has died
  * @param pid_src Signal source
  * @param pid Pid of the process which has just died
@@ -37,7 +37,7 @@ struct io_src_pid;
  * @note the pid field of the io_src_pid context is invalid in the context of
  * the callback. One _must_ use the pid parameter instead
  */
-typedef void (io_pid_cb_t)(struct io_src_pid *pid_src, pid_t pid, int status);
+typedef void (io_pid_cb)(struct io_src_pid *pid_src, pid_t pid, int status);
 
 /**
  * @struct io_src_pid
@@ -51,7 +51,7 @@ struct io_src_pid {
 	/** status of the process when it dies. Same semantic as waitpid's */
 	int status;
 	/** user callback, notified when one of the registered signals occur */
-	io_pid_cb_t *cb;
+	io_pid_cb *cb;
 };
 
 /**
@@ -60,7 +60,7 @@ struct io_src_pid {
  * @param cb User calback, notified when the process dies
  * @return errno compatible negative value
  */
-int io_src_pid_init(struct io_src_pid *pid_src, io_pid_cb_t *cb);
+int io_src_pid_init(struct io_src_pid *pid_src, io_pid_cb *cb);
 
 /**
  * Configures up a pid_src to monitor a given pid

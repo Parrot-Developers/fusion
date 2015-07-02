@@ -298,7 +298,7 @@ static void src_cb(struct io_src *src)
 	io_process_process_events(process);
 }
 
-int io_process_init(struct io_process *process, io_pid_cb_t termination_cb, ...)
+int io_process_init(struct io_process *process, io_pid_cb termination_cb, ...)
 {
 	int ret;
 	va_list args;
@@ -310,7 +310,7 @@ int io_process_init(struct io_process *process, io_pid_cb_t termination_cb, ...)
 	return ret;
 }
 
-int io_process_vinit(struct io_process *process, io_pid_cb_t termination_cb,
+int io_process_vinit(struct io_process *process, io_pid_cb termination_cb,
 		va_list args)
 {
 	int ret;
@@ -619,7 +619,7 @@ int io_process_prepare(struct io_process *process,
 
 int io_process_init_prepare(struct io_process *process,
 		struct io_process_parameters *parameters,
-		io_pid_cb_t termination_cb, ...)
+		io_pid_cb termination_cb, ...)
 {
 	int ret;
 	va_list args;
@@ -634,7 +634,7 @@ int io_process_init_prepare(struct io_process *process,
 
 int io_process_vinit_prepare(struct io_process *process,
 		struct io_process_parameters *p,
-		io_pid_cb_t termination_cb, va_list args)
+		io_pid_cb termination_cb, va_list args)
 {
 	int ret;
 
@@ -658,7 +658,7 @@ err:
 
 int io_process_init_prepare_and_launch(struct io_process *process,
 		struct io_process_parameters *parameters,
-		io_pid_cb_t termination_cb, ...)
+		io_pid_cb termination_cb, ...)
 {
 	int ret;
 	va_list args;
@@ -673,7 +673,7 @@ int io_process_init_prepare_and_launch(struct io_process *process,
 
 int io_process_vinit_prepare_and_launch(struct io_process *process,
 		struct io_process_parameters *parameters,
-		io_pid_cb_t termination_cb, va_list args)
+		io_pid_cb termination_cb, va_list args)
 {
 	int ret;
 
@@ -687,7 +687,7 @@ int io_process_vinit_prepare_and_launch(struct io_process *process,
 
 int io_process_init_prepare_launch_and_wait(struct io_process *process,
 		struct io_process_parameters *parameters,
-		io_pid_cb_t termination_cb, ...)
+		io_pid_cb termination_cb, ...)
 {
 	int ret;
 	va_list args;
@@ -702,7 +702,7 @@ int io_process_init_prepare_launch_and_wait(struct io_process *process,
 
 int io_process_vinit_prepare_launch_and_wait(struct io_process *process,
 		struct io_process_parameters *parameters,
-		io_pid_cb_t termination_cb, va_list args)
+		io_pid_cb termination_cb, va_list args)
 {
 	int ret;
 

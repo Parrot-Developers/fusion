@@ -51,7 +51,7 @@ static void pid_cb(struct io_src *src)
 	pid_src->cb(pid_src, pid_ret, pid_src->status);
 }
 
-int io_src_pid_init(struct io_src_pid *pid_src, io_pid_cb_t *cb)
+int io_src_pid_init(struct io_src_pid *pid_src, io_pid_cb *cb)
 {
 	int pidfd;
 
