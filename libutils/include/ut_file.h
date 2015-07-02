@@ -37,13 +37,15 @@ long ut_file_get_file_size(const char *path);
 
 /**
  * Reads the content of a file and store it in a suitably allocated buffer
- * @param path path of the file to open
+ * @param fmt printf format for building the path of the file to open, with the
+ * arguments corresponding to the ellipsis
  * @param string in input, must be a valid pointer, in output, points to the
  * allocated string read, which must be freed after usage with either free() or
  * ut_string_free(). Set to NULL on error.
  * @return errno-compatible negative value on error, 0 on success
  */
-int ut_file_to_string(const char *path, char **string);
+__attribute__ ((format (printf, 1, 3)))
+int ut_file_to_string(const char *fmt, char **string, ...);
 
 /**
  * Writes the content of a buffer to a file.
