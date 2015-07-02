@@ -46,17 +46,6 @@ long ut_file_get_file_size(const char *path);
 int ut_file_to_string(const char *path, char **string);
 
 /**
- * Reads the content of a file and store it in a suitably allocated buffer
- * @param string in input, must be a valid pointer, in output, points to the
- * allocated string read, which must be freed after usage with either free() or
- * ut_string_free(). Set to NULL on error.
- * @param fmt a-la-printf format for building the path to the file to read
- * @return errno-compatible negative value on error, 0 on success
- */
-__attribute__ ((format (printf, 2, 3)))
-int ut_file_to_vstring(char **string, const char *fmt, ...);
-
-/**
  * Writes the content of a buffer to a file.
  * @param buffer Buffer to write
  * @param size Number of bytes from buffer, to write to the file
