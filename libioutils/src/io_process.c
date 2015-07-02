@@ -35,7 +35,6 @@ static int command_line_new(struct io_process *process, va_list args)
 {
 	int ret;
 	char *arg;
-	int nargs = 0;
 
 	if (process == NULL)
 		return -EINVAL;
