@@ -29,7 +29,7 @@ add_subdirectory(libioutils)
 # build a CPack driven installer package
 include(InstallRequiredSystemLibraries)
 set(CPACK_RESOURCE_FILE_LICENSE
-    "${CMAKE_CURRENT_SOURCE_DIR}/LICENCE")
+    "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 set(CPACK_PACKAGE_VERSION_MAJOR "0")
 set(CPACK_PACKAGE_VERSION_MINOR "3")
 set(CPACK_PACKAGE_VERSION_PATCH "2")
