@@ -31,10 +31,10 @@ struct io_src_inot;
 struct io_src_inot_watch;
 
 /**
- * @typedef io_src_inot_cb_t
+ * @typedef io_src_inot_cb
  * @brief Type of the callback used to be notified of inotify events
  */
-typedef void (io_src_inot_cb_t)(struct io_src_inot *inot,
+typedef void (io_src_inot_cb)(struct io_src_inot *inot,
 		struct inotify_event *evt, struct io_src_inot_watch *watch);
 
 /**
@@ -72,7 +72,7 @@ struct io_src_inot_watch {
 	/** inotify events set */
 	uint32_t events;
 	/** callback called on events concerning the watch descriptor */
-	io_src_inot_cb_t *cb;
+	io_src_inot_cb *cb;
 };
 
 /**
