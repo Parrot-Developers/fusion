@@ -106,7 +106,7 @@ static void uad_cb(struct io_src_msg *src, enum io_src_event evt)
 }
 
 static int uad_init_args_are_invalid(struct io_src_msg_uad *uad,
-		io_src_msg_uad_cb_t *cb, void *rcv_buf, unsigned len,
+		io_src_msg_uad_cb *cb, void *rcv_buf, unsigned len,
 		const char *fmt)
 {
 	return NULL == uad || NULL == cb || NULL == rcv_buf || 0 == len ||
@@ -131,7 +131,7 @@ int io_src_msg_uad_get_message(struct io_src_msg_uad *uad, void **msg)
 	return io_src_msg_get_message(&(uad->src_msg), msg);
 }
 
-int io_src_msg_uad_init(struct io_src_msg_uad *uad, io_src_msg_uad_cb_t *cb,
+int io_src_msg_uad_init(struct io_src_msg_uad *uad, io_src_msg_uad_cb *cb,
 		void *rcv_buf, unsigned len, const char *fmt, ...)
 {
 	int sockfd;

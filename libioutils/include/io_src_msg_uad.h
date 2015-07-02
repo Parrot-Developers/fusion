@@ -40,7 +40,7 @@ struct sockaddr_un sun_sizecheck;
  * @param evt Event type, either IO or OUT not both. The evt parameter must be
  * used instead of io_src_has(in|out) in the callback.
  */
-typedef void (io_src_msg_uad_cb_t)(struct io_src_msg_uad *src,
+typedef void (io_src_msg_uad_cb)(struct io_src_msg_uad *src,
 		enum io_src_event evt);
 
 /**
@@ -51,7 +51,7 @@ struct io_src_msg_uad {
 	/** inner msg monitor source */
 	struct io_src_msg src_msg;
 	/** user callback, notified when I/O is possible */
-	io_src_msg_uad_cb_t *cb;
+	io_src_msg_uad_cb *cb;
 	/** path of the socket */
 	struct sockaddr_un addr;
 };
@@ -85,7 +85,7 @@ int io_src_msg_uad_get_message(struct io_src_msg_uad *uad, void **msg);
  * @param fmt A la printf format string for the construction of the path
  * @return errno compatible negative value
  */
-int io_src_msg_uad_init(struct io_src_msg_uad *uad, io_src_msg_uad_cb_t *cb,
+int io_src_msg_uad_init(struct io_src_msg_uad *uad, io_src_msg_uad_cb *cb,
 		void *rcv_buf, unsigned len, const char *fmt, ...)
 __attribute__((format(printf, 5, 6)));
 
