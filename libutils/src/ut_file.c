@@ -57,7 +57,8 @@ static long get_file_size(FILE *f)
 /**
  * Read the content of a file, which reports a size of 0
  * @param f File to read
- * @param string in output, contains the content of the file
+ * @param string in output, contains the content of the file, left untouched on
+ * error
  * @return errno compatible negative value on error, 0 on success
  */
 static int do_file_to_string_zero_size(FILE *f, char **string)
@@ -65,13 +66,14 @@ static int do_file_to_string_zero_size(FILE *f, char **string)
 #define BASE_SIZE 0x40
 	size_t sret;
 	size_t size = BASE_SIZE;
+	char *s;
 
 	while (true) {
-		*string = realloc(*string, size + 1);
-		if (*string == NULL)
+		s = realloc(s, size + 1);
+		if (s == NULL)
 			return -errno;
 
-		sret = fread(*string + size - BASE_SIZE, 1, BASE_SIZE, f);
+		sret = fread(s + size - BASE_SIZE, 1, BASE_SIZE, f);
 		if (sret != BASE_SIZE) {
 			if (ferror(f)) {
 				ut_string_free(string);
@@ -80,13 +82,15 @@ static int do_file_to_string_zero_size(FILE *f, char **string)
 
 			/* be sure the string is nul-terminated */
 			size = size - BASE_SIZE + sret;
-			(*string)[size] = '\0';
+			s[size] = '\0';
 
 			break;
 		}
 
 		size += BASE_SIZE;
 	}
+
+	*string = s;
 
 	return 0;
 #undef BASE_SIZE
@@ -96,7 +100,7 @@ static int do_file_to_string_zero_size(FILE *f, char **string)
  * Actually reads a previously opened file and stores it into a string
  * @param f opened file stream
  * @param string in output, points to the newly allocated buffer containing the
- * content of the file
+ * content of the file, left untouched on error.
  * @return errno-compatible negative value on error, 0 on success
  */
 static int do_file_to_string(FILE *f, char **string)
@@ -104,6 +108,7 @@ static int do_file_to_string(FILE *f, char **string)
 	int ret;
 	long size;
 	size_t sret;
+	char *s;
 
 	size = get_file_size(f);
 	if (size == -1) {
@@ -117,20 +122,45 @@ static int do_file_to_string(FILE *f, char **string)
 	if (size == 0)
 		return do_file_to_string_zero_size(f, string);
 
-	*string = calloc(size + 1, 1);
-	if (*string == NULL) {
+	s = calloc(size + 1, 1);
+	if (s == NULL) {
 		ut_perr("calloc", errno);
 		return -errno;
 	}
-	sret = fread(*string, size, 1, f);
+	sret = fread(s, size, 1, f);
 	if (sret != 1 && ferror(f)) {
 		ret = -errno;
-		ut_string_free(string);
+		ut_string_free(&s);
 		ut_err("fread error");
 		return ret;
 	}
+	*string = s;
 
 	return 0;
+}
+
+/**
+ * Reads a file and stores it's content to a string
+ * @param path Path of the file to read.
+ * @param string In input, must point to a valid storage for a char *, which, in
+ * output, will be filled with an address of a newly allocated string, the user
+ * has to free after usage. Left untouched on error.
+ * @return errno compatible negative value on error, 0 on success
+ */
+static int file_to_string(const char *path, char **string)
+{
+	FILE __attribute__((cleanup(ut_file_close)))*f = NULL;
+
+	if (ut_string_is_invalid(path))
+		return -EINVAL;
+
+	f = fopen(path, "rbe");
+	if (f == NULL) {
+		ut_perr("fopen", errno);
+		return -errno;
+	}
+
+	return do_file_to_string(f, string);
 }
 
 void ut_file_close(FILE **file)
@@ -183,31 +213,15 @@ long ut_file_get_file_size(const char *path)
 	return get_file_size(f);
 }
 
-static int file_to_string(const char *path, char **string)
-{
-	FILE __attribute__((cleanup(ut_file_close)))*f = NULL;
-
-	if (string == NULL)
-		return -EINVAL;
-	*string = NULL;
-	if (ut_string_is_invalid(path))
-		return -EINVAL;
-
-	f = fopen(path, "rbe");
-	if (f == NULL) {
-		ut_perr("fopen", errno);
-		return -errno;
-	}
-
-	return do_file_to_string(f, string);
-}
-
 int ut_file_to_string(const char *fmt, char **string, ...)
 {
 	int ret;
 	va_list args;
 	char __attribute__((cleanup(ut_string_free)))*path = NULL;
 
+	if (string == NULL)
+		return -EINVAL;
+	*string = NULL;
 	if (ut_string_is_invalid(fmt))
 		return -EINVAL;
 
