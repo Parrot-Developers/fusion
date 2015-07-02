@@ -93,7 +93,11 @@ struct io_process {
 	/**
 	 * command line of the process to launch
 	 */
-	char **command_line;
+	char *command_line;
+	/**
+	 * size of the command_line buffer
+	 */
+	size_t command_line_len;
 	/**
 	 * current state of the process
 	 */

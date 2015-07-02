@@ -19,6 +19,8 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
+#include <argz.h>
+
 #include <ut_string.h>
 #include <ut_file.h>
 
@@ -26,69 +28,30 @@
 #include "io_utils.h"
 
 /**
- * Destroys a command line array, previously built by command_line_new()
- * @param command_line Command line to destroy, NULL in output
- */
-static void command_line_destroy(char ***command_line)
-{
-	int i = 0;
-
-	if (command_line == NULL || *command_line == NULL)
-		return;
-
-	do {
-		if ((*command_line)[i] != NULL)
-			ut_string_free((*command_line) + i);
-		else
-			break;
-		i++;
-	} while (true);
-
-	free(*command_line);
-	*command_line = NULL;
-}
-
-/**
  * Builds the command line for the process from the list of arguments supplied
- * @param command_line Command line built on output, NULL on error
+ * @param process Process context
  * @param args NULL-terminated list of strings for building the command-line
  */
-static int command_line_new(char ***command_line, va_list args)
+static int command_line_new(struct io_process *process, va_list args)
 {
 	int ret;
 	char *arg;
-	char **cmdline = NULL;
 	int nargs = 0;
 
-	if (command_line == NULL)
+	if (process == NULL)
 		return -EINVAL;
 
 	do {
 		arg = va_arg(args, char *);
 		if (arg == NULL)
 			break;
-		cmdline = realloc(*command_line,
-				(nargs + 2) * sizeof(*cmdline));
-		if (cmdline == NULL)
-			goto err;
-		cmdline[nargs] = strdup(arg);
-		if (cmdline[nargs] == NULL)
-			goto err;
-		cmdline[nargs + 1] = NULL;
-		*command_line = cmdline;
-		nargs++;
+		ret = argz_add(&process->command_line,
+				&process->command_line_len, arg);
+		if (ret != 0)
+			return ret;
 	} while (true);
 
-	if (*command_line == NULL)
-		return -EINVAL;
-
 	return 0;
-err:
-	ret = -errno;
-
-	command_line_destroy(command_line);
-
-	return ret;
 }
 
 /**
@@ -172,7 +135,7 @@ static void io_process_clean(struct io_process *process)
 	if (process == NULL)
 		return;
 
-	command_line_destroy(&process->command_line);
+	ut_string_free(&process->command_line);
 
 	io_mon_remove_source(&process->mon,
 			io_src_pid_get_source(&process->pid_src));
@@ -276,6 +239,8 @@ static void in_child(struct io_process *process)
 {
 	int i;
 	int ret;
+	size_t argc;
+	char **argv;
 
 	if (process->stdin_pipe[0] != -1) {
 		ret = dup2(process->stdin_pipe[0], STDIN_FILENO);
@@ -292,13 +257,21 @@ static void in_child(struct io_process *process)
 		if (ret < 0)
 			error(EXIT_FAILURE, errno, "dup stderr");
 	}
+	/* prepare the command-line */
+	argc = argz_count(process->command_line, process->command_line_len);
+	argv = calloc(argc + 1, sizeof(*argv));
+	if (argv == NULL) {
+		ULOGE("calloc: %m");
+		_exit(EXIT_FAILURE);
+	}
+	argz_extract(process->command_line, process->command_line_len, argv);
 	/* from here, log will be available to the parent if redirect enabled */
 	ret = prctl(PR_SET_PDEATHSIG, SIGKILL);
 	if (ret < 0)
 		error(EXIT_FAILURE, errno, "prctl");
 	for (i = sysconf(_SC_OPEN_MAX) - 1; i > 2; i--)
 		close(i);
-	ret = execv(process->command_line[0], process->command_line);
+	ret = execv(argv[0], argv);
 	if (ret < 0)
 		error(EXIT_FAILURE, errno, "execve");
 
@@ -351,7 +324,7 @@ int io_process_vinit(struct io_process *process, io_pid_cb_t termination_cb,
 	process->stderr_pipe[0] = process->stderr_pipe[1] = -1;
 	process->termination_cb = termination_cb;
 
-	ret = command_line_new(&process->command_line, args);
+	ret = command_line_new(process, args);
 	if (ret < 0)
 		goto err;
 
