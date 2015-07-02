@@ -38,7 +38,7 @@ extern "C" {
 struct io_src_sep;
 
 /**
- * @typedef io_src_sep_cb_t
+ * @typedef io_src_sep_cb
  * @brief User callback, called when :
  * <ul>
  *   <li>
@@ -61,7 +61,7 @@ struct io_src_sep;
  * @note it is guaranteed that chunk[len] can be written, for example to add a
  * null byte for terminating a string, even if len == IO_SRC_SEP_SIZE
  */
-typedef void (io_src_sep_cb_t)(struct io_src_sep *sep, char *chunk,
+typedef void (io_src_sep_cb)(struct io_src_sep *sep, char *chunk,
 		unsigned len);
 
 /**
@@ -78,7 +78,7 @@ struct io_src_sep {
 	/** 1 if the separator is made of two bytes, 0 otherwise */
 	bool two_bytes;
 	/** user callback, notified when one of the registered signals occur */
-	io_src_sep_cb_t *cb;
+	io_src_sep_cb *cb;
 	/** buffer containing the bytes read from the source */
 	char buf[2 * IO_SRC_SEP_SIZE + 1];
 
@@ -107,7 +107,7 @@ struct io_src_sep {
  * IO_SRC_SEP_NO_SEP2 to use only one separator
  * @return Negative errno compatible value on error, 0 otherwise
  */
-int io_src_sep_init(struct io_src_sep *sep_src, int fd, io_src_sep_cb_t *cb,
+int io_src_sep_init(struct io_src_sep *sep_src, int fd, io_src_sep_cb *cb,
 		int sep1, int sep2);
 
 /**

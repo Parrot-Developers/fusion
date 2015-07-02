@@ -182,7 +182,7 @@ static void sep_cb(struct io_src *src)
 
 }
 
-int io_src_sep_init(struct io_src_sep *sep_src, int fd, io_src_sep_cb_t *cb,
+int io_src_sep_init(struct io_src_sep *sep_src, int fd, io_src_sep_cb *cb,
 		int sep1, int sep2)
 {
 	if (sep1 != (char)sep1)

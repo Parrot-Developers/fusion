@@ -64,7 +64,7 @@ static int command_line_new(struct io_process *process, va_list args)
  * @return Negative errno compatible value on error, 0 otherwise
  */
 static int set_sep_src(struct io_process *process, struct io_src_sep *sep_src,
-		int pipefd[2], io_src_sep_cb_t *cb, int sep1, int sep2)
+		int pipefd[2], io_src_sep_cb *cb, int sep1, int sep2)
 {
 	int ret;
 	struct io_src *src = NULL;
@@ -408,7 +408,7 @@ int io_process_set_stdin_src(struct io_process *process, io_src_cb *cb)
 }
 
 int io_process_set_stdout_sep_src(struct io_process *process,
-		io_src_sep_cb_t *cb, int sep1, int sep2)
+		io_src_sep_cb *cb, int sep1, int sep2)
 {
 	return set_sep_src(process, &process->stdout_src, process->stdout_pipe,
 			cb, sep1, sep2);
@@ -421,7 +421,7 @@ int io_process_set_stdout_src(struct io_process *process, io_src_cb *cb)
 }
 
 int io_process_set_stderr_sep_src(struct io_process *process,
-		io_src_sep_cb_t *cb, int sep1, int sep2)
+		io_src_sep_cb *cb, int sep1, int sep2)
 {
 	return set_sep_src(process, &process->stderr_src, process->stderr_pipe,
 			cb, sep1, sep2);
