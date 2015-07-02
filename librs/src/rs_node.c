@@ -136,7 +136,7 @@ struct rs_node *rs_node_find(struct rs_node *needle, struct rs_node *haystack)
 }
 
 struct rs_node *rs_node_find_match(struct rs_node *node,
-		rs_node_match_cb_t match, const void *data)
+		rs_node_match_cb match, const void *data)
 {
 	if (NULL == node || NULL == match)
 		return NULL;
@@ -154,7 +154,7 @@ struct rs_node *rs_node_remove(struct rs_node *list, struct rs_node *trash)
 }
 
 struct rs_node *rs_node_remove_match(struct rs_node *list,
-		rs_node_match_cb_t match, const void *data)
+		rs_node_match_cb match, const void *data)
 {
 	struct rs_node *needle;
 

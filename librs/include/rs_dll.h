@@ -154,7 +154,7 @@ struct rs_node *rs_dll_find(struct rs_dll *dll, struct rs_node *node);
  * @param data User data, passed to the match callback
  * @return Node if found, NULL otherwise
  */
-struct rs_node *rs_dll_find_match(struct rs_dll *dll, rs_node_match_cb_t match,
+struct rs_node *rs_dll_find_match(struct rs_dll *dll, rs_node_match_cb match,
 		const void *data);
 
 /**
@@ -221,7 +221,7 @@ struct rs_node *rs_dll_remove(struct rs_dll *dll, struct rs_node *node);
  * @return Node if found, NULL otherwise or on error (NULL parameter)
  */
 struct rs_node *rs_dll_remove_match(struct rs_dll *dll,
-		rs_node_match_cb_t match, const void *data);
+		rs_node_match_cb match, const void *data);
 
 /**
  * Applies a callback to each element of the list, in the list order

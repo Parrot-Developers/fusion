@@ -29,13 +29,13 @@ struct rs_node {
 };
 
 /**
- * @typedef rs_node_match_cb_t
+ * @typedef rs_node_match_cb
  * @brief Matching callback
  * @param node Node to match. Can be NULL
  * @param data User defined data. Can be NULL
  * @return Returns 1 if the node matches, 0 otherwise
  */
-typedef int (*rs_node_match_cb_t)(struct rs_node *node, const void *data);
+typedef int (*rs_node_match_cb)(struct rs_node *node, const void *data);
 
 /**
  * @typedef rs_node_cb_t
@@ -169,7 +169,7 @@ struct rs_node *rs_node_find(struct rs_node *needle, struct rs_node *haystack);
  * @return Node if found, NULL otherwise
  */
 struct rs_node *rs_node_find_match(struct rs_node *node,
-		rs_node_match_cb_t match, const void *data);
+		rs_node_match_cb match, const void *data);
 
 /**
  * Removes a node from a list of whom any node is known
@@ -193,7 +193,7 @@ struct rs_node *rs_node_remove(struct rs_node *list, struct rs_node *trash);
  * @return Node removed if found, NULL otherwise or on error
  */
 struct rs_node *rs_node_remove_match(struct rs_node *list,
-		rs_node_match_cb_t match, const void *data);
+		rs_node_match_cb match, const void *data);
 
 /**
  * Applies a callback to each element of the list, in the list order. Stops at

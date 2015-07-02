@@ -145,7 +145,7 @@ unsigned rs_dll_get_count(struct rs_dll *dll)
 	return NULL == dll ? UINT_MAX : dll->count;
 }
 
-struct rs_node *rs_dll_find_match(struct rs_dll *dll, rs_node_match_cb_t match,
+struct rs_node *rs_dll_find_match(struct rs_dll *dll, rs_node_match_cb match,
 		const void *data)
 {
 	if (NULL == dll || NULL == match)
@@ -225,7 +225,7 @@ int rs_dll_rewind(struct rs_dll *dll)
 }
 
 struct rs_node *rs_dll_remove_match(struct rs_dll *dll,
-		rs_node_match_cb_t match, const void *data)
+		rs_node_match_cb match, const void *data)
 {
 	struct rs_node *head_next_bkp = NULL;
 	struct rs_node *tail_prev_bkp = NULL;
