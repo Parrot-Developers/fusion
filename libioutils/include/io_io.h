@@ -70,7 +70,7 @@ enum io_io_write_status {
 	IO_IO_WRITE_ABORTED,	/**< write aborted */
 };
 
-/* forward reference for io_io_write_cb_t definition */
+/* forward reference for io_io_write_cb definition */
 struct io_io_write_buffer;
 
 /**
@@ -78,7 +78,7 @@ struct io_io_write_buffer;
  * @param buffer buffer written or on which an error occurred
  * @param status Status of the IO context concerning this buffer
  */
-typedef void (*io_io_write_cb_t) (struct io_io_write_buffer *buffer,
+typedef void (*io_io_write_cb) (struct io_io_write_buffer *buffer,
 		enum io_io_write_status status);
 
 /**
@@ -87,7 +87,7 @@ typedef void (*io_io_write_cb_t) (struct io_io_write_buffer *buffer,
  */
 struct io_io_write_buffer {
 	struct rs_node node;	/**< node for chaining */
-	io_io_write_cb_t cb;	/**< user callback */
+	io_io_write_cb cb;	/**< user callback */
 	void *data;		/**< user data */
 	size_t length;		/**< write buffer length */
 	const void *address;	/**< write buffer data address*/
@@ -220,7 +220,7 @@ int io_io_write_abort(struct io_io *io);
  * @param address Address of the buffer containing the write_buffer's data
  * @return Negative errno-compatible value on error, 0 on success
  */
-int io_io_write_buffer_init(struct io_io_write_buffer *buf, io_io_write_cb_t cb,
+int io_io_write_buffer_init(struct io_io_write_buffer *buf, io_io_write_cb cb,
 		void *data, size_t length, const void *address);
 
 /**

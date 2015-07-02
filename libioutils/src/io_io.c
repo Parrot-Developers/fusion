@@ -640,7 +640,7 @@ int io_io_write_abort(struct io_io *io)
 	return 0;
 }
 
-int io_io_write_buffer_init(struct io_io_write_buffer *buf, io_io_write_cb_t cb,
+int io_io_write_buffer_init(struct io_io_write_buffer *buf, io_io_write_cb cb,
 		void *data, size_t length, const void *address)
 {
 	int ret;
