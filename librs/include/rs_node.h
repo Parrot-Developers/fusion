@@ -38,11 +38,11 @@ struct rs_node {
 typedef int (*rs_node_match_cb)(struct rs_node *node, const void *data);
 
 /**
- * @typedef rs_node_cb_t
+ * @typedef rs_node_cb
  * @param node Node of the linked list the callback must apply to
  * @return 0 on success, non-zero on error
  */
-typedef int (*rs_node_cb_t)(struct rs_node *node);
+typedef int (*rs_node_cb)(struct rs_node *node);
 
 /**
  * @def RS_NODE_MATCH_MEMBER
@@ -203,7 +203,7 @@ struct rs_node *rs_node_remove_match(struct rs_node *list,
  * @return -EINVAL if an invalid argument is passed, 0 on success, or the first
  * cb's call non-zero return value
  */
-int rs_node_foreach(struct rs_node *list, rs_node_cb_t cb);
+int rs_node_foreach(struct rs_node *list, rs_node_cb cb);
 
 /**
  * Pops all the nodes of a linked list and allow user to perform a cleanup
@@ -212,7 +212,7 @@ int rs_node_foreach(struct rs_node *list, rs_node_cb_t cb);
  * @param cb Callback called on each node. Can be NULL
  * @return -EINVAL if an invalid argument is passed
  */
-int rs_node_remove_all(struct rs_node **list, rs_node_cb_t cb);
+int rs_node_remove_all(struct rs_node **list, rs_node_cb cb);
 
 #ifdef __cplusplus
 }

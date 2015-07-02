@@ -59,7 +59,7 @@ struct rs_dll_vtable {
 	 * performs the cleanup operations on the node in remove_all
 	 * the return value is ignored
 	 */
-	rs_node_cb_t remove;
+	rs_node_cb remove;
 };
 
 /**
@@ -230,7 +230,7 @@ struct rs_node *rs_dll_remove_match(struct rs_dll *dll,
  * @return Negative errno compatible value on error otherwise zero 0 if all the
  * callback calls returned 0 or the first non 0 callback result
  */
-int rs_dll_foreach(struct rs_dll *dll, rs_node_cb_t cb);
+int rs_dll_foreach(struct rs_dll *dll, rs_node_cb cb);
 
 /**
  * Pops all the nodes of a linked list and allow user to perform a cleanup
@@ -239,7 +239,7 @@ int rs_dll_foreach(struct rs_dll *dll, rs_node_cb_t cb);
  * @param cb Callback called on each node. Can be NULL
  * @return Negative errno compatible value on error otherwise zero
  */
-int rs_dll_remove_all_cb(struct rs_dll *dll, rs_node_cb_t cb);
+int rs_dll_remove_all_cb(struct rs_dll *dll, rs_node_cb cb);
 
 /**
  * Pops all the nodes of a linked list and call the remove method from the
