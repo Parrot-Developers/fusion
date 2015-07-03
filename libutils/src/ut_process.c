@@ -182,7 +182,7 @@ int ut_process_sync_parent_lock(struct ut_process_sync *sync)
 int ut_process_sync_parent_unlock(struct ut_process_sync *sync)
 {
 	ssize_t sret;
-	char c;
+	char c = 0;
 
 	if (sync == NULL)
 		return -EINVAL;
