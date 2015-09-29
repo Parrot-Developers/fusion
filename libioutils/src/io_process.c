@@ -178,6 +178,7 @@ static void termination_cb_wrapper(struct io_src_pid *pid_src, pid_t pid,
 
 	process->state = IO_PROCESS_DEAD;
 	process->termination_cb(pid_src, pid, status);
+	waitpid(pid, NULL, 0);
 }
 
 /**
