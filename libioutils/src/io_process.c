@@ -543,14 +543,15 @@ int io_process_wait(struct io_process *process)
 
 	do {
 		ret = io_mon_poll(&process->mon, -1);
-		if (ret < 0)
+		if (ret < 0) {
 			break;
+		}
 	} while (process->state != IO_PROCESS_DEAD);
 
 	if (process->state != IO_PROCESS_DEAD)
 		io_process_kill(process);
 
-	return ret;
+	return ret > 0 ? 0 : ret;
 }
 
 int io_process_launch_and_wait(struct io_process *process)
