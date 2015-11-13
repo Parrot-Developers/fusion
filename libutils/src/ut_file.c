@@ -242,6 +242,9 @@ int ut_file_write_buffer(const void *buffer, size_t size, const char *path)
 	size_t sret;
 	FILE __attribute__((cleanup(ut_file_close))) *file = NULL;
 
+	if (buffer == NULL || ut_string_is_invalid(path))
+		return -EINVAL;
+
 	file = fopen(path, "wbe");
 	if (file == NULL)
 		return -errno;
