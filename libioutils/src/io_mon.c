@@ -227,6 +227,7 @@ static int do_process_events_sets(struct io_mon *mon, int n,
 		src = event->data.ptr;
 		assert(src != NULL);
 		if (NULL == src)
+			/* coverity[deadcode] */
 			return -EINVAL;
 
 		/*
