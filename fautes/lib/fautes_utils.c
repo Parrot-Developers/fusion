@@ -357,7 +357,7 @@ char *get_tun_path(void)
 	tmp[strlen(tmp) - 1] = '/';
 	ret = asprintf(&tun_path, "%snet/tun", tmp);
 	if (-1 == ret) {
-		tmp = NULL;
+		tun_path = NULL;
 		fprintf(stderr, "memory allocation\n");
 		return NULL;
 	}
