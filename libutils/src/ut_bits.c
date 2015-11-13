@@ -22,7 +22,7 @@ uint8_t ut_bit_field_claim_free_index(ut_bit_field *indices)
 		return -EINVAL;
 
 	for (i = 0; i < max; i++) {
-		bit = (1 << i);
+		bit = ((ut_bit_field)1 << i);
 		if ((*indices & bit) == 0) {
 			/* claim the index */
 			*indices |= bit;
