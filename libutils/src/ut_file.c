@@ -243,7 +243,7 @@ int ut_file_write_buffer(const void *buffer, size_t size, const char *path)
 	FILE __attribute__((cleanup(ut_file_close))) *file = NULL;
 
 	file = fopen(path, "wbe");
-	if (path == NULL)
+	if (file == NULL)
 		return -errno;
 
 	sret = fwrite(buffer, size, 1, file);
