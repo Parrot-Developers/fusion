@@ -77,6 +77,7 @@ static int do_file_to_string_zero_size(FILE *f, char **string)
 		if (sret != BASE_SIZE) {
 			if (ferror(f)) {
 				ut_string_free(string);
+				ut_string_free(&s);
 				return -EIO;
 			}
 
