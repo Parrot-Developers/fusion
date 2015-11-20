@@ -549,6 +549,8 @@ int io_process_wait(struct io_process *process)
 
 	if (process->state != IO_PROCESS_DEAD)
 		io_process_kill(process);
+	else
+		io_process_clean(process);
 
 	return ret > 0 ? 0 : ret;
 }
