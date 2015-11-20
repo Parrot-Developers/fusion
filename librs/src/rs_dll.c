@@ -60,14 +60,10 @@ int rs_dll_init(struct rs_dll *dll, const struct rs_dll_vtable *vtable)
 
 void rs_dll_dump(struct rs_dll *dll)
 {
-	int display(struct rs_node *node)
-	{
-		dll->vtable.print(node);
+	struct rs_node *n = NULL;
 
-		return 0;
-	}
-
-	rs_node_foreach(dll->head, display);
+	while ((n = rs_dll_next_from(dll, n)))
+		dll->vtable.print(n);
 }
 
 int rs_dll_push(struct rs_dll *dll, struct rs_node *node)

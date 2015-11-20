@@ -122,6 +122,8 @@ static void testRS_DLL_PUSH(void)
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
 	ret = rs_dll_push(&dll, &(int_node_c.node));
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
+	/* just in case a modif breaks severely _dump */
+	rs_dll_dump(&dll);
 	ret = rs_dll_foreach(&dll, two_times_cb);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_EQUAL(int_node_a.val, 34);
