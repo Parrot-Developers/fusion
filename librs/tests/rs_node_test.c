@@ -327,6 +327,12 @@ static void testRS_NODE_FIND(void)
 	/* error cases : none */
 }
 
+static int match(struct rs_node *node, const void *data)
+{
+	struct int_node *int_node = to_int_node(node);
+	return int_node->val == 666;
+}
+
 static void testRS_NODE_FIND_MATCH(void)
 {
 	struct int_node int_node_a = {.val = 17,};
@@ -365,11 +371,6 @@ static void testRS_NODE_FIND_MATCH(void)
 	CU_ASSERT_PTR_NULL(needle);
 
 	/* NULL data is possible, useful for nested matching functions */
-	int match(struct rs_node *node, const void *data)
-	{
-		struct int_node *int_node = to_int_node(node);
-		return int_node->val == 666;
-	}
 	needle = rs_node_find_match(haystack, match, NULL);
 	CU_ASSERT(int_node_test_equals(needle, &int_node_c));
 
@@ -484,29 +485,29 @@ static void testRS_NODE_REMOVE_MATCH(void)
 	/* error cases : none */
 }
 
+static int testRS_NODE_FOREACH_cb(struct rs_node *node)
+{
+	struct int_node *in = to_int_node(node);
+
+	in->val *= 2;
+
+	return 0;
+};
+
 static void testRS_NODE_FOREACH(void)
 {
-	int val = 2;
 	int ret;
 	struct int_node int_node_a = {.val = 17,};
 	struct int_node int_node_b = {.val = 42,};
 	struct int_node int_node_c = {.val = 666,};
 	struct rs_node *list = NULL;
-	int cb(struct rs_node *node)
-	{
-		struct int_node *in = to_int_node(node);
-
-		in->val *= val;
-
-		return 0;
-	};
 
 	rs_node_push(&list, &(int_node_a.node));
 	rs_node_push(&list, &(int_node_b.node));
 	rs_node_push(&list, &(int_node_c.node));
 
 	/* normal use cases */
-	ret = rs_node_foreach(list, cb);
+	ret = rs_node_foreach(list, testRS_NODE_FOREACH_cb);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_EQUAL(int_node_a.val, 34);
 	CU_ASSERT_EQUAL(int_node_b.val, 84);
@@ -515,6 +516,15 @@ static void testRS_NODE_FOREACH(void)
 	/* error use cases */
 }
 
+static int testRS_NODE_REMOVE_ALL_cb(struct rs_node *node)
+{
+	struct int_node *in = to_int_node(node);
+
+	in->val = 0;
+
+	return 0;
+};
+
 static void testRS_NODE_REMOVE_ALL(void)
 {
 	int ret;
@@ -522,21 +532,12 @@ static void testRS_NODE_REMOVE_ALL(void)
 	struct int_node int_node_b = {.val = 42,};
 	struct int_node int_node_c = {.val = 666,};
 	struct rs_node *list = NULL;
-	int cb(struct rs_node *node)
-	{
-		struct int_node *in = to_int_node(node);
-
-		in->val = 0;
-
-		return 0;
-	};
-
 	rs_node_push(&list, &(int_node_a.node));
 	rs_node_push(&list, &(int_node_b.node));
 	rs_node_push(&list, &(int_node_c.node));
 
 	/* normal use cases */
-	ret = rs_node_remove_all(&list, cb);
+	ret = rs_node_remove_all(&list, testRS_NODE_REMOVE_ALL_cb);
 	CU_ASSERT_EQUAL(ret, 0);
 	CU_ASSERT_EQUAL(int_node_a.val, 0);
 	CU_ASSERT_EQUAL(int_node_b.val, 0);
@@ -549,7 +550,7 @@ static void testRS_NODE_REMOVE_ALL(void)
 	CU_ASSERT_PTR_NULL(int_node_c.node.next);
 	CU_ASSERT_PTR_NULL(int_node_c.node.prev);
 	/* it's ok to call remove_all on an empty list */
-	ret = rs_node_remove_all(&list, cb);
+	ret = rs_node_remove_all(&list, testRS_NODE_REMOVE_ALL_cb);
 	CU_ASSERT_EQUAL(ret, 0);
 	/*
 	 * it's ok to call remove_all with no callback, all elements will only
@@ -559,7 +560,7 @@ static void testRS_NODE_REMOVE_ALL(void)
 	CU_ASSERT_EQUAL(ret, 0);
 
 	/* error use cases */
-	ret = rs_node_remove_all(NULL, cb);
+	ret = rs_node_remove_all(NULL, testRS_NODE_REMOVE_ALL_cb);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 }
 

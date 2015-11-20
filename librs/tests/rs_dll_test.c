@@ -94,6 +94,17 @@ static void testRS_DLL_INIT(void)
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 }
 
+static int two_times_cb(struct rs_node *node)
+{
+	struct int_node *in = to_int_node(node);
+
+	CU_ASSERT_PTR_NOT_NULL(node);
+
+	in->val *= 2;
+
+	return 0;
+};
+
 static void testRS_DLL_PUSH(void)
 {
 	struct int_node int_node_a = {.val = 17,};
@@ -101,16 +112,6 @@ static void testRS_DLL_PUSH(void)
 	struct int_node int_node_c = {.val = 666,};
 	struct rs_dll dll;
 	int ret = 0;
-	int two_times_cb(struct rs_node *node)
-	{
-		struct int_node *in = to_int_node(node);
-
-		CU_ASSERT_PTR_NOT_NULL(node);
-
-		in->val *= 2;
-
-		return 0;
-	};
 
 	ret = rs_dll_init(&dll, &dll_test_vtable);
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
@@ -151,17 +152,6 @@ static void testRS_DLL_ENQUEUE(void)
 	struct int_node int_node_c = {.val = 666,};
 	struct rs_dll dll;
 	int ret = 0;
-	int two_times_cb(struct rs_node *node, void *data)
-	{
-		struct int_node *in = to_int_node(node);
-
-		CU_ASSERT_EQUAL_FATAL((uint32_t)data, 0xdeadbeef);
-		CU_ASSERT_PTR_NOT_NULL(node);
-
-		in->val *= 2;
-
-		return 0;
-	};
 
 	ret = rs_dll_init(&dll, &dll_test_vtable);
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
@@ -348,18 +338,19 @@ static void testRS_DLL_FIND(void)
 	CU_ASSERT_PTR_NULL(node);
 }
 
+static int match_cb(struct rs_node *node, const void *data)
+{
+	int searched_value = (int)data;
+	struct int_node *int_node = to_int_node(node);
+
+	return int_node->val == searched_value;
+}
+
 static void testRS_DLL_FIND_MATCH(void)
 {
 	struct int_node int_node_a = {.val = 17,};
 	struct int_node int_node_b = {.val = 42,};
 	struct int_node int_node_c = {.val = 666,};
-	int match_cb(struct rs_node *node, const void *data)
-	{
-		int searched_value = (int)data;
-		struct int_node *int_node = to_int_node(node);
-
-		return int_node->val == searched_value;
-	}
 	struct rs_node *node;
 	struct rs_dll dll;
 	int ret = 0;
@@ -605,6 +596,17 @@ static void testRS_DLL_REMOVE(void)
 	CU_ASSERT_PTR_NULL(node);
 }
 
+static int parity_cb(struct rs_node *n, const void *data)
+{
+	const int my_odd = *((const int *)data);
+	struct int_node *int_node = to_int_node(n);
+
+	if (my_odd)
+		return int_node->val % 2;
+	else
+		return !(int_node->val % 2);
+};
+
 static void testRS_DLL_REMOVE_MATCH(void)
 {
 	struct int_node int_node_a = {.val = 17,};
@@ -614,16 +616,6 @@ static void testRS_DLL_REMOVE_MATCH(void)
 	int odd;
 	struct rs_dll dll;
 	int ret = 0;
-	int parity_cb(struct rs_node *n, const void *data)
-	{
-		const int my_odd = *((const int *)data);
-		struct int_node *int_node = to_int_node(n);
-
-		if (my_odd)
-			return int_node->val % 2;
-		else
-			return !(int_node->val % 2);
-	};
 
 	ret = rs_dll_init(&dll, &dll_test_vtable);
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
@@ -655,24 +647,34 @@ static void testRS_DLL_REMOVE_MATCH(void)
 	CU_ASSERT_PTR_NULL(node);
 }
 
+static int testRS_DLL_FOREACH_cb(struct rs_node __attribute__((unused))*node)
+{
+	/* do nothing */
+	return 0;
+};
+
 static void testRS_DLL_FOREACH(void)
 {
 	struct rs_dll dll;
 	int ret = 0;
-	int cb(struct rs_node __attribute__((unused))*node)
-	{
-		/* do nothing */
-		return 0;
-	};
 
 	/* normal use case is tested in testRS_DLL_PUSH */
 
 	/* error use cases */
-	ret = rs_dll_foreach(NULL, cb);
+	ret = rs_dll_foreach(NULL, testRS_DLL_FOREACH_cb);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 	ret = rs_dll_foreach(&dll, NULL);
 	CU_ASSERT_NOT_EQUAL(ret, 0);
 }
+
+static int cleanup_cb(struct rs_node *n)
+{
+	struct int_node *int_node = to_int_node(n);
+
+	int_node->val = -1;
+
+	return 0;
+};
 
 static void testRS_DLL_REMOVE_ALL_CB(void)
 {
@@ -681,14 +683,6 @@ static void testRS_DLL_REMOVE_ALL_CB(void)
 	struct int_node int_node_c = {.val = 666,};
 	struct rs_dll dll;
 	int ret = 0;
-	int cleanup_cb(struct rs_node *n)
-	{
-		struct int_node *int_node = to_int_node(n);
-
-		int_node->val = -1;
-
-		return 0;
-	};
 
 	ret = rs_dll_init(&dll, &dll_test_vtable);
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
