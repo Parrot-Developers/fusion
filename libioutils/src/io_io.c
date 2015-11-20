@@ -39,6 +39,7 @@
  * @param length
  * @param fmt
  */
+__attribute__((format(printf, 5, 6)))
 static void io_log_raw(void (*log_cb)(const char *), const char *func,
 		const void *buffer, size_t length, const char *fmt, ...)
 {
@@ -129,7 +130,7 @@ static int read_io(int fd, int ign_eof, void (*log_cb)(const char *),
 		/* log data read */
 		if (log_cb)
 			io_log_raw(log_cb, __func__, buffer, *length,
-					"%s read fd=%d length=%d", name, fd,
+					"%s read fd=%d length=%zu", name, fd,
 					*length);
 	}
 
@@ -242,7 +243,7 @@ static int write_io(int fd, void (*log_cb)(const char *), const char *name,
 	/* log data written */
 	if (NULL != log_cb)
 		io_log_raw(log_cb, __func__, buffer, *length,
-				"%s written fd=%d length=%d", name, fd,
+				"%s written fd=%d length=%zu", name, fd,
 				*length);
 
 
