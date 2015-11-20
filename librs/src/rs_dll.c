@@ -38,6 +38,40 @@ static const struct rs_dll_vtable default_vtable = {
 		.print = default_print,
 };
 
+/**
+ * Helper for implementing rs_dll_remove{,_match}
+ * @param dll list from which the node will be removed
+ * @param needle node to remove which _must_ be a node from the list (and thus,
+ * non NULL)
+ * @return needle
+ */
+static struct rs_node *dll_remove_impl(struct rs_dll *dll,
+		struct rs_node *needle)
+{
+	struct rs_node *head_next_bkp = NULL;
+	struct rs_node *tail_prev_bkp = NULL;
+
+	if (NULL == dll)
+		return NULL;
+
+	/* in case we remove the head, we want it to be replaced by it's next */
+	head_next_bkp = rs_node_next(dll->head);
+	/* in case we remove the tail, we want it to be replaced by it's prev */
+	tail_prev_bkp = rs_node_prev(dll->tail);
+
+	rs_node_remove(dll->head, needle);
+	/* keep list coherent */
+	if (needle == dll->head)
+		dll->head = head_next_bkp;
+	if (needle == dll->tail)
+		dll->tail = tail_prev_bkp;
+	dll->count--;
+
+	rs_dll_rewind(dll);
+
+	return needle;
+}
+
 int rs_dll_init(struct rs_dll *dll, const struct rs_dll_vtable *vtable)
 {
 	if (NULL == dll)
@@ -227,31 +261,14 @@ int rs_dll_rewind(struct rs_dll *dll)
 struct rs_node *rs_dll_remove_match(struct rs_dll *dll,
 		rs_node_match_cb match, const void *data)
 {
-	struct rs_node *head_next_bkp = NULL;
-	struct rs_node *tail_prev_bkp = NULL;
 	struct rs_node *needle;
 
 	if (NULL == dll || NULL == match)
 		return NULL;
 
-	/* in case we remove the head, we want it to be replaced by it's next */
-	head_next_bkp = rs_node_next(dll->head);
-	/* in case we remove the tail, we want it to be replaced by it's prev */
-	tail_prev_bkp = rs_node_prev(dll->tail);
+	needle = rs_dll_find_match(dll, match, data);
 
-	needle = rs_node_remove_match(dll->head, match, data);
-	if (NULL != needle) {
-		/* keep list coherent */
-		if (needle == dll->head)
-			dll->head = head_next_bkp;
-		if (needle == dll->tail)
-			dll->tail = tail_prev_bkp;
-		dll->count--;
-	}
-
-	rs_dll_rewind(dll);
-
-	return needle;
+	return needle == NULL ? NULL : dll_remove_impl(dll, needle);
 }
 
 struct rs_node *rs_dll_remove(struct rs_dll *dll, struct rs_node *node)
