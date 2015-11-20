@@ -160,12 +160,16 @@ int rs_dll_is_empty(struct rs_dll *dll)
 
 struct rs_node *rs_dll_find(struct rs_dll *dll, struct rs_node *node)
 {
-	int match(struct rs_node *n, const void *data)
-	{
-		return dll->vtable.equals(n, data);
-	}
+	struct rs_node *n = NULL;
 
-	return rs_dll_find_match(dll, match, node);
+	if (dll == NULL)
+		return NULL;
+
+	while ((n = rs_dll_next_from(dll, n)) != NULL)
+		if (dll->vtable.equals(n, node))
+			return n;
+
+	return NULL;
 }
 
 struct rs_node *rs_dll_pop(struct rs_dll *dll)
