@@ -273,12 +273,14 @@ struct rs_node *rs_dll_remove_match(struct rs_dll *dll,
 
 struct rs_node *rs_dll_remove(struct rs_dll *dll, struct rs_node *node)
 {
-	int match(struct rs_node *n, const void *data)
-	{
-		return dll->vtable.equals(n, data);
-	}
+	struct rs_node *needle;
 
-	return rs_dll_remove_match(dll, match, node);
+	if (NULL == dll)
+		return NULL;
+
+	needle = rs_dll_find(dll, node);
+
+	return needle == NULL ? NULL : dll_remove_impl(dll, needle);
 }
 
 int rs_dll_foreach(struct rs_dll *dll, rs_node_cb cb)
