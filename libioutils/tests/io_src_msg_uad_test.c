@@ -28,7 +28,7 @@ enum {
 
 /* global state of the test, messages sent, received... */
 static int state = STATE_START;
-struct io_mon mon;
+static struct io_mon mon;
 
 struct msg {
 	char string[17];
