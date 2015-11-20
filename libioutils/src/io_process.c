@@ -712,12 +712,7 @@ int io_process_vinit_prepare_launch_and_wait(struct io_process *process,
 	if (ret < 0)
 		return ret;
 
-	ret = io_process_wait(process);
-
-	if (process->state != IO_PROCESS_DEAD)
-		io_process_kill(process);
-
-	return ret;
+	return io_process_wait(process);
 }
 
 /* waits for the process thus can block */
