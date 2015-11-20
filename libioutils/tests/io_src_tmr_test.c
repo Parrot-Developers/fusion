@@ -39,34 +39,43 @@ static void testIO_SRC_TMR_INIT(void)
 	io_src_tmr_clean(&tmr);
 }
 
+struct my_tmr_src {
+	struct io_src_tmr tmr;
+	int expired;
+};
+
+static void tmr_cb(struct io_src_tmr *t, uint64_t *nbexpired)
+{
+	struct my_tmr_src *s = ut_container_of(t, struct my_tmr_src, tmr);
+
+	s->expired = 1;
+};
+
 static void testIO_SRC_TMR_SET(void)
 {
 	int ret;
 	fd_set rfds;
 	struct io_mon mon;
-	struct io_src_tmr tmr;
-	int expired = 0;
+	struct my_tmr_src s = {
+			.expired = 0,
+	};
 	struct timeval timeout = {
 			.tv_sec = 1,
 			.tv_usec = 0,
-	};
-	void tmr_cb(struct io_src_tmr *local_tmr, uint64_t *nbexpired)
-	{
-		expired = 1;
 	};
 
 	/* initialization */
 	ret = io_mon_init(&mon);
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
-	ret = io_src_tmr_init(&tmr, tmr_cb);
+	ret = io_src_tmr_init(&s.tmr, tmr_cb);
 	CU_ASSERT_EQUAL(ret, 0);
-	CU_ASSERT_EQUAL(tmr.cb, tmr_cb);
-	ret = io_mon_add_source(&mon, io_src_tmr_get_source(&tmr));
+	CU_ASSERT_EQUAL(s.tmr.cb, tmr_cb);
+	ret = io_mon_add_source(&mon, io_src_tmr_get_source(&s.tmr));
 	CU_ASSERT_EQUAL(ret, 0);
 
 	/* normal use cases */
 	/* one shoot */
-	ret = io_src_tmr_set(&tmr, 999);
+	ret = io_src_tmr_set(&s.tmr, 999);
 	CU_ASSERT_EQUAL(ret, 0);
 
 	FD_ZERO(&rfds);
@@ -80,20 +89,20 @@ static void testIO_SRC_TMR_SET(void)
 	ret = io_mon_process_events(&mon);
 	CU_ASSERT(ret >= 0);
 
-	CU_ASSERT(expired);
+	CU_ASSERT(s.expired);
 
 	/* disarm test */
-	expired = 0;
+	s.expired = 0;
 	timeout.tv_sec = 0;
 	timeout.tv_usec = 500000;
 
-	ret = io_src_tmr_set(&tmr, 10000);
+	ret = io_src_tmr_set(&s.tmr, 10000);
 	CU_ASSERT_EQUAL(ret, 0);
 
 	FD_ZERO(&rfds);
 	FD_SET(mon.epollfd, &rfds);
 
-	ret = io_src_tmr_set(&tmr, IO_SRC_TMR_DISARM);
+	ret = io_src_tmr_set(&s.tmr, IO_SRC_TMR_DISARM);
 	CU_ASSERT_EQUAL(ret, 0);
 
 	ret = select(mon.epollfd + 1, &rfds, NULL, NULL, &timeout);
@@ -104,12 +113,12 @@ static void testIO_SRC_TMR_SET(void)
 	ret = io_mon_process_events(&mon);
 	CU_ASSERT(ret >= 0);
 
-	CU_ASSERT_FALSE(expired);
+	CU_ASSERT_FALSE(s.expired);
 
 out:
 	/* cleanup */
 	io_mon_clean(&mon);
-	io_src_tmr_clean(&tmr);
+	io_src_tmr_clean(&s.tmr);
 
 	/* error use cases */
 	ret = io_src_tmr_set(NULL, 100);
