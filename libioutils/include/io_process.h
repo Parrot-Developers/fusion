@@ -190,7 +190,8 @@ int io_process_init(struct io_process *process, io_pid_cb termination_cb, ...)
  * termination callback. After this last event, the io_process structure can be
  * freely destroyed
  * @param process Process to initialize
- * @param termination_cb Function called when the process terminates
+ * @param termination_cb Function called when the process terminates. Can be
+ * NULL
  * @param args List of the command line arguments, the first one must be an
  * absolute path and will be used for both the path to the file to exec() and
  * the argv[0] of the process created. The list must end with a NULL pointer
@@ -347,7 +348,8 @@ int io_process_prepare(struct io_process *process,
  * Convenience function which calls io_process_init() and io_process_prepare()
  * @param process Process context
  * @param parameters Set of parameters to use to configure the process.
- * @param termination_cb Function called when the process terminates
+ * @param termination_cb Function called when the process terminates. Can be
+ * NULL
  * @return errno-compatible negative value on error, 0 on success
  */
 int io_process_init_prepare(struct io_process *process,
@@ -358,7 +360,8 @@ int io_process_init_prepare(struct io_process *process,
  * Convenience function which calls io_process_vinit() and io_process_prepare()
  * @param process Process context
  * @param parameters Set of parameters to use to configure the process.
- * @param termination_cb Function called when the process terminates
+ * @param termination_cb Function called when the process terminates. Can be
+ * NULL
  * @return errno-compatible negative value on error, 0 on success
  * @return
  */
@@ -371,7 +374,8 @@ int io_process_vinit_prepare(struct io_process *process,
  * io_process_launch()
  * @param process Process context
  * @param parameters Set of parameters to use to configure the process.
- * @param termination_cb Function called when the process terminates
+ * @param termination_cb Function called when the process terminates. Can be
+ * NULL
  * @return errno-compatible negative value on error, 0 on success
  */
 int io_process_init_prepare_and_launch(struct io_process *process,
@@ -384,7 +388,8 @@ __attribute__ ((sentinel(0)));
  * io_process_launch()
  * @param process Process context
  * @param parameters Set of parameters to use to configure the process.
- * @param termination_cb Function called when the process terminates
+ * @param termination_cb Function called when the process terminates. Can be
+ * NULL
  * @param args
  * @return errno-compatible negative value on error, 0 on success
  */
@@ -397,7 +402,8 @@ int io_process_vinit_prepare_and_launch(struct io_process *process,
  * io_process_launch() and io_process_wait()
  * @param process Process context
  * @param parameters Set of parameters to use to configure the process.
- * @param termination_cb Function called when the process terminates
+ * @param termination_cb Function called when the process terminates. Can be
+ * NULL
  * @return errno-compatible negative value on error, 0 on success
  */
 int io_process_init_prepare_launch_and_wait(struct io_process *process,
@@ -410,7 +416,8 @@ __attribute__ ((sentinel(0)));
  * io_process_launch() and io_process_wait()
  * @param process Process context
  * @param parameters Set of parameters to use to configure the process.
- * @param termination_cb Function called when the process terminates
+ * @param termination_cb Function called when the process terminates. Can be
+ * NULL
  * @param args
  * @return errno-compatible negative value on error, 0 on success
  */

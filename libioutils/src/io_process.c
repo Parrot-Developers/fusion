@@ -177,7 +177,8 @@ static void termination_cb_wrapper(struct io_src_pid *pid_src, pid_t pid,
 			pid_src);
 
 	process->state = IO_PROCESS_DEAD;
-	process->termination_cb(pid_src, pid, status);
+	if (process->termination_cb != NULL)
+		process->termination_cb(pid_src, pid, status);
 	waitpid(pid, NULL, 0);
 }
 
@@ -319,9 +320,6 @@ int io_process_vinit(struct io_process *process, io_pid_cb termination_cb,
 	if (process == NULL)
 		return -EINVAL;
 	memset(process, 0, sizeof(*process));
-
-	if (termination_cb == NULL)
-		return -EINVAL;
 
 	process->pid_src.src.fd = -1;
 	process->stdin_src.fd = -1;
