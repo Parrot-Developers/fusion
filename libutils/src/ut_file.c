@@ -110,10 +110,12 @@ static int do_file_to_string(FILE *f, char **string)
 	long size;
 	size_t sret;
 	char *s;
+	int errno_value;
 
 	size = get_file_size(f);
-	if (size == -1) {
-		ut_perr("get_file_size", size);
+	if (size < 0) {
+		errno_value = -size;
+		ut_perr("get_file_size", errno_value);
 		return -errno;
 	}
 	/*
