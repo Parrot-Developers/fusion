@@ -537,6 +537,7 @@ err:
 int io_process_wait(struct io_process *process)
 {
 	int ret;
+	int status;
 
 	if (process == NULL || process->state != IO_PROCESS_STARTED)
 		return -EINVAL;
@@ -547,10 +548,14 @@ int io_process_wait(struct io_process *process)
 			break;
 	} while (process->state != IO_PROCESS_DEAD);
 
-	if (process->state != IO_PROCESS_DEAD)
+	if (process->state != IO_PROCESS_DEAD) {
 		io_process_kill(process);
-	else
+	} else {
+		status = process->status;
 		io_process_clean(process);
+		process->status = status;
+	}
+
 
 	return ret > 0 ? 0 : ret;
 }

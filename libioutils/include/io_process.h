@@ -108,6 +108,12 @@ struct io_process {
 	 * customize the callback
 	 */
 	struct io_src src;
+
+	/**
+	 * return status of the process, guaranteed to be usable after any of
+	 * the xxx_wait() function has returned
+	 */
+	int status;
 };
 
 /**
