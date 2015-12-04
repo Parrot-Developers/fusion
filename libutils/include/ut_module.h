@@ -40,31 +40,31 @@ struct ut_module_binding {
 		 * for internal use only, allows concatenating the criteria in a
 		 * simple way
 		 */
-		const char const *gen_filters[UT_MODULE_MAX_FILTER_CRITERIA];
+		const char *gen_filters[UT_MODULE_MAX_FILTER_CRITERIA];
 		/**
 		 * matching criteria for an usb module
 		 * @see kernel/Documentation/ABI/testing/sysfs-bus-usb: new_id
 		 */
 		struct {
-			const char const *id_vendor;
-			const char const *id_product;
-			const char const *b_interface_class;
-			const char const *ref_id_vendor;
-			const char const *ref_id_product;
-			const char const *must_be_null;
+			const char *id_vendor;
+			const char *id_product;
+			const char *b_interface_class;
+			const char *ref_id_vendor;
+			const char *ref_id_product;
+			const char *must_be_null;
 		} usb_filters;
 		/**
 		 * matching criteria for an pci module
 		 * @see kernel/Documentation/ABI/testing/sysfs-bus-pci: new_id
 		 */
 		struct {
-			const char const *vendor_id;
-			const char const *device_id;
-			const char const *subsystem_vendor_id;
-			const char const *subsystem_device_id;
-			const char const *class;
-			const char const *class_mask;
-			const char const *private_driver_data;
+			const char *vendor_id;
+			const char *device_id;
+			const char *subsystem_vendor_id;
+			const char *subsystem_device_id;
+			const char *class;
+			const char *class_mask;
+			const char *private_driver_data;
 		} pci_filters;
 	};
 };
