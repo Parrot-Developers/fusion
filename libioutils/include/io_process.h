@@ -31,6 +31,14 @@ enum io_process_state {
 };
 
 /**
+ * @def io_process_from_pid_src
+ * @brief allows to retrieve an io_process knowing it's pid_src, handy for
+ * termination callback implementation.
+ */
+#define io_process_from_pid_src(s) ut_container_of(s, struct io_process, \
+		pid_src);
+
+/**
  * @struct io_process
  * @brief main structure wrapping a process
  */
