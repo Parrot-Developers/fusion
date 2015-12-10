@@ -295,3 +295,25 @@ bool ut_file_is_dir(const char *path)
 {
 	return test_file(path, F_OK, S_IFDIR);
 }
+
+int ut_file_mkdir(const char *fmt, mode_t mode, ...)
+{
+	int ret = -1;
+	char __attribute__((cleanup(ut_string_free))) *dir = NULL;
+	va_list args;
+
+	if (fmt == NULL)
+		return -EINVAL;
+
+	va_start(args, mode);
+	ret = vasprintf(&dir, fmt, args);
+	va_end(args);
+	if (ret == -1) {
+		dir = NULL;
+		return -ENOMEM;
+	}
+
+	ret = mkdir(dir, mode);
+
+	return ret < 0 ? -errno : 0;
+}

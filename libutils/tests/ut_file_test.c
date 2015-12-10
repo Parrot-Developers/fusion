@@ -131,6 +131,21 @@ static void testUT_FILE_IS_DIR(void)
 	CU_ASSERT(!ut_file_is_dir(NULL));
 }
 
+static void testUT_FILE_MKDIR(void)
+{
+#define testUT_FILE_MKDIR_fmt "/tmp/dir_format_%s"
+	int ret;
+
+	ret = ut_file_mkdir(testUT_FILE_MKDIR_fmt, 644, "%s");
+	CU_ASSERT(ret == 0);
+
+	rmdir(testUT_FILE_MKDIR_fmt);
+#undef testUT_FILE_MKDIR_fmt
+
+	ret = ut_file_mkdir(NULL, 00);
+	CU_ASSERT(ret != 0);
+}
+
 static const struct test_t tests[] = {
 		{
 				.fn = testUT_FILE_CLOSE,
@@ -155,6 +170,10 @@ static const struct test_t tests[] = {
 		{
 				.fn = testUT_FILE_IS_DIR,
 				.name = "ut_file_is_dir"
+		},
+		{
+				.fn = testUT_FILE_MKDIR,
+				.name = "ut_file_mkdir"
 		},
 
 		/* NULL guard */

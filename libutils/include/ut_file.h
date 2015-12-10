@@ -8,6 +8,8 @@
  */
 #ifndef UT_FILE_H_
 #define UT_FILE_H_
+#include <sys/types.h>
+
 #include <stdbool.h>
 #include <stdio.h>
 
@@ -77,5 +79,14 @@ bool ut_file_exists(const char *path);
  * @return true iif the given path is a directory and exists
  */
 bool ut_file_is_dir(const char *path);
+
+/**
+ * Variadic wrapper around mkdir
+ * @param fmt À-la-printf format to build the path of the directory to create
+ * @return 0 on success, -EINVAL if fmt is NULL, -ENOMEM on asprintf failure or
+ * -errno on any mkdir(2) failure
+ */
+__attribute__ ((format (printf, 1, 3)))
+int ut_file_mkdir(const char *fmt, mode_t mode, ...);
 
 #endif /* UT_FILE_H_ */
