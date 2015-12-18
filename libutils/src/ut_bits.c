@@ -36,10 +36,12 @@ uint8_t ut_bit_field_claim_free_index(ut_bit_field *indices)
 
 int ut_bit_field_release_index(ut_bit_field *indices, uint8_t index)
 {
+	uint64_t one = 1;
+
 	if (index >= UT_BIT_FIELD_MAX || indices == NULL)
 		return -EINVAL;
 
-	*indices &= ~(1 << index);
+	*indices &= ~(one << index);
 
 	return 0;
 }
