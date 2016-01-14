@@ -120,7 +120,6 @@ static void testPROCESS_INIT_PREPARE_LAUNCH_AND_WAIT(void)
 	CU_ASSERT(test.terminated);
 	CU_ASSERT(test.stderr_cb_error_encountered);
 
-
 	/* error use cases, pfiouuuu, there are plenty... */
 	/* normally, nothing to clean */
 }
@@ -189,7 +188,7 @@ static int init_process_suite(void)
 {
 	if (!ut_file_is_executable(getenv(PROCESS_TEST_SCRIPT_ENV))) {
 		fprintf(stderr, "\nThe environment variable "
-				PROCESS_TEST_SCRIPT_ENV"must be set to the "
+				PROCESS_TEST_SCRIPT_ENV" must be set to the "
 				"path of the test.process script.\n");
 		return -1;
 	}
