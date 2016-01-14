@@ -27,6 +27,12 @@
 #include "io_utils.h"
 
 /**
+ * @define from_thread
+ * @brief retrieves a process context knowing it's thread field's address
+ */
+#define from_thread(t) ut_container_of((t), struct io_process, thread)
+
+/**
  * Builds the command line for the process from the list of arguments supplied
  * @param process Process context
  * @param args NULL-terminated list of strings for building the command-line
@@ -136,8 +142,8 @@ static void io_process_clean(struct io_process *process)
 	ut_string_free(&process->command_line);
 
 	io_mon_remove_source(&process->mon,
-			io_src_pid_get_source(&process->pid_src));
-	io_src_pid_clean(&process->pid_src);
+			io_src_thread_get_source(&process->thread));
+	io_src_thread_clean(&process->thread);
 	io_mon_remove_source(&process->mon, &process->stdin_src);
 	io_src_clean(&process->stdin_src);
 	ut_file_fd_close(process->stdin_pipe + 0);
@@ -166,20 +172,21 @@ static void io_process_clean(struct io_process *process)
 /**
  * Wrapper around the user supplied termination cb, which cleans the process
  * structure after notifying the client
- * @param pid_src Signal source
+ * @param thread monitor thread of the process which has just died
  * @param pid Pid of the process which has just died
  * @param status Status of the process, same as that of waitpid(2)
  */
-static void termination_cb_wrapper(struct io_src_pid *pid_src, pid_t pid,
-		int status)
+static void process_termination_cb(struct io_src_thread *thread, int ret)
 {
-	struct io_process *process = ut_container_of(pid_src, struct io_process,
-			pid_src);
+	pid_t pid;
+	struct io_process *process = from_thread(thread);
 
+	pid = process->pid;
+	process->pid = 1;
 	process->state = IO_PROCESS_DEAD;
 	if (process->termination_cb != NULL)
-		process->termination_cb(pid_src, pid, status);
-	waitpid(pid, NULL, 0);
+		process->termination_cb(process, pid, ret);
+
 }
 
 /**
@@ -300,7 +307,26 @@ static void src_cb(struct io_src *src)
 	io_process_process_events(process);
 }
 
-int io_process_init(struct io_process *process, io_pid_cb termination_cb, ...)
+/**
+ * Function responsible of monitoring the process' death. Blocks until it does.
+ * @param thread monitor thread for the process
+ * @return return status of the process, see man 3 wait for signification
+ */
+static int process_start_routine(struct io_src_thread *thread)
+{
+	int ret;
+	int status;
+	struct io_process *process = from_thread(thread);
+
+	ret = waitpid(process->pid, &status, 0);
+	if (ret == -1)
+		return 0; /* normally not reachable */
+
+	return status;
+}
+
+int io_process_init(struct io_process *process,
+		io_process_termination_cb termination_cb, ...)
 {
 	int ret;
 	va_list args;
@@ -312,8 +338,8 @@ int io_process_init(struct io_process *process, io_pid_cb termination_cb, ...)
 	return ret;
 }
 
-int io_process_vinit(struct io_process *process, io_pid_cb termination_cb,
-		va_list args)
+int io_process_vinit(struct io_process *process,
+		io_process_termination_cb termination_cb, va_list args)
 {
 	int ret;
 
@@ -321,7 +347,7 @@ int io_process_vinit(struct io_process *process, io_pid_cb termination_cb,
 		return -EINVAL;
 	memset(process, 0, sizeof(*process));
 
-	process->pid_src.src.fd = -1;
+	process->thread.src.fd = -1;
 	process->stdin_src.fd = -1;
 	process->stdout_src.src.fd = -1;
 	process->stderr_src.src.fd = -1;
@@ -330,6 +356,7 @@ int io_process_vinit(struct io_process *process, io_pid_cb termination_cb,
 	process->stdout_pipe[0] = process->stdout_pipe[1] = -1;
 	process->stderr_pipe[0] = process->stderr_pipe[1] = -1;
 	process->termination_cb = termination_cb;
+	process->pid = 1;
 
 	ret = command_line_new(process, args);
 	if (ret < 0)
@@ -346,12 +373,12 @@ int io_process_vinit(struct io_process *process, io_pid_cb termination_cb,
 	if (ret < 0)
 		return ret;
 
-	ret = io_src_pid_init(&process->pid_src, termination_cb_wrapper);
+	ret = io_src_thread_init(&process->thread);
 	if (ret < 0)
 		goto err;
 
 	return io_mon_add_source(&process->mon,
-			io_src_pid_get_source(&process->pid_src));
+			io_src_thread_get_source(&process->thread));
 err:
 	io_process_clean(process);
 
@@ -506,7 +533,7 @@ int io_process_launch(struct io_process *process)
 	if (process == NULL || process->state != IO_PROCESS_INITIALIZED)
 		return -EINVAL;
 
-	pid = fork();
+	pid = process->pid = fork();
 	if (pid < 0)
 		return -errno;
 	if (pid == 0)
@@ -519,7 +546,8 @@ int io_process_launch(struct io_process *process)
 		io_mon_activate_out_source(&process->mon, &process->stdin_src,
 				true);
 
-	ret = io_src_pid_set_pid(&process->pid_src, pid);
+	ret = io_src_thread_start(&process->thread, NULL, process_start_routine,
+			process_termination_cb);
 	if (ret < 0)
 		goto err;
 
@@ -625,7 +653,7 @@ int io_process_prepare(struct io_process *process,
 
 int io_process_init_prepare(struct io_process *process,
 		struct io_process_parameters *parameters,
-		io_pid_cb termination_cb, ...)
+		io_process_termination_cb termination_cb, ...)
 {
 	int ret;
 	va_list args;
@@ -640,7 +668,7 @@ int io_process_init_prepare(struct io_process *process,
 
 int io_process_vinit_prepare(struct io_process *process,
 		struct io_process_parameters *p,
-		io_pid_cb termination_cb, va_list args)
+		io_process_termination_cb termination_cb, va_list args)
 {
 	int ret;
 
@@ -664,7 +692,7 @@ err:
 
 int io_process_init_prepare_and_launch(struct io_process *process,
 		struct io_process_parameters *parameters,
-		io_pid_cb termination_cb, ...)
+		io_process_termination_cb termination_cb, ...)
 {
 	int ret;
 	va_list args;
@@ -679,7 +707,7 @@ int io_process_init_prepare_and_launch(struct io_process *process,
 
 int io_process_vinit_prepare_and_launch(struct io_process *process,
 		struct io_process_parameters *parameters,
-		io_pid_cb termination_cb, va_list args)
+		io_process_termination_cb termination_cb, va_list args)
 {
 	int ret;
 
@@ -693,7 +721,7 @@ int io_process_vinit_prepare_and_launch(struct io_process *process,
 
 int io_process_init_prepare_launch_and_wait(struct io_process *process,
 		struct io_process_parameters *parameters,
-		io_pid_cb termination_cb, ...)
+		io_process_termination_cb termination_cb, ...)
 {
 	int ret;
 	va_list args;
@@ -708,7 +736,7 @@ int io_process_init_prepare_launch_and_wait(struct io_process *process,
 
 int io_process_vinit_prepare_launch_and_wait(struct io_process *process,
 		struct io_process_parameters *parameters,
-		io_pid_cb termination_cb, va_list args)
+		io_process_termination_cb termination_cb, va_list args)
 {
 	int ret;
 
@@ -735,17 +763,12 @@ int io_process_kill(struct io_process *process)
 int io_process_signal(struct io_process *process, int signum)
 {
 	int ret;
-	pid_t pid;
 
 	if (process == NULL || signum < 0 ||
 			process->state != IO_PROCESS_STARTED)
 		return -EINVAL;
 
-	pid = io_src_pid_get_pid(&process->pid_src);
-	if (pid <= 0)
-		return -ESRCH;
-
-	ret = kill(io_src_pid_get_pid(&process->pid_src), signum);
+	ret = kill(process->pid, signum);
 	if (ret < 0)
 		return -errno;
 

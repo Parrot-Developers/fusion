@@ -72,10 +72,8 @@ static void stderr_sep_cb(struct io_src_sep *sep, char *chunk, unsigned len)
 		test->stderr_cb_error_encountered = true;
 }
 
-static void termination_cb(struct io_src_pid *pid_src, pid_t pid, int status)
+static void termination_cb(struct io_process *process, pid_t pid, int status)
 {
-	struct io_process *process = ut_container_of(pid_src, struct io_process,
-			pid_src);
 	struct process_test *test = ut_container_of(process,
 			struct process_test, process);
 
@@ -189,11 +187,6 @@ static const struct test_t tests[] = {
 
 static int init_process_suite(void)
 {
-	if (getuid() != 0) {
-		fprintf(stderr, "\n"__FILE__" test suite can't run without "
-				"root privileges\n");
-		return -1;
-	}
 	if (!ut_file_is_executable(getenv(PROCESS_TEST_SCRIPT_ENV))) {
 		fprintf(stderr, "\nThe environment variable "
 				PROCESS_TEST_SCRIPT_ENV"must be set to the "
