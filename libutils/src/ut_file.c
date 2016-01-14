@@ -67,11 +67,15 @@ static int do_file_to_string_zero_size(FILE *f, char **string)
 	size_t sret;
 	size_t size = BASE_SIZE;
 	char *s = NULL;
+	char *s_temp;
 
 	while (true) {
-		s = realloc(s, size + 1);
-		if (s == NULL)
+		s_temp = realloc(s, size + 1);
+		if (s_temp == NULL) {
+			free(s);
 			return -errno;
+		}
+		s = s_temp;
 
 		sret = fread(s + size - BASE_SIZE, 1, BASE_SIZE, f);
 		if (sret != BASE_SIZE) {
