@@ -61,6 +61,18 @@ char *ut_process_get_name(char name[17]);
 bool ut_process_is_being_ptraced(void);
 
 /**
+ * Reads what a process outputs to it's standard output and store it in a buffer
+ * @param buf *buf must be the address of a storage sufficient to store size
+ * bytes and will be filled in output, with what has been read from the command
+ * issued.
+ * @param size size of the buffer provided and size of the data to read
+ * @param fmt a-la-printf format for building the command-line to execute
+ * @return errno compatible value negative value on error, 0 on success
+ */
+__attribute__ ((format (printf, 3, 4)))
+int ut_process_read_from_output(char **buf, size_t size, const char *fmt, ...);
+
+/**
  * @struct ut_process_sync
  * @brief parent/child synchronization mechanism
  *

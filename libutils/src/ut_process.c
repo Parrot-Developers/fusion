@@ -24,6 +24,51 @@
 #include "ut_file.h"
 #include "ut_utils.h"
 
+/**
+ * Launches a shell command and retrieve it's output in a user supplied buffer
+ * @param buf Buffer of at least size size in which the command's output will be
+ * stored
+ * @param size amont of data to read from the command's output
+ * @param cmd command to run
+ * @return errno negative value on error, 0 on success
+ */
+static int do_read_from_output(char *buf, size_t size, const char *cmd)
+{
+	FILE *f = NULL;
+	int ret;
+	size_t bytes_read;
+
+	if (size == 0)
+		return -EINVAL;
+
+	/*
+	 * Note : An "e" should be added to the modes, but our toolchains are
+	 * too old and this test code isn't sufficiently critical, so re-coding
+	 * popen to support cloexec doesn't worth it
+	 */
+	f = popen(cmd, "r");
+	if (f == NULL)
+		return -errno;
+
+	memset(buf, 0, size);
+	bytes_read = fread(buf, 1, size - 1, f);
+	/*
+	 * implicit nul termination due to memset isn't sufficient for coverity
+	 * what's more, explicit is better than implicit...
+	 */
+	buf[size - 1] = '\0';
+	if (ferror(f)) {
+		ret = -EIO;
+		goto out;
+	}
+
+	ret = 0;
+out:
+	pclose(f);
+
+	return ret;
+}
+
 int ut_process_vsystem(const char *fmt, ...)
 {
 	int ret = -1;
@@ -112,6 +157,30 @@ bool ut_process_is_being_ptraced(void)
 	}
 
 	return false; /* in theory, never reached */
+}
+
+int ut_process_read_from_output(char **buf, size_t size, const char *fmt, ...)
+{
+	int ret;
+	char __attribute__((cleanup(ut_string_free))) *cmd = NULL;
+	va_list args;
+
+	if (buf == NULL || *buf == NULL || ut_string_is_invalid(fmt))
+		return -EINVAL;
+
+	va_start(args, fmt);
+	ret = vasprintf(&cmd, fmt, args);
+	va_end(args);
+	if (ret == -1) {
+		cmd = NULL;
+		return -ENOMEM;
+	}
+
+	/*
+	 * TODO implementation accepting NULL for *buf, allocating the buffer
+	 * to fit what the process outputs
+	 */
+	return do_read_from_output(*buf, size, cmd);
 }
 
 int ut_process_sync_init(struct ut_process_sync *sync, bool cloexec)
