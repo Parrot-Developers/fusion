@@ -52,11 +52,15 @@ static char *loaded_modprobe_path;
  * constructor called at the library's loading, initializes the path to the
  * modprobe utility
  */
-static void __attribute__ ((constructor)) ut_module_init(void)
+void __attribute__ ((constructor)) ut_module_init(void)
 {
 	int ret;
-	/* read the modprobe command line from /proc/sys/kernel/modprobe */
 
+	/* exit if we have already been called */
+	if (loaded_modprobe_path != NULL)
+		return;
+
+	/* read the modprobe command line from /proc/sys/kernel/modprobe */
 	ret = ut_file_to_string(MODPROBE_PROCFS, &loaded_modprobe_path);
 	if (ret < 0 || ut_string_is_invalid(loaded_modprobe_path)) {
 		ut_info("could'nt read "MODPROBE_PROCFS" defaulting to "
@@ -75,7 +79,7 @@ static void __attribute__ ((constructor)) ut_module_init(void)
 /**
  * destructor called at the library's unloading, frees the loaded modprobe path
  */
-static void __attribute__ ((destructor)) ut_module_clean(void)
+void __attribute__ ((destructor)) ut_module_clean(void)
 {
 	ut_string_free(&loaded_modprobe_path);
 	loaded_modprobe_path = MODPROBE_DEFAULT_PATH;

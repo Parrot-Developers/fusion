@@ -150,4 +150,20 @@ bool ut_modules_contains(const struct ut_module *list, const char *name);
  */
 bool ut_module_bindings_are_valid(const struct ut_module *module);
 
+/**
+ * Initializes internal resources needed by the ut_module module to work.
+ * It is normally not needed to call it, since it is a constructor and will be
+ * loaded automatically at the library's opening, but in context with is not the
+ * case, like when the libutils.so is ran directly, it should be called prior to
+ * using libutils
+ */
+void __attribute__ ((constructor)) ut_module_init(void);
+
+/**
+ * Cleans up internal ut_module resources, normally called automatically by the
+ * libutils destructor, but in situations where this constructor can't be called
+ * automatically, one can have the need to call it manually
+ */
+void  __attribute__ ((destructor)) ut_module_clean(void);
+
 #endif /* UT_MODULE_H_ */

@@ -45,6 +45,8 @@ void libutils_tests(void)
 {
 	int ret;
 
+	ut_module_init();
+
 	ret = fautes_run_test_pool(&fautes_pool, fautes_generate_xml());
 
 	_exit(ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE);
