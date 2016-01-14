@@ -78,4 +78,12 @@ char *ut_string_lstrip(char *str);
  */
 char *ut_string_strip(char *str);
 
+/**
+ * Says whether a string is contained in another or not
+ * @param haystack string in which to look up
+ * @param needle string to look for in haystack
+ * @return true if needle is contained in haystack, false otherwise
+ */
+bool ut_string_contains(const char *haystack, const char *needle);
+
 #endif /* UT_STRING_H_ */

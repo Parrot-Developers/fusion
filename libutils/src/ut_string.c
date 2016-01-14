@@ -105,3 +105,8 @@ char *ut_string_strip(char *str)
 {
 	return ut_string_lstrip(ut_string_rstrip(str));
 }
+
+bool ut_string_contains(const char *haystack, const char *needle)
+{
+	return strstr(haystack, needle) != NULL;
+}
