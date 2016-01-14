@@ -18,7 +18,9 @@
  * Reads the list of the modules listed in /proc/modules and store their names
  * in an array
  * @param module in output, contains the list of modules read terminated with an
- * empty string (and followed by NULL pointers)
+ * empty string (and followed by NULL pointers). The strings are part of the
+ * same buffer, which is allocated and must be freed after usage by calling
+ * free(module[0])
  * @return number of modules in the list
  */
 static int read_modules_list(char *module[0x100])
@@ -30,7 +32,7 @@ static int read_modules_list(char *module[0x100])
 
 	ret = ut_file_to_string("/proc/modules", &proc_modules);
 	CU_ASSERT_EQUAL(ret, 0);
-	*module = proc_modules;
+	module[0] = proc_modules;
 	module++;
 	for (c = proc_modules; *c != '\0'; c++) {
 		if (*c == ' ') {
@@ -123,10 +125,19 @@ static void testUT_MODULE_IS_LOADED(void)
 	CU_ASSERT_FALSE(ut_module_is_loaded(NULL));
 }
 
+static void free_ut_modules_list(struct ut_module **list)
+{
+	if (list == NULL)
+		return;
+
+	free(*list);
+}
+
 static void testUT_MODULES_ARE_LOADED(void)
 {
 	char *modules[0x100] = {NULL};
-	struct ut_module *list = NULL;
+	struct ut_module __attribute__((cleanup(free_ut_modules_list)))*list =
+			NULL;
 	int nb_modules;
 	/* use static so that all is set to 0 (especially .must_be_null) */
 	/* required_size + 1 so that there is a last element all NULL */
@@ -167,6 +178,7 @@ static void testUT_MODULES_ARE_LOADED(void)
 
 	/* error use cases */
 	CU_ASSERT_FALSE(ut_modules_are_loaded(NULL));
+	free(modules[0]);
 }
 
 static void testUT_MODULES_CONTAINS(void)
