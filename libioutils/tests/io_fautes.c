@@ -11,6 +11,7 @@
 #include <stdlib.h>
 
 #include <fautes.h>
+#include <ut_module.h>
 
 #include "io_fautes.h"
 
@@ -61,7 +62,16 @@ void libioutils_tests(void)
 {
 	int ret;
 
+	/*
+	 * the following call should not be commented, but for an unknown
+	 * reason, the ut_module constructor is call automatically, whereas the
+	 * destructor isn't
+	 */
+	/* ut_module_init(); */
+
 	ret = fautes_run_test_pool(&fautes_pool, fautes_generate_xml());
+
+	ut_module_clean();
 
 	_exit(ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE);
 }
