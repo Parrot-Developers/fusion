@@ -555,6 +555,7 @@ int io_process_launch(struct io_process *process)
 	return 0;
 err:
 	kill(pid, SIGKILL);
+	/* coverity[check_return] */
 	waitpid(pid, NULL, 0);
 
 	return ret;
