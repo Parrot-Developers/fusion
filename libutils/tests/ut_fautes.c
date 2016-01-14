@@ -12,6 +12,8 @@
 
 #include <fautes.h>
 
+#include <ut_module.h>
+
 #include "ut_fautes.h"
 
 /* set an interpreter section so that this lib can be run as an executable */
@@ -48,6 +50,12 @@ void libutils_tests(void)
 	ut_module_init();
 
 	ret = fautes_run_test_pool(&fautes_pool, fautes_generate_xml());
+
+	/*
+	 * the libutils desstructor can't be called when libutils.so is ran
+	 * directly, we need to call it manually
+	 */
+	ut_module_clean();
 
 	_exit(ret == 0 ? EXIT_SUCCESS : EXIT_FAILURE);
 }
