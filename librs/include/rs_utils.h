@@ -61,7 +61,7 @@ extern "C" {
  * @param str String to free
  * @deprecated use ut_string_free from libutils
  */
-static void rs_str_free(char **str) __attribute__ ((deprecated));
+__attribute__ ((deprecated("use ut_string_free from libutils")))
 static inline void rs_str_free(char **str)
 {
 	if (NULL == str || NULL == *str)
@@ -76,7 +76,7 @@ static inline void rs_str_free(char **str)
  * @param file File to close
  * @deprecated use ut_string_match_prefix from ut_file_close
  */
-static void rs_file_close(FILE **file) __attribute__ ((deprecated));
+__attribute__ ((deprecated("use ut_string_match_prefix from ut_file_close")))
 static inline void rs_file_close(FILE **file)
 {
 	if (NULL == file || NULL == *file)
@@ -93,8 +93,7 @@ static inline void rs_file_close(FILE **file)
  * @return non-zero if the string does match
  * @deprecated use ut_string_match_prefix from libutils
  */
-static int rs_str_match_prefix(const char *str, const char *prefix)
-__attribute__ ((deprecated));
+__attribute__ ((deprecated("use ut_string_match_prefix from libutils")))
 static inline int rs_str_match_prefix(const char *str, const char *prefix)
 {
 	if (NULL == str || NULL == prefix)
@@ -109,8 +108,7 @@ static inline int rs_str_match_prefix(const char *str, const char *prefix)
  * @return true if the string is NULL or empty, 0 otherwise
  * @deprecated use ut_string_is_invalid from libutils
  */
-static bool rs_str_is_invalid(const char *str)
-__attribute__ ((deprecated));
+__attribute__ ((deprecated("use ut_string_is_invalid from libutils")))
 static inline bool rs_str_is_invalid(const char *str)
 {
 	return NULL == str || '\0' == *str;
@@ -121,7 +119,7 @@ static inline bool rs_str_is_invalid(const char *str)
  * @param str String to right strip
  * @deprecated use ut_string_rstrip from libutils
  */
-static inline void rs_str_rstrip(char *str) __attribute__ ((deprecated));
+__attribute__ ((deprecated("use ut_string_rstrip from libutils")));
 static inline void rs_str_rstrip(char *str)
 {
 	size_t s;

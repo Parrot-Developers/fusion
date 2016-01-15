@@ -88,7 +88,8 @@ int io_set_non_blocking(int fd);
  * untouched
  * @deprecated use ut_file_fd_close from libutils
  */
-int io_close(int *fd) __attribute__ ((deprecated));
+__attribute__ ((deprecated("use ut_file_fd_close from libutils")))
+int io_close(int *fd);
 
 #ifdef __cplusplus
 }
