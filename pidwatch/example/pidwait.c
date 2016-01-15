@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <error.h>
 
 #include <pidwatch.h>
 
@@ -82,7 +83,7 @@ static void close_p(int *fd)
 static void process_args(int argc, char *argv[], int *child, pid_t *pid)
 {
 	if (NULL == child || NULL == pid)
-		fprintf(stderr, "Coding error : NULL argument\n");
+		error(EXIT_FAILURE, EINVAL, "Coding error : NULL argument\n");
 
 	if (argc < 2)
 		usage(EXIT_FAILURE);
