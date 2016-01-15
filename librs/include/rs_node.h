@@ -64,7 +64,7 @@ int type##_match_##member(struct rs_node *__n, const void *__d) \
 	if (NULL == __d) \
 		return 0; \
 	__v = __d; \
- \
+\
 	return __o->member == *__v; \
 }
 

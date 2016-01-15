@@ -71,7 +71,7 @@ int rs_rb_init(struct rs_rb *rb, void *buffer, size_t size)
 	if (rb->mirror) {
 		/* augment size to the next multiple of page size */
 		page_size = sysconf(_SC_PAGE_SIZE);
-		if ((size % page_size) !=0)
+		if ((size % page_size) != 0)
 			size = ((size / page_size) + 1) * page_size;
 	}
 

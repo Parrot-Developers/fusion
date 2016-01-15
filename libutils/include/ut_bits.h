@@ -72,6 +72,7 @@
  * @typedef ut_bit_field
  * @brief the biggest unsigned integer type possible, used to store a bit field
  */
+/* codecheck_ignore[NEW_TYPEDEFS] */
 typedef uintmax_t ut_bit_field;
 
 /**

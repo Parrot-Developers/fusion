@@ -148,7 +148,7 @@ static void testSRC_PID_INIT(void)
 
 	CU_ASSERT(s.process_dead);
 
-out :
+out:
 	/* cleanup */
 	io_mon_clean(&mon);
 	io_src_pid_clean(&s.pid_src);
@@ -240,7 +240,7 @@ static void testSRC_PID_SET_PID(void)
 
 	CU_ASSERT(s.process_dead);
 
-out :
+out:
 	/* cleanup */
 	io_mon_clean(&mon);
 	io_src_pid_clean(&s.pid_src);

@@ -129,7 +129,7 @@ static pid_t __attribute__((sentinel)) launch(const char *prog, ...)
 		fprintf(stderr, "Executing ");
 		dump_args(child_argc, child_argv);
 		fprintf(stderr, " (%jd)\n", (intmax_t)getpid());
-		ret = execvp(child_argv[0], (char * const*)child_argv);
+		ret = execvp(child_argv[0], (char * const *)child_argv);
 		if (-1 == ret) {
 			perror("execve");
 			exit(1);
@@ -263,8 +263,10 @@ static bool testPIDWATCH_WAIT_145990_loop(void)
 		if (pid_ret != pid) {
 			fprintf(stderr, "pid_ret = %jd, pid = %jd\n",
 					(intmax_t)pid_ret, (intmax_t)(pid));
-			fprintf(stderr, "process 1: %s\n", get_process_name(pid_ret));
-			fprintf(stderr, "process 2: %s\n", get_process_name(pid));
+			fprintf(stderr, "process 1: %s\n",
+					get_process_name(pid_ret));
+			fprintf(stderr, "process 2: %s\n",
+					get_process_name(pid));
 			quit = true;
 		} else {
 			/* cleanup */

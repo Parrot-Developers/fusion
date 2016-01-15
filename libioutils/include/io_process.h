@@ -43,7 +43,7 @@ struct io_process;
  * @param pid process id of the process which terminated
  * @param status return status, see man 3 wait for signification
  */
-typedef void (io_process_termination_cb)(struct io_process *process, \
+typedef void (io_process_termination_cb)(struct io_process *process,
 		pid_t pid, int status);
 
 /**
