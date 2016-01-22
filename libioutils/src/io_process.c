@@ -347,7 +347,7 @@ int io_process_vinit(struct io_process *process,
 		return -EINVAL;
 	memset(process, 0, sizeof(*process));
 
-	process->thread.src.fd = -1;
+	process->thread.evt.src.fd = -1;
 	process->stdin_src.fd = -1;
 	process->stdout_src.src.fd = -1;
 	process->stderr_src.src.fd = -1;

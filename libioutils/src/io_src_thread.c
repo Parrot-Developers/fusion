@@ -27,31 +27,30 @@
 static void *thread_src_start_routine(void *arg)
 {
 	char *byte = 0;
-	ssize_t sret;
+	int ret;
 	struct io_src_thread *thread_src = arg;
 
 	thread_src->ret = thread_src->start_routine(thread_src);
 
-	sret = write(thread_src->pipefd[1], &byte, sizeof(byte));
-	/* sret is discarded */
+	ret = io_src_evt_notify(&thread_src->evt, 1);
+	/* ret is discarded */
 
 	return &thread_src->ret;
 }
 
-static void thread_src_cb(struct io_src *src)
+/**
+ * Callback notified via the event source, of when the thread has terminated
+ * @param evt event fd source
+ * @param value discarded
+ */
+static void thread_src_cb(struct io_src_evt *evt, uint64_t value)
 {
 	union {
 		void *v;
 		int *i;
 	} ret;
-	ssize_t sret;
-	char byte;
-	struct io_src_thread *thread_src = ut_container_of(src,
-			struct io_src_thread, src);
-
-	sret = read(thread_src->pipefd[0], &byte, sizeof(byte));
-	if (sret == -1)
-		byte = -errno;
+	struct io_src_thread *thread_src = ut_container_of(evt,
+			struct io_src_thread, evt);
 
 	pthread_join(thread_src->thread, &ret.v);
 	thread_src->termination_cb(thread_src, *ret.i);
@@ -65,12 +64,8 @@ int io_src_thread_init(struct io_src_thread *thread_src)
 		return -EINVAL;
 
 	memset(thread_src, 0, sizeof(*thread_src));
-	ret = pipe2(thread_src->pipefd, O_CLOEXEC | O_NONBLOCK);
-	if (ret == -1)
-		return -errno;
 
-	return io_src_init(&thread_src->src, thread_src->pipefd[0], IO_IN,
-			thread_src_cb);
+	return io_src_evt_init(&thread_src->evt, thread_src_cb, false, 0);
 }
 
 int io_src_thread_start(struct io_src_thread *thread_src,
@@ -97,14 +92,12 @@ int io_src_thread_start(struct io_src_thread *thread_src,
 
 void io_src_thread_clean(struct io_src_thread *thread_src)
 {
-	io_src_clean(&thread_src->src);
 	if (thread_src->thread_initialized) {
 		pthread_cancel(thread_src->thread);
 		pthread_join(thread_src->thread, NULL);
 	}
 	thread_src->thread_initialized = false;
-	ut_file_fd_close(thread_src->pipefd + 0);
-	ut_file_fd_close(thread_src->pipefd + 1);
+	io_src_evt_clean(&thread_src->evt);
 	thread_src->ret = 0;
 	thread_src->start_routine = NULL;
 	thread_src->termination_cb = NULL;

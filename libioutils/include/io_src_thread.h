@@ -13,6 +13,7 @@
 #include <stdbool.h>
 
 #include <io_src.h>
+#include <io_src_evt.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,14 +49,12 @@ typedef void (io_src_thread_termination_cb)(struct io_src_thread *thread_src,
  * @brief thread source type
  */
 struct io_src_thread {
-	/** inner monitor source */
-	struct io_src src;
+	/** event source, notifying of the thread's death */
+	struct io_src_evt evt;
 	/** the very thread */
 	pthread_t thread;
 	/** true iif the pthread_create call has succeeded */
 	bool thread_initialized;
-	/** communication pipe, notifying of the thread's death */
-	int pipefd[2];
 	/** main function of the thread */
 	io_src_thread_start_routine *start_routine;
 	/** callback called when the thread terminates */
@@ -92,7 +91,10 @@ int io_src_thread_start(struct io_src_thread *thread_src,
 static inline struct io_src *io_src_thread_get_source(
 		struct io_src_thread *thread_src)
 {
-	return NULL == thread_src ? NULL : &thread_src->src;
+	if (thread_src == NULL)
+		return NULL;
+
+	return io_src_evt_get_source(&thread_src->evt);
 }
 
 /**
