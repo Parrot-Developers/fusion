@@ -347,11 +347,11 @@ int io_process_vinit(struct io_process *process,
 		return -EINVAL;
 	memset(process, 0, sizeof(*process));
 
-	process->thread.evt.src.fd = -1;
-	process->stdin_src.fd = -1;
-	process->stdout_src.src.fd = -1;
-	process->stderr_src.src.fd = -1;
-	process->timeout_src.src.fd = -1;
+	io_src_close_fd(io_src_thread_get_source(&process->thread));
+	io_src_close_fd(&process->stdin_src);
+	io_src_close_fd(io_src_sep_get_source(&process->stdout_src));
+	io_src_close_fd(io_src_sep_get_source(&process->stderr_src));
+	io_src_close_fd(io_src_tmr_get_source(&process->timeout_src));
 	process->stdin_pipe[0] = process->stdin_pipe[1] = -1;
 	process->stdout_pipe[0] = process->stdout_pipe[1] = -1;
 	process->stderr_pipe[0] = process->stderr_pipe[1] = -1;
