@@ -49,7 +49,7 @@ static pid_t launch(int argc, char *argv[])
 		ret = execvp(argv[0], argv);
 		if (-1 == ret) {
 			perror("execvp");
-			exit(1);
+			_exit(1);
 		}
 	}
 
