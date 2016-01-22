@@ -12,6 +12,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 #include <dlfcn.h>
 
@@ -81,13 +82,12 @@ out:
 
 int main(int argc, char *argv[])
 {
-	// TODO use booleans
 	int ret;
-	int xml = 0;
+	bool xml = 0;
 	char **so_lib;
 	void *lib_handle;
 	int tests_failed = 0;
-	int failure;
+	bool failure;
 	struct pool_t *pool;
 
 	if (argc <= 1) {
