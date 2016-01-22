@@ -35,7 +35,7 @@
  * @var running_suite
  * @brief Current test suite being executed by cunit.
  */
-static CU_pSuite running_suite = NULL;
+static CU_pSuite running_suite;
 
 /**
  * @var start_ru
@@ -129,7 +129,8 @@ static void all_tests_complete_message_handler(const CU_pFailureRecord failure)
 	struct rusage end_ru;
 	struct timeval diff_tv;
 
-	printf("\n\nRun Summary:    Type  Total    Ran Passed Failed Inactive\n");
+	printf("\n\nRun Summary:    Type  Total    Ran Passed Failed "
+			"Inactive\n");
 	printf("              suites %*u %*u    n/a %*u %*u\n",
 			6, registry->uiNumberOfSuites,
 			6, summary->nSuitesRun,
