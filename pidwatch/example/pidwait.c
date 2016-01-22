@@ -61,12 +61,12 @@ static void usage(int exit_code)
 {
 	FILE *out = exit_code ? stderr : stdout;
 	fprintf(out, "usage : pidwait -p|--pid PID\n"
-	       "        pidwait COMMAND_LINE\n"
-	       "\tThe first form waits for the termination a process of a given"
-	       "pid.\n"
-	       "\tThe second form launches the command whose arguments are "
-	       "passed, and wait for it's termination.\n"
-	       "Both two forms return the waited process return value.\n");
+		"        pidwait COMMAND_LINE\n"
+		"\tThe first form waits for the termination a process of a given"
+		"pid.\n"
+		"\tThe second form launches the command whose arguments are "
+		"passed, and wait for it's termination.\n"
+		"Both two forms return the waited process return value.\n");
 
 	exit(exit_code);
 }
