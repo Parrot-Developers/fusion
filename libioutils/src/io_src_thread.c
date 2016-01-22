@@ -26,7 +26,6 @@
  */
 static void *thread_src_start_routine(void *arg)
 {
-	char *byte = 0;
 	int ret;
 	struct io_src_thread *thread_src = arg;
 
@@ -58,8 +57,6 @@ static void thread_src_cb(struct io_src_evt *evt, uint64_t value)
 
 int io_src_thread_init(struct io_src_thread *thread_src)
 {
-	int ret;
-
 	if (thread_src == NULL)
 		return -EINVAL;
 
