@@ -186,8 +186,8 @@ int ut_file_fd_close(int *fd)
 	if (NULL == fd)
 		return -EINVAL;
 	if (-1 == *fd) {
-		goto out;
 		ret = -EBADF;
+		goto out;
 	}
 
 	/*
