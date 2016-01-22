@@ -75,7 +75,7 @@ int io_src_close_fd(struct io_src *src)
 {
 	int ret;
 
-	if (NULL == src || -1 == src->fd)
+	if (src == NULL)
 		return -EINVAL;
 
 	ret = ut_file_fd_close(&src->fd);

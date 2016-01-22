@@ -24,7 +24,8 @@ void ut_file_close(FILE **file);
  * @param fd pointer to the file descriptor to close, set to -1 in output
  * @note this this function refuses to close the 0 file descriptor to avoid some
  * nasty bugs
- * @return errno-compatible negative value on error, 0 on success
+ * @return errno-compatible negative value on error, 0 on success. On error, fd
+ * is set to -1, if possible.
  */
 int ut_file_fd_close(int *fd);
 

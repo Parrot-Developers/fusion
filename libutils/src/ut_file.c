@@ -183,8 +183,12 @@ int ut_file_fd_close(int *fd)
 {
 	int ret;
 
-	if (NULL == fd || -1 == *fd)
-		return -EBADF;
+	if (NULL == fd)
+		return -EINVAL;
+	if (-1 == *fd) {
+		goto out;
+		ret = -EBADF;
+	}
 
 	/*
 	 * Although 0 is a perfectly valid file descriptor, we forbid closing it
@@ -192,16 +196,22 @@ int ut_file_fd_close(int *fd)
 	 * fail early when these bugs occur.
 	 * If one really want to close 0, he must use close explicitly.
 	 */
-	if (*fd == 0)
-		return -EBADF;
+	if (*fd == 0) {
+		ret = -EBADF;
+		goto out;
+	}
 
 	ret = close(*fd);
-	if (ret == -1)
-		return errno;
+	if (ret == -1) {
+		ret = -errno;
+		goto out;
+	}
 
+	ret = 0;
+out:
 	*fd = -1;
 
-	return 0;
+	return ret;
 }
 
 long ut_file_get_file_size(const char *path)
