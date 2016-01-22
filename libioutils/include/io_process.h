@@ -149,7 +149,7 @@ struct io_process {
  */
 struct io_process_parameters {
 	/**
-	 * buffer fed into the process' input, mutually exclusive with stdin_src
+	 * buffer fed into the process' input, mutually exclusive with stdin_cb
 	 */
 	const char *buffer;
 	/** used only if buffer is not NULL: amount of data it contains */
