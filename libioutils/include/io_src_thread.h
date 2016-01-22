@@ -2,7 +2,7 @@
  * @file io_src_thread.h
  * @date 15 jan. 2016
  * @author nicolas.carrier@parrot.com
- * @brief Source for watching for monitoring a thread
+ * @brief Source for monitoring a thread in an event loop
  *
  * Copyright (C) 2016 Parrot S.A.
  */
@@ -43,6 +43,10 @@ typedef int (io_src_thread_start_routine)(struct io_src_thread *thread_src);
 typedef void (io_src_thread_termination_cb)(struct io_src_thread *thread_src,
 		int ret);
 
+/**
+ * @struct io_src_thread
+ * @brief thread source type
+ */
 struct io_src_thread {
 	/** inner monitor source */
 	struct io_src src;

@@ -2,7 +2,7 @@
  * @file io_src_thread.c
  * @date 15 jan. 2016
  * @author nicolas.carrier@parrot.com
- * @brief Source for watching for monitoring a thread
+ * @brief Source for monitoring a thread in an event loop
  *
  * Copyright (C) 2016 Parrot S.A.
  */
