@@ -288,7 +288,7 @@ static void in_child(struct io_process *process)
 		close(i);
 	ret = execv(argv[0], argv);
 	if (ret < 0) {
-		fprintf(stderr, "execve: %m\n");
+		fprintf(stderr, "execv \"%s\": %m\n", argv[0]);
 		_exit(EXIT_FAILURE);
 	}
 
