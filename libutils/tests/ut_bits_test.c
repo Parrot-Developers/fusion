@@ -13,7 +13,7 @@
 #include <fautes.h>
 #include <fautes_utils.h>
 
-static void testUT_FILE_IS_EXECUTABLE(void)
+static void testUT_TO_LOWER(void)
 {
 	int c;
 	char lut[] = {
@@ -91,7 +91,7 @@ static void testUT_IS_09_OR_AZ_NO_CASE(void)
 
 static const struct test_t tests[] = {
 		{
-				.fn = testUT_FILE_IS_EXECUTABLE,
+				.fn = testUT_TO_LOWER,
 				.name = "UT_TO_LOWER"
 		},
 		{
