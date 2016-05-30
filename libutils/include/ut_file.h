@@ -65,21 +65,21 @@ int ut_file_write_buffer(const void *buffer, size_t size, const char *path);
  * @param path Path to test
  * @return true iif the given path is executable
  */
-bool ut_file_is_executable(const char *path);
+bool ut_file_is_executable(const char *fmt, ...);
 
 /**
  * Tests whether or not a path exists as a file
  * @param path Path to test
  * @return true iif the given path is a file and exists
  */
-bool ut_file_exists(const char *path);
+bool ut_file_exists(const char *fmt, ...);
 
 /**
  * Tests whether or not a path exists as a directory
  * @param path Path to test
  * @return true iif the given path is a directory and exists
  */
-bool ut_file_is_dir(const char *path);
+bool ut_file_is_dir(const char *fmt, ...);
 
 /**
  * Variadic wrapper around mkdir

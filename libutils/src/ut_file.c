@@ -276,13 +276,20 @@ int ut_file_write_buffer(const void *buffer, size_t size, const char *path)
  * @param how how flag passed to access
  * @return true iif the test is successful
  */
-static bool test_file(const char *path, int how, unsigned type)
+static bool test_file(const char *fmt, int how, unsigned type, va_list args)
 {
 	struct stat st;
 	int ret;
+	char __attribute__((cleanup(ut_string_free))) *path = NULL;
 
-	if (ut_string_is_invalid(path))
+	if (ut_string_is_invalid(fmt))
 		return false;
+
+	ret = vasprintf(&path, fmt, args);
+	if (ret == -1) {
+		path = NULL;
+		return false;
+	}
 
 	memset(&st, 0, sizeof(st));
 	ret = stat(path, &st);
@@ -295,19 +302,40 @@ static bool test_file(const char *path, int how, unsigned type)
 	return access(path, how) == 0;
 }
 
-bool ut_file_is_executable(const char *path)
+bool ut_file_is_executable(const char *fmt, ...)
 {
-	return test_file(path, X_OK, S_IFREG);
+	int ret;
+	va_list args;
+
+	va_start(args, fmt);
+	ret = test_file(fmt, X_OK, S_IFREG, args);
+	va_end(args);
+
+	return ret;
 }
 
-bool ut_file_exists(const char *path)
+bool ut_file_exists(const char *fmt, ...)
 {
-	return test_file(path, F_OK, S_IFREG);
+	int ret;
+	va_list args;
+
+	va_start(args, fmt);
+	ret = test_file(fmt, F_OK, S_IFREG, args);
+	va_end(args);
+
+	return ret;
 }
 
-bool ut_file_is_dir(const char *path)
+bool ut_file_is_dir(const char *fmt, ...)
 {
-	return test_file(path, F_OK, S_IFDIR);
+	int ret;
+	va_list args;
+
+	va_start(args, fmt);
+	ret = test_file(fmt, F_OK, S_IFDIR, args);
+	va_end(args);
+
+	return ret;
 }
 
 int ut_file_mkdir(const char *fmt, mode_t mode, ...)
