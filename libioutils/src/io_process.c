@@ -184,6 +184,7 @@ static void process_termination_cb(struct io_src_thread *thread, int ret)
 	pid = process->pid;
 	process->pid = 1;
 	process->state = IO_PROCESS_DEAD;
+	process->status = ret;
 	if (process->termination_cb != NULL)
 		process->termination_cb(process, pid, ret);
 
