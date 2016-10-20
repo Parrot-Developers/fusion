@@ -40,7 +40,7 @@ TESTED_MODULE := libutils
 
 LOCAL_MODULE := tst-$(TESTED_MODULE)
 
-LOCAL_REQUIRED_MODULES := $(TESTED_MODULE)
+LOCAL_REQUIRED_MODULES := fautes $(TESTED_MODULE)
 
 LOCAL_COPY_FILES := \
 	tests/tst-libutils.sh:usr/bin/
