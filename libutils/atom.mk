@@ -40,11 +40,10 @@ TESTED_MODULE := libutils
 
 LOCAL_MODULE := tst-$(TESTED_MODULE)
 
-LOCAL_REQUIRED_MODULES := fautes $(TESTED_MODULE)
+LOCAL_REQUIRED_MODULES := $(TESTED_MODULE)
 
 LOCAL_COPY_FILES := \
-	tests/tst-01.sh:tests/bin/$(TESTED_MODULE)/ \
-	tests/email_notification:tests/bin/$(TESTED_MODULE)/
+	tests/tst-libutils.sh:usr/bin/
 
 include $(BUILD_CUSTOM)
 endif # TARGET_TEST
