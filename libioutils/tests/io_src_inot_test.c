@@ -290,12 +290,12 @@ static void testSRC_INOT_FULL_TEST(void)
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
 	ret = io_src_inot_add_watch(&ctx.inot, &ctx.dir_watch);
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
-	fd = open(TEST_FILE, O_WRONLY | O_CLOEXEC | O_CREAT, S_IRUSR | S_IRUSR);
+	fd = open(TEST_FILE, O_WRONLY | O_CLOEXEC | O_CREAT, S_IRUSR | S_IWUSR);
 	CU_ASSERT_NOT_EQUAL_FATAL(ret, -1);
 	close(fd);
 	ret = io_src_inot_add_watch(&ctx.inot, &ctx.file_watch);
 	CU_ASSERT_EQUAL_FATAL(ret, 0);
-	fd = open(TEST_FILE, O_WRONLY | O_CLOEXEC | O_CREAT, S_IRUSR | S_IRUSR);
+	fd = open(TEST_FILE, O_WRONLY | O_CLOEXEC | O_CREAT, S_IRUSR | S_IWUSR);
 	CU_ASSERT_NOT_EQUAL_FATAL(ret, -1);
 	ret = write(fd, TEST_FILE_CONTENT, sizeof(TEST_FILE_CONTENT));
 	CU_ASSERT_NOT_EQUAL_FATAL(ret, -1);
